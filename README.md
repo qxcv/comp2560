@@ -1,7 +1,7 @@
 # comp2560
 
 Code and papers for COMP2560 (Studies in Advanced Computing R&D) at ANU. I'm yet
-to flesh out my course project, but I'll update `README.md` when I do :-)
+to flesh out my course project, but I'll update `README.md` when I do :smile:
 
 ## Copyright
 
