@@ -1,0 +1,18 @@
+If you use this code, please cite:
+@InProceedings{Cherian14,
+  author    = "Cherian, A. and Mairal, J. and Alahari, K. and Schmid, C.",
+  title     = "Mixing Body-Part Sequences for Human Pose Estimation",
+  booktitle = "Proceedings of IEEE Conference on Computer Vision and Pattern Recognition",
+  year      = "2014"
+}
+
+
+How to use this package?
+
+There is a demo.m in the package that you should be able to run. I have included one sample sequence in the package to test if everything works. To run on the full "poses in the wild" dataset, you need to download and unzip the dataset and set the correct paths in set_algo_parameters.m. As the code caches intermediate results (such as the flow,  pose candidates, etc.), you might need to provide a larger disk space for the cache (~15GB free space or more).
+
+I have also included the Yang and Ramanan pose implementation and a Matlab implementation of the LDOF optical flow, to make the package self-contained. 
+
+For any bugs or issues, contact Anoop Cherian at anoop.cherian@inria.fr.
+
+
