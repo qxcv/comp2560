@@ -12,10 +12,11 @@ easier to perform high-level tasks like gesture recognition.
 
 Contents of this repository:
 
-- `dcnn/` houses code related to body part detection in single frames. This is
-  implemented using the [Caffe](http://caffe.berkeleyvision.org/) deep learning
-  framework, and follows the approach of Chen & Yuille in [Articulated Pose
-  Estimation by a Graphical Model with Image Dependent Pairwise
+- At the moment, `project/` houses code related to body part detection in single
+  frames. This is implemented using the
+  [Caffe](http://caffe.berkeleyvision.org/) deep learning framework, and follows
+  the approach of Chen & Yuille in [Articulated Pose Estimation by a Graphical
+  Model with Image Dependent Pairwise
   Relations](http://www.stat.ucla.edu/~xianjie.chen/projects/pose_estimation/pose_estimation.html).
 
   My understanding of Chen & Yuille's reference implementation is that it uses a
