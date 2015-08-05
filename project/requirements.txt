@@ -1,0 +1,7 @@
+numpy
+scipy
+matplotlib
+Pillow
+
+# For running tests only. You can skip this if it causes problems.
+pytest
