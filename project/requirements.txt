@@ -1,7 +1,8 @@
 numpy
 scipy
-matplotlib
+scikit-learn
 Pillow
+matplotlib
 
 # For running tests only. You can skip this if it causes problems.
 pytest
