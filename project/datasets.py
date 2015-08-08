@@ -54,7 +54,8 @@ class Joints(object):
         self.locations = point_locations
         self.point_names = point_names
 
-    # TODO: Enable visualisation of points!
+    # TODO: Enable visualisation of points! This would be a good idea if I
+    # wanted to check that my skeletons are correct.
 
 
 class LSP(DataSet):
