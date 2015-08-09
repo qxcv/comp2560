@@ -1,6 +1,7 @@
 """Functions for reading data sets (LSP, INRIA, Buffy, etc.)"""
 
 from abc import abstractmethod, ABCMeta
+from copy import copy
 from io import BytesIO
 from zipfile import is_zipfile, ZipFile
 
@@ -10,13 +11,57 @@ from scipy.io import loadmat
 from scipy.misc import imread
 
 
+def split_items(items, num_groups):
+    """Splits a list of items into ``num_groups`` groups fairly (i.e. every
+    item is assigned to exactly one group and no group is more than one item
+    larger than any other)."""
+    per_set = len(items) / float(num_groups)
+    assert per_set >= 1, "At least one set will be empty"
+    small = int(np.floor(per_set))
+    big = small + 1
+    num_oversized = len(items) % small
+
+    rv_items = []
+    total_allocated = 0
+    for i in range(num_groups):
+        if i < num_oversized:
+            l = items[total_allocated:total_allocated + big]
+            total_allocated += big
+        else:
+            l = items[total_allocated:total_allocated + small]
+            total_allocated += small
+        rv_items.append(l)
+
+    assert total_allocated == len(items), "Did not assign exactly 100% of " \
+        "items to a group"
+    assert len(rv_items) == num_groups, "Wrong number of groups"
+
+    return rv_items
+
+
 class DataSet(object):
     """ABC for datasets"""
     __metaclass__ = ABCMeta
 
-    @abstractmethod
-    def load_joints(self):
-        pass
+    def split(self, num_groups):
+        """Splits one monolothic dataset into several equally sized
+        datasets. May need to be overridden."""
+        assert num_groups > 1, "It's not splitting if there's < 2 groups :)"
+
+        # Shallow-copy myself several times
+        rv = tuple(copy(self) for i in range(num_groups))
+
+        # Figure out which indices each group will get
+        my_size = len(self.joints.locations)
+        indices = np.arange(my_size)
+        np.random.shuffle(indices)
+        rv_indices = split_items(indices, num_groups)
+
+        for new_dataset, new_indices in zip(rv, rv_indices):
+            new_dataset.joints = self.joints.for_indices(new_indices)
+            new_dataset.image_ids = np.array(self.image_ids)[new_indices]
+
+        return rv
 
     @abstractmethod
     def load_image(self, identifier):
@@ -53,6 +98,12 @@ class Joints(object):
         self.pairs = joint_pairs
         self.locations = point_locations
         self.point_names = point_names
+
+    def for_indices(self, indices):
+        """Takes a series of indices corresponding to data samples and returns
+        a new ``Joints`` instance containing only samples corresponding to
+        those indices."""
+        return Joints(self.locations[indices], self.pairs, self.point_names)
 
     # TODO: Enable visualisation of points! This would be a good idea if I
     # wanted to check that my skeletons are correct.
@@ -97,11 +148,13 @@ class LSP(DataSet):
     def __init__(self, lsp_path):
         assert is_zipfile(lsp_path), "Supplied path must be to lsp_dataset.zip"
         self.lsp_path = lsp_path
+        self.joints = self._load_joints()
+        self.image_ids = list(range(len(self.joints.locations)))
 
     def _transpose_joints(self, joints):
         return joints.T
 
-    def load_joints(self):
+    def _load_joints(self):
         """Load ``joints.mat`` from LSP dataset. Return value holds a 2000x14x3
         ndarray. The first dimension selects an image, the second selects a
         joint, and the final dimension selects between an x-coord, a y-coord
@@ -133,8 +186,7 @@ class LSP(DataSet):
     def load_all_images(self):
         """Return a list of all images in the archive, ordered to correspond to
         joints matrix."""
-        num_images = len(self.load_joints())
-        return [self.load_image(ident) for ident in range(num_images)]
+        return [self.load_image(ident) for ident in self.image_ids]
 
 
 class LSPET(LSP):
