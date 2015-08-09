@@ -16,8 +16,7 @@ def from_dataset(joints, k):
     joints, k is given, and d is the dimension of each cluster center (in this
     case, 2)."""
     # Cluster centers for each joint
-    cluster_centers = [
-    ]
+    cluster_centers = []
 
     for first_idx, second_idx in joints.pairs:
         # Take x and y locations (:2) of each joint (first_idx, second_idx)
