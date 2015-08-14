@@ -63,6 +63,22 @@ class DataSet(object):
 
         return rv
 
+    # TODO: Calculate scale like Chen & Yuille do. I'm not convinced that this
+    # is an excellent way to do things, since it's very sensitive to
+    # perspective-based foreshortening, but I guess I'l have to at least try
+    # it. Should also estimate the template size from this data (Chen & Yuille
+    # do this by assuming that templates are (2w + 1) x (2h + 1) pixels, where
+    # w is the 75th percentile x-displacement of joints in a given image, and h
+    # is the analogue of w but for y-displacement. This is like having
+    # templates extending all the way from one part to another.
+    def calculate_scale(self):
+        """Calculates a scale factor for each image in the dataset. This is
+        indended to indicate roughly how long the average limb is in each image
+        (in pixels), so that images taken at different distances from a person
+        can be considered differently for joint RP (relative position)
+        clustering and the like."""
+        raise NotImplemented()
+
     @abstractmethod
     def load_image(self, identifier):
         pass

@@ -1,13 +1,15 @@
-numpy
-scipy
-scikit-learn
-Pillow
-matplotlib
+numpy>=1.9.2
+scipy>=0.16.0
+scikit-learn>=0.16.1
+Pillow>=2.9.0
+matplotlib>=1.4.3
+lmdb>=0.86
 
 # For running tests only. You can skip this if it causes problems.
-pytest
+pytest>=2.7.2
 
-# These are pycaffe requirements (not including requirements listed above):
+# These are pycaffe requirements (not including requirements listed above:
+# numpy, scipy, Pillow, matplotlib):
 Cython>=0.19.2
 scikit-image>=0.9.3
 ipython>=3.0.0
