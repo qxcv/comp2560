@@ -43,6 +43,17 @@ class DataSet(object):
     """ABC for datasets"""
     __metaclass__ = ABCMeta
 
+    def post_init(self):
+        """Should be called after __init__."""
+        self.scales = self._calculate_scale()
+        assert np.all(self.scales >= 18)
+        assert np.any(self.scales > 18)
+        assert self.scales.shape == (self.num_samples,)
+
+        self.template_size = self._calculate_template_size()
+        assert self.template_size.shape == (2,)
+        assert np.all(self.template_size > 0)
+
     def split(self, num_groups):
         """Splits one monolothic dataset into several equally sized
         datasets. May need to be overridden."""
@@ -52,8 +63,8 @@ class DataSet(object):
         rv = tuple(copy(self) for i in range(num_groups))
 
         # Figure out which indices each group will get
-        my_size = len(self.joints.locations)
-        indices = np.arange(my_size)
+        self.num_samples = len(self.joints.locations)
+        indices = np.arange(self.num_samples)
         np.random.shuffle(indices)
         rv_indices = split_items(indices, num_groups)
 
@@ -63,21 +74,52 @@ class DataSet(object):
 
         return rv
 
-    # TODO: Calculate scale like Chen & Yuille do. I'm not convinced that this
-    # is an excellent way to do things, since it's very sensitive to
-    # perspective-based foreshortening, but I guess I'l have to at least try
-    # it. Should also estimate the template size from this data (Chen & Yuille
-    # do this by assuming that templates are (2w + 1) x (2h + 1) pixels, where
-    # w is the 75th percentile x-displacement of joints in a given image, and h
-    # is the analogue of w but for y-displacement. This is like having
-    # templates extending all the way from one part to another.
-    def calculate_scale(self):
+    def _calculate_scales(self):
         """Calculates a scale factor for each image in the dataset. This is
         indended to indicate roughly how long the average limb is in each image
         (in pixels), so that images taken at different distances from a person
         can be considered differently for joint RP (relative position)
-        clustering and the like."""
-        raise NotImplemented()
+        clustering and the like. Magic constants (75th percentile, 18px
+        minimum) taken from Chen & Yuille's code"""
+        lengths = np.ndarray((self.num_samples, len(self.joints.pairs)))
+
+        for idx, pair in enumerate(self.joints.pairs):
+            fst_prt, snd_prt = pair
+            fst_loc = self.joints.locations[:, fst_prt, :2]
+            snd_loc = self.joints.locations[:, snd_prt, :2]
+            assert fst_loc.shape == (self.num_samples, 2)
+            assert fst_loc.shape == snd_loc.shape
+            # lengths stores the length of each joint in the model
+            lengths[:, idx] = np.linalg.norm(fst_loc - snd_loc, axis=1)
+
+        # The last joint is head-neck (we can consider this the "root" joint,
+        # since we assume that the head is the root for graphical model
+        # calculations). We will normalise all lengths to this value.
+        log_diff = np.log(lengths[:, :-1]) - np.log(lengths[:, -1])
+        assert log_diff.shape == (self.num_samples, len(self.joints.pairs) - 1)
+        norm_factor = np.exp(np.median(log_diff, axis=1))
+        normed_lengths = lengths / norm_factor
+        percentiles = np.percentile(normed_lengths, 75, axis=1)
+        assert percentiles.ndim == 1
+        assert len(percentiles) == self.num_samples
+
+        # NOTE: Chen & Yuille use scale_x and scale_y, but that seems to be
+        # redundant, since scale_x == scale_y in their code (init_scale.m)
+        return np.maximum(percentiles, 18)
+
+    def _calculate_template_size(self):
+        """Use calculated scales to choose template sizes for body part
+        detection. Follows Chen & Yuille formula."""
+        # This is a little different to Chen & Yuille's formula (they use a
+        # fixed aspect ratio, and calculate a square root which makes no sense
+        # in context), but it should yield the same result
+        side_lengths = 2 * self.scales + 1
+        assert side_lengths.shape == (self.num_samples,)
+
+        bottom_length = np.percentile(side_lengths, 1)
+        template_side = np.floor(bottom_length / self.STEP)
+
+        return np.array([template_side, template_side])
 
     @abstractmethod
     def load_image(self, identifier):
@@ -128,7 +170,12 @@ class Joints(object):
 class LSP(DataSet):
     """Loads the Leeds Sports Poses dataset from a ZIP file."""
     PATH_PREFIX = 'lsp_dataset/'
+    # ID_WIDTH is the number of digits in the LSP image filenames (e.g.
+    # im0022.jpg has width 4).
     ID_WIDTH = 4
+    # TODO: Clarify what this does. It's analogous to conf.step (in lsp_conf
+    # and flic_conf) from Chen & Yuille's code.
+    STEP = 4
     POINT_NAMES = [
         "Right ankle",     # 0
         "Right knee",      # 1
@@ -145,6 +192,7 @@ class LSP(DataSet):
         "Neck",            # 12
         "Head top"         # 13
     ]
+    # NOTE: "Root" joint should be first!
     JOINTS = [
         (0, 1),    # Right shin
         (1, 2),    # Right thigh
@@ -166,6 +214,8 @@ class LSP(DataSet):
         self.lsp_path = lsp_path
         self.joints = self._load_joints()
         self.image_ids = list(range(len(self.joints.locations)))
+
+        self.post_init()
 
     def _transpose_joints(self, joints):
         return joints.T
