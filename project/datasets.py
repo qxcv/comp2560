@@ -45,7 +45,9 @@ class DataSet(object):
 
     def post_init(self):
         """Should be called after __init__."""
-        self.scales = self._calculate_scale()
+        self.num_samples = len(self.joints.locations)
+
+        self.scales = self._calculate_scales()
         assert np.all(self.scales >= 18)
         assert np.any(self.scales > 18)
         assert self.scales.shape == (self.num_samples,)
@@ -63,7 +65,6 @@ class DataSet(object):
         rv = tuple(copy(self) for i in range(num_groups))
 
         # Figure out which indices each group will get
-        self.num_samples = len(self.joints.locations)
         indices = np.arange(self.num_samples)
         np.random.shuffle(indices)
         rv_indices = split_items(indices, num_groups)
@@ -81,7 +82,11 @@ class DataSet(object):
         can be considered differently for joint RP (relative position)
         clustering and the like. Magic constants (75th percentile, 18px
         minimum) taken from Chen & Yuille's code"""
-        lengths = np.ndarray((self.num_samples, len(self.joints.pairs)))
+        lengths = np.zeros((self.num_samples, len(self.joints.pairs)))
+
+        # If the length of a limb is 0, then we'll mark it as invalid for our
+        # calculations
+        valid = np.ones_like(lengths, dtype=bool)  # array of True
 
         for idx, pair in enumerate(self.joints.pairs):
             fst_prt, snd_prt = pair
@@ -89,19 +94,37 @@ class DataSet(object):
             snd_loc = self.joints.locations[:, snd_prt, :2]
             assert fst_loc.shape == (self.num_samples, 2)
             assert fst_loc.shape == snd_loc.shape
-            # lengths stores the length of each joint in the model
-            lengths[:, idx] = np.linalg.norm(fst_loc - snd_loc, axis=1)
+            # lengths stores the length of each limb in the model
+            pair_dists = np.linalg.norm(fst_loc - snd_loc, axis=1)
+            lengths[:, idx] = pair_dists
 
-        # The last joint is head-neck (we can consider this the "root" joint,
+            # Mark zeros invalid
+            valid[pair_dists == 0, idx] = False
+
+        # The last limb is head-neck (we can consider this the "root" limb,
         # since we assume that the head is the root for graphical model
         # calculations). We will normalise all lengths to this value.
-        log_diff = np.log(lengths[:, :-1]) - np.log(lengths[:, -1])
-        assert log_diff.shape == (self.num_samples, len(self.joints.pairs) - 1)
-        norm_factor = np.exp(np.median(log_diff, axis=1))
+        exp_med = np.zeros(len(self.joints.pairs) - 1)
+        for idx, pair in enumerate(self.joints.pairs[:-1]):
+            valid_col = valid[:, idx]
+            log_neck = np.log(lengths[valid_col, -1])
+            log_diff = np.log(lengths[valid_col, idx]) - log_neck
+            exp_med[idx] = np.exp(np.median(log_diff))
+
+        print(exp_med)
+
+        # Norm calculated lengths using the exponent of the median of the
+        # quantities we calculated above
+        norm_factor_nc = exp_med.reshape((1, -1))
+        norm_factor = np.concatenate([norm_factor_nc, [[1]]], axis=1)
+        assert norm_factor.shape == (1, len(self.joints.pairs))
         normed_lengths = lengths / norm_factor
+
         percentiles = np.percentile(normed_lengths, 75, axis=1)
         assert percentiles.ndim == 1
         assert len(percentiles) == self.num_samples
+
+        assert not np.any(np.isnan(percentiles) + np.isinf(percentiles))
 
         # NOTE: Chen & Yuille use scale_x and scale_y, but that seems to be
         # redundant, since scale_x == scale_y in their code (init_scale.m)
