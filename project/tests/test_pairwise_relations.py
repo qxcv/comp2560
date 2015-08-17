@@ -45,8 +45,9 @@ def test_clustering():
         (2, 3)
     ]
     fake_joints = Joints(fake_locations, fake_pairs)
-    # Make two clusters for each relationship type
-    centers = from_dataset(fake_joints, 2)
+    # Make two clusters for each relationship type. Yes, passing in zeros as
+    # your scale is stupid, and poor testing practice.
+    centers = from_dataset(fake_joints, 2, np.zeros(len(fake_locations)), 1)
 
     assert centers.ndim == 3
     # Three joints, two clusters per joint, two coordinates (i.e. x, y) per

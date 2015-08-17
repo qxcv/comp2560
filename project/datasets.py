@@ -105,13 +105,15 @@ class DataSet(object):
         # since we assume that the head is the root for graphical model
         # calculations). We will normalise all lengths to this value.
         exp_med = np.zeros(len(self.joints.pairs) - 1)
-        for idx, pair in enumerate(self.joints.pairs[:-1]):
-            valid_col = valid[:, idx]
+        for idx in xrange(len((self.joints.pairs[:-1]))):
+            # Ignore entries where head distance or joint distance is 0
+            valid_col = valid[:, idx] * valid[:, -1]
+            # No more than 15% of entries should be eliminated this way
+            assert np.sum(valid_col) >= 0.85 * valid_col.size
+
             log_neck = np.log(lengths[valid_col, -1])
             log_diff = np.log(lengths[valid_col, idx]) - log_neck
             exp_med[idx] = np.exp(np.median(log_diff))
-
-        print(exp_med)
 
         # Norm calculated lengths using the exponent of the median of the
         # quantities we calculated above
@@ -179,12 +181,43 @@ class Joints(object):
         self.pairs = joint_pairs
         self.locations = point_locations
         self.point_names = point_names
+        self.num_parts = point_locations.shape[1]
+        self.parents = self.get_parents_array()
+        self.adjacent = self.get_adjacency_matrix()
 
     def for_indices(self, indices):
         """Takes a series of indices corresponding to data samples and returns
         a new ``Joints`` instance containing only samples corresponding to
         those indices."""
         return Joints(self.locations[indices], self.pairs, self.point_names)
+
+    def get_parents_array(self):
+        """Produce a p-dimensional array giving the parent of part i."""
+        rv = -1 * np.ones(self.num_parts, dtype='int32')
+
+        for child, parent in self.pairs:
+            assert 0 <= child < self.num_parts
+            assert 0 <= parent < self.num_parts
+            assert rv[child] == -1
+            rv[child] = parent
+
+        # Now assign the root. If this fails with "Too many values to unpack",
+        # then it means that there are two parts with no parents!
+        root_idx, = np.flatnonzero(rv == -1)
+        rv[root_idx] = root_idx
+
+        return rv
+
+    def get_adjacency_matrix(self):
+        """Produces a p * p adjacency matrix."""
+        rv = np.zeros((self.num_parts, self.num_parts), dtype='bool')
+
+        for i, j in self.pairs:
+            assert 0 <= i < self.num_parts
+            assert 0 <= j < self.num_parts
+            rv[i, j] = rv[j, i] = True
+
+        return rv
 
     # TODO: Enable visualisation of points! This would be a good idea if I
     # wanted to check that my skeletons are correct.
@@ -215,20 +248,21 @@ class LSP(DataSet):
         "Neck",            # 12
         "Head top"         # 13
     ]
-    # NOTE: "Root" joint should be first!
+    # NOTE: 'Root' joint should be last, joints should be ordered child ->
+    # parent
     JOINTS = [
-        (0, 1),    # Right shin
-        (1, 2),    # Right thigh
-        (2, 8),    # Right side of body
-        (3, 4),    # Left thigh
-        (3, 9),    # Left side of body
-        (4, 5),    # Left shin
-        (6, 7),    # Right forearm
-        (7, 8),    # Right upper arm
-        (8, 12),   # Right shoulder
-        (9, 10),   # Left upper arm
-        (9, 12),   # Left shoulder
-        (10, 11),  # Left forearm
+        (0, 1),    # Right shin (ankle[0] -> knee[1])
+        (1, 2),    # Right thigh (knee[1] -> hip[2])
+        (2, 8),    # Right side of body (hip[2] -> shoulder[8])
+        (5, 4),    # Left shin (ankle[5] -> knee[4])
+        (4, 3),    # Left thigh (knee[4] -> hip[3])
+        (3, 9),    # Left side of body (hip[3] -> shoulder[9])
+        (7, 8),    # Right upper arm (elbow[7] -> shoulder[8])
+        (6, 7),    # Right forearm (wrist[6] -> elbow[7])
+        (8, 12),   # Right shoulder (shoulder[8] -> neck[12])
+        (10, 9),   # Left upper arm (elbow[10] -> shoulder[9])
+        (9, 12),   # Left shoulder (shoulder[9] -> neck[12])
+        (11, 10),  # Left forearm (wrist[11] -> elbow[10])
         (12, 13),  # Neck and head
     ]
 
