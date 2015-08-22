@@ -184,6 +184,12 @@ class Joints(object):
         self.num_parts = point_locations.shape[1]
         self.parents = self.get_parents_array()
         self.adjacent = self.get_adjacency_matrix()
+        # pair_indices[(i, j)] contains an index into self.pairs for each joint
+        # i->j (or j->i; it's bidirectional).
+        self.pair_indices = {}
+        for idx, pair in enumerate(joint_pairs):
+            p1, p2 = (pair[0], pair[1]), (pair[1], pair[0])
+            self.pair_indices[p1] = self.pair_indices[p2] = idx
 
     def for_indices(self, indices):
         """Takes a series of indices corresponding to data samples and returns

@@ -80,10 +80,42 @@ def _make_id_dict(adjacency, k):
 class TrainingLabels(object):
     """Class for producing training labels from a dataset and some cluster
     centroids."""
-    def __init__(self, dataset, centroids):
+    def __init__(self, dataset, centroids, template_size):
         """Take a dataset and some clusters and produce global labels for
         them."""
-        self.dataset = dataset
-        self.joints = self.dataset.joints
+        self.scales = dataset.scales
+        self.joints = dataset.joints
         self.centroids = centroids
         self.ids = _make_id_dict(self.joints.adjacency, centroids.shape[1])
+        self.template_size = template_size
+
+    def id_for(self, sample_idx, part_idx):
+        """Produces an ID for a specific sample and part."""
+        adj = self.joints.adjacency[part_idx]
+        neighbours = np.nonzero(adj)
+        locs = self.joints.locations[sample_idx]
+        scale = self.scales[sample_idx]
+        cluster_ids = np.zeros_like(neighbours)
+
+        for cluster_ids_idx, neighbour in enumerate(neighbours):
+            assert neighbour != part_idx
+            pair = (part_idx, neighbour)
+            limb_id = self.joints.pair_indices[pair]
+            clusters = self.centroids[limb_id]
+
+            # XXX: This relative position calculation is potentially VERY
+            # buggy. I should figure out a better way of doing this.
+            first_loc_id, second_loc_id = self.joints.pairs[limb_id]
+            relative_pos = locs[second_loc_id] - locs[first_loc_id]
+            normed_rp = self.template_size * relative_pos / (2 * scale + 1)
+            assert normed_rp.shape == (2,)
+
+            diffs = clusters - normed_rp.reshape((1, 2))
+            assert diffs.shape == clusters.shape
+            mags = np.sum(diffs, axis=1) ** 2
+            assert mags.shape == (clusters.shape[0],)
+            cluster_ids[cluster_ids_idx] = np.amin(mags)
+
+        cluster_ids_key = tuple(cluster_ids)
+
+        return self.ids[part_idx][cluster_ids_key]

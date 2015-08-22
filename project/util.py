@@ -33,7 +33,8 @@ def unique_key():
 
 def sample_patch(image, center_x, center_y, width, height, mode='edge'):
     """Crops a patch out an image, padding with the boundary value if
-    necessary."""
+    necessary. ``mode`` takes on the same values as ``numpy.pad``'s ``mode``
+    keyword argument."""
     assert image.ndim >= 2
 
     top = center_y - height/2
