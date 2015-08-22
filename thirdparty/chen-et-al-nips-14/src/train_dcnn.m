@@ -28,9 +28,15 @@ end
 caffe_root = conf.caffe_root;
 model_file = cnn.cnn_model_file;
 if ~exist(model_file, 'file')
-  fprintf('Training model using gpu id: %d\n', conf.device_id);
-  system([caffe_root, '/build/tools/caffe train ', sprintf('-gpu %d -solver %s', ...
-    conf.device_id, caffe_solver_file)]);
+  if conf.useGpu
+    fprintf('Training model using gpu id: %d\n', conf.device_id);
+    system([caffe_root, '/build/tools/caffe train ', sprintf('-gpu %d -solver %s', ...
+        conf.device_id, caffe_solver_file)]);
+  else
+    fprintf('Training model using CPU');
+    system([caffe_root, '/build/tools/caffe train ', sprintf('-solver %s', ...
+        caffe_solver_file)]);
+  end
 end
 
 % -------------------------------------------------------------------------
