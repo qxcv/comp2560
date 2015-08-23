@@ -2,12 +2,30 @@
 
 """Trains a complete model from a supplied dataset."""
 
+# Standard library imports
 from __future__ import print_function
 
 from argparse import ArgumentParser
 import logging
 from os import path
-from sys import stderr, exit
+import sys
+
+# Now try to get Caffe on the PATH if we need to
+try:
+    import caffe
+except ImportError:
+    best_guess = path.expanduser('~/repos/caffe/distribute/python')
+    success = False
+    if path.isdir(best_guess):
+        sys.path.append(best_guess)
+        try:
+            import caffe
+            success = True
+        except ImportError:
+            success = False
+
+    if not success:
+        print("Couldn't find pycaffe!", file=sys.stderr)
 
 from config import from_files
 from cnn import make_patches
@@ -55,8 +73,8 @@ if __name__ == '__main__':
     if loader_name not in datasets.ALLOWED_LOADERS:
         print("'{}' is not a valid loader. Allowed loaders: {}".format(
             loader_name, ', '.join(datasets.ALLOWED_LOADERS)
-        ), file=stderr)
-        exit(1)
+        ), file=sys.stderr)
+        sys.exit(1)
     loader = getattr(datasets, loader_name)
     dataset = loader(cfg.get('dataset', 'path'))
 
