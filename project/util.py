@@ -7,6 +7,18 @@ from struct import pack
 
 import numpy as np
 
+from errno import EEXIST
+from os import makedirs, path
+
+
+def create_dirs(dest, mode=0777):
+    """Mimics mkdir -p."""
+    try:
+        makedirs(dest, mode)
+    except OSError as e:
+        if e.errno != EEXIST or not path.isdir(dest):
+            raise e
+
 
 def unique_key():
     """Return a base64-encoded key of ~10 characters; attempts to be unique."""

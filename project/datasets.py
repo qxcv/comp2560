@@ -11,6 +11,14 @@ from scipy.io import loadmat
 from scipy.misc import imread
 
 
+# Configuration files will only be allowed to specify classes with the
+# following names to use as dataset loaders.
+ALLOWED_LOADERS = [
+    'LSP',
+    'LSPET'
+]
+
+
 def split_items(items, num_groups):
     """Splits a list of items into ``num_groups`` groups fairly (i.e. every
     item is assigned to exactly one group and no group is more than one item
@@ -53,8 +61,7 @@ class DataSet(object):
         assert self.scales.shape == (self.num_samples,)
 
         self.template_size = self._calculate_template_size()
-        assert self.template_size.shape == (2,)
-        assert np.all(self.template_size > 0)
+        assert self.template_size > 0
 
     def split(self, num_groups):
         """Splits one monolothic dataset into several equally sized
@@ -142,9 +149,9 @@ class DataSet(object):
         assert side_lengths.shape == (self.num_samples,)
 
         bottom_length = np.percentile(side_lengths, 1)
-        template_side = np.floor(bottom_length / self.STEP)
+        template_side = int(np.floor(bottom_length / self.STEP))
 
-        return np.array([template_side, template_side])
+        return template_side
 
     @abstractmethod
     def load_image(self, identifier):

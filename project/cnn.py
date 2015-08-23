@@ -1,7 +1,10 @@
 """Code for training and using relevant CNNs. Uses pycaffe underneath."""
 
+import logging
+
 import caffe as cf
 import lmdb
+from scipy.misc import imresize
 
 from util import unique_key, sample_patch
 
@@ -16,9 +19,12 @@ def make_patches(dataset, labels, destination):
     :param labels: ``TrainingLabels`` instance giving a label to each
     on each limb.
     :param destination: path to LMDB file."""
-    with lmdb.open(destination) as env:
-        for sample_id in xrange(len(dataset.num_samples)):
-            data = sample_to_data(dataset, sample_id)
+    with lmdb.open(destination, create=True) as env:
+        for sample_id in xrange(dataset.num_samples):
+            logging.info('Generating patches for sample {}/{}'.format(
+                sample_id, dataset.num_samples
+            ))
+            data = sample_to_data(dataset, labels, sample_id)
             with env.begin(write=True, buffers=True) as txn:
                 for datum in data:
                     datum_string = datum.SerializeToString()
@@ -32,6 +38,8 @@ def sample_to_data(dataset, labels, sample_id):
     into LMDB."""
     locs = dataset.joints.locations[sample_id]
     img = dataset.load_image(sample_id)
+    side_length = dataset.template_size * dataset.STEP
+    assert isinstance(side_length, int)
     rv = []
 
     for part_idx in xrange(len(locs)):
@@ -41,8 +49,11 @@ def sample_to_data(dataset, labels, sample_id):
 
         scale = dataset.scales[part_idx]
         cropped = sample_patch(img, part_x, part_y, scale, scale, mode='edge')
+        scaled = imresize(cropped, (side_length,) * 2)
+        assert scaled.shape == (side_length,) * 2 + cropped.shape[2:]
+        assert scaled.dtype.name == 'uint8'
         label = labels.id_for(sample_id, part_idx)
-        datum = cf.io.array_to_datum(cropped, label=label)
+        datum = cf.io.array_to_datum(scaled, label=label)
         rv.append(datum)
 
     return rv

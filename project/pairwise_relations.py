@@ -68,9 +68,9 @@ def _make_id_dict(adjacency, k):
     rv = []
     current_idx = 0
 
-    for adj in enumerate(adjacency):
+    for adj in adjacency:
         num_neighbours = np.sum(adj)
-        ids = np.arange(num_neighbours * k).reshape([k] * num_neighbours)
+        ids = np.arange(k ** num_neighbours).reshape((k,) * num_neighbours)
         rv.append(ids)
         current_idx += ids.size
 
@@ -80,19 +80,19 @@ def _make_id_dict(adjacency, k):
 class TrainingLabels(object):
     """Class for producing training labels from a dataset and some cluster
     centroids."""
-    def __init__(self, dataset, centroids, template_size):
+    def __init__(self, dataset, centroids):
         """Take a dataset and some clusters and produce global labels for
         them."""
         self.scales = dataset.scales
         self.joints = dataset.joints
         self.centroids = centroids
-        self.ids = _make_id_dict(self.joints.adjacency, centroids.shape[1])
-        self.template_size = template_size
+        self.ids = _make_id_dict(self.joints.adjacent, centroids.shape[1])
+        self.template_size = dataset.template_size
 
     def id_for(self, sample_idx, part_idx):
         """Produces an ID for a specific sample and part."""
-        adj = self.joints.adjacency[part_idx]
-        neighbours = np.nonzero(adj)
+        adj = self.joints.adjacent[part_idx]
+        neighbours = np.flatnonzero(adj)
         locs = self.joints.locations[sample_idx]
         scale = self.scales[sample_idx]
         cluster_ids = np.zeros_like(neighbours)
@@ -106,7 +106,7 @@ class TrainingLabels(object):
             # XXX: This relative position calculation is potentially VERY
             # buggy. I should figure out a better way of doing this.
             first_loc_id, second_loc_id = self.joints.pairs[limb_id]
-            relative_pos = locs[second_loc_id] - locs[first_loc_id]
+            relative_pos = locs[second_loc_id, :2] - locs[first_loc_id, :2]
             normed_rp = self.template_size * relative_pos / (2 * scale + 1)
             assert normed_rp.shape == (2,)
 
