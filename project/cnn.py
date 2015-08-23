@@ -1,12 +1,28 @@
 """Code for training and using relevant CNNs. Uses pycaffe underneath."""
 
 import logging
+from multiprocessing import cpu_count, Pool
 
 import caffe as cf
 import lmdb
 from scipy.misc import imresize
 
 from util import unique_key, sample_patch
+
+
+def process_patch(args):
+    destination, dataset, labels, sample_id = args
+    logging.info('Generating patches for sample {}/{}'.format(
+        sample_id, dataset.num_samples
+    ))
+    data = sample_to_data(dataset, labels, sample_id)
+    # map_size is 1TiB. Hopefully this won't cause problems ;)
+    with lmdb.open(destination, create=True, map_size=1 << 40) as env:
+        with env.begin(write=True, buffers=True) as txn:
+            for datum in data:
+                datum_string = datum.SerializeToString()
+                datum_name = '{}_{:08}'.format(unique_key(), sample_id)
+                txn.put(datum_name, datum_string)
 
 
 def make_patches(dataset, labels, destination):
@@ -19,17 +35,10 @@ def make_patches(dataset, labels, destination):
     :param labels: ``TrainingLabels`` instance giving a label to each
     on each limb.
     :param destination: path to LMDB file."""
-    with lmdb.open(destination, create=True) as env:
-        for sample_id in xrange(dataset.num_samples):
-            logging.info('Generating patches for sample {}/{}'.format(
-                sample_id, dataset.num_samples
-            ))
-            data = sample_to_data(dataset, labels, sample_id)
-            with env.begin(write=True, buffers=True) as txn:
-                for datum in data:
-                    datum_string = datum.SerializeToString()
-                    datum_name = '{}_{:08}'.format(unique_key(), sample_id)
-                    txn.put(datum_name, datum_string)
+    pool = Pool(cpu_count() + 1)
+    gen = ((destination, dataset, labels, n)
+           for n in xrange(dataset.num_samples))
+    pool.map(process_patch, gen)
 
 
 def sample_to_data(dataset, labels, sample_id):

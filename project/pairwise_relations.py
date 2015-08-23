@@ -114,7 +114,7 @@ class TrainingLabels(object):
             assert diffs.shape == clusters.shape
             mags = np.sum(diffs, axis=1) ** 2
             assert mags.shape == (clusters.shape[0],)
-            cluster_ids[cluster_ids_idx] = np.amin(mags)
+            cluster_ids[cluster_ids_idx] = np.argmin(mags)
 
         cluster_ids_key = tuple(cluster_ids)
 
