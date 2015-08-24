@@ -68,7 +68,13 @@ def sample_to_data(dataset, labels, sample_id):
     return rv
 
 
-def train_on_patches():
+def compute_image_mean(lmdb_path, destination):
+    """Uses the ``compute_image_mean`` Caffe tool to compute the mean pixel
+    value of a training database."""
+    raise NotImplemented()
+
+
+def train_dcnn_patches(train_db, val_db, mu_pix_db, solver, gpu=None):
     """Uses patches stored in an LMDB file by ``make_patches()`` to train a
     CNN."""
-    # TODO
+    raise NotImplemented()

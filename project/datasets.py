@@ -19,6 +19,10 @@ ALLOWED_LOADERS = [
 ]
 
 
+# XXX: At the moment, dataset splitting is totally broken. I need to handle
+# .scales in DataSet and .adjacent in Joints, among other attributes!
+
+
 def split_items(items, num_groups):
     """Splits a list of items into ``num_groups`` groups fairly (i.e. every
     item is assigned to exactly one group and no group is more than one item
