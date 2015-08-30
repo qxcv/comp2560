@@ -28,7 +28,8 @@ except ImportError:
         print("Couldn't find pycaffe!", file=sys.stderr)
 
 from config import from_files
-from cnn import compute_mean_pixel, make_patches, train_dcnn
+from cnn import (customize_solver, customize_train_net, make_patches,
+                 train_dcnn_patches)
 import datasets
 from pairwise_relations import from_dataset, TrainingLabels
 from util import create_dirs
@@ -104,23 +105,41 @@ if __name__ == '__main__':
     logging.info("Labelling test set")
     test_labels = TrainingLabels(test_set, centroids)
 
-    # Train the CNN
+    # Make training patches for the CNN
     logging.info("Generating training image patches for CNN")
     train_patch_dir = path.join(cache_dir, 'train_patches.lmdb')
     validate_patch_dir = path.join(cache_dir, 'validate_patches.lmdb')
     make_patches(
         train_set, train_labels, train_patch_dir
     )
+
+    # Make validation patches for the CNN
     logging.info("Generating validation image patches for CNN")
     make_patches(
         validate_set, validate_labels, validate_patch_dir
     )
-    logging.info("Computing mean pixel value for training set")
-    mean_pixel_path = path.join(cache_dir, "mean_pixel")
-    compute_mean_pixel(train_patch_dir, mean_pixel_path)
-    logging.info("Training Caffe model")
+
+    # TODO: Mean pixel. This isn't needed for the the Chen & Yuille net (which
+    # uses a fixed mean of #808080).
+    # logging.info("Computing mean pixel value for training set")
+    # mean_pixel_path = path.join(cache_dir, "mean_pixel")
+    # compute_mean_pixel(train_patch_dir, mean_pixel_path)
+
     gpu_id = None if args.gpu == -1 else args.gpu
-    train_dcnn(
-        train_patch_dir, validate_patch_dir, mean_pixel_path,
-        cfg.get('cnn', 'solver_path'), gpu_id=gpu_id
+
+    # Now we load & update the solver and net definitions
+    model_source_path = cfg.get('cnn', 'train_net')
+    model_dest_path = path.join(cache_dir, 'train_val.prototxt')
+    customize_train_net(
+        model_source_path, model_dest_path, train_patch_dir, validate_patch_dir
     )
+
+    solver_source_path = cfg.get('cnn', 'solver_path')
+    solver_dest_path = path.join(cache_dir, 'solver.prototxt')
+    customize_solver(
+        solver_source_path, solver_dest_path, cache_dir, model_dest_path
+    )
+
+    # caffe train!
+    logging.info("Training Caffe model")
+    train_dcnn_patches(model_dest_path, solver_dest_path, gpu_id=gpu_id)

@@ -23,7 +23,7 @@ path: ../datasets/lsp/lsp_dataset.zip
 
 [cnn]
 solver: {MOD_PATH}/lsp_solver.prototxt
-train_net: {MOD_PATH}/lsp_solver.prototxt
+train_net: {MOD_PATH}/lsp_train_val.prototxt
 test_net: {MOD_PATH}/lsp_deploy.prototxt
 fully_conv_test_net: {MOD_PATH}/lsp_deploy_conv.prototxt
 """.format(MOD_PATH=MOD_PATH)

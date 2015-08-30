@@ -19,10 +19,6 @@ ALLOWED_LOADERS = [
 ]
 
 
-# XXX: At the moment, dataset splitting is totally broken. I need to handle
-# .scales in DataSet and .adjacent in Joints, among other attributes!
-
-
 def split_items(items, num_groups):
     """Splits a list of items into ``num_groups`` groups fairly (i.e. every
     item is assigned to exactly one group and no group is more than one item
@@ -83,6 +79,7 @@ class DataSet(object):
         for new_dataset, new_indices in zip(rv, rv_indices):
             new_dataset.joints = self.joints.for_indices(new_indices)
             new_dataset.image_ids = np.array(self.image_ids)[new_indices]
+            new_dataset.post_init()
 
         return rv
 
@@ -287,7 +284,7 @@ class LSP(DataSet):
         assert is_zipfile(lsp_path), "Supplied path must be to lsp_dataset.zip"
         self.lsp_path = lsp_path
         self.joints = self._load_joints()
-        self.image_ids = list(range(len(self.joints.locations)))
+        self.image_ids = list(range(1, len(self.joints.locations) + 1))
 
         self.post_init()
 
@@ -310,23 +307,33 @@ class LSP(DataSet):
             return Joints(point_locations, self.JOINTS, self.POINT_NAMES)
 
     def load_image(self, zero_ident):
-        """Takes an integer image idenifier in 0, 1, ..., 1999 and returns an
-        associated image. The image will have dimensions corresponding to row
-        number, column number and channels (RGB, usually)."""
+        """Takes an integer image idenifier in 0, 1, ..., self.num_samples - 1
+        and returns an associated image. The image will have dimensions
+        corresponding to row number, column number and channels (RGB,
+        usually)."""
         assert isinstance(zero_ident, int)
-        ident = zero_ident + 1
+        ident = self.image_ids[zero_ident]
         assert ident > 0
         # Images start from 1, not 0
         str_ident = str(ident).zfill(self.ID_WIDTH)
         file_path = self.PATH_PREFIX + 'images/im' + str_ident + '.jpg'
         with ZipFile(self.lsp_path) as zip_file:
-            with zip_file.open(file_path) as image_file:
-                return imread(image_file)
+            try:
+                with zip_file.open(file_path) as image_file:
+                    rv = imread(image_file)
+                    assert rv.ndim == 3
+                    assert np.all(np.array(rv.shape) != 0)
+                    return rv
+            except Exception as e:
+                print("Couldn't load '{}' from '{}'".format(
+                    file_path, self.lsp_path
+                ))
+                raise e
 
     def load_all_images(self):
         """Return a list of all images in the archive, ordered to correspond to
         joints matrix."""
-        return [self.load_image(ident) for ident in self.image_ids]
+        return [self.load_image(idx) for idx in xrange(self.num_samples)]
 
 
 class LSPET(LSP):
