@@ -125,8 +125,6 @@ if __name__ == '__main__':
     # mean_pixel_path = path.join(cache_dir, "mean_pixel")
     # compute_mean_pixel(train_patch_dir, mean_pixel_path)
 
-    gpu_id = None if args.gpu == -1 else args.gpu
-
     # Now we load & update the solver and net definitions
     model_source_path = cfg.get('cnn', 'train_net')
     model_dest_path = path.join(cache_dir, 'train_val.prototxt')
@@ -134,7 +132,7 @@ if __name__ == '__main__':
         model_source_path, model_dest_path, train_patch_dir, validate_patch_dir
     )
 
-    solver_source_path = cfg.get('cnn', 'solver_path')
+    solver_source_path = cfg.get('cnn', 'solver')
     solver_dest_path = path.join(cache_dir, 'solver.prototxt')
     customize_solver(
         solver_source_path, solver_dest_path, cache_dir, model_dest_path
@@ -142,4 +140,5 @@ if __name__ == '__main__':
 
     # caffe train!
     logging.info("Training Caffe model")
-    train_dcnn_patches(model_dest_path, solver_dest_path, gpu_id=gpu_id)
+    gpu_id = None if args.gpu == -1 else args.gpu
+    train_dcnn_patches(model_dest_path, solver_dest_path, gpu=gpu_id)
