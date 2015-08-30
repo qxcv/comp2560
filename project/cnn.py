@@ -59,7 +59,14 @@ def sample_to_data(dataset, labels, sample_id):
         assert scaled.shape == (side_length,) * 2 + cropped.shape[2:]
         assert scaled.dtype.name == 'uint8'
         label = labels.id_for(sample_id, part_idx)
-        datum = cf.io.array_to_datum(scaled, label=label)
+        # For array_to_datum, the dimensions are (channels, height, width).
+        # This means need to swap width and height, then transpose the entire
+        # Numpy array
+        trans_scaled = scaled.transpose((2, 0, 1))
+        datum = cf.io.array_to_datum(trans_scaled, label=label)
+        assert datum.height == scaled.shape[0]
+        assert datum.width == scaled.shape[1]
+        assert datum.channels == 3
         rv.append(datum)
 
     return rv
