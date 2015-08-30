@@ -24,9 +24,10 @@ def make_patches(dataset, labels, destination):
     :param destination: path to LMDB file."""
     with lmdb.open(destination, create=True, map_size=1 << 40) as env:
         for sample_id in xrange(dataset.num_samples):
-            logging.info('Generating patches for sample {}/{}'.format(
-                sample_id + 1, dataset.num_samples
-            ))
+            if (sample_id % 50) == 0:
+                logging.info('Generating patches for sample {}/{}'.format(
+                    sample_id + 1, dataset.num_samples
+                ))
             data = sample_to_data(dataset, labels, sample_id)
             with env.begin(write=True, buffers=True) as txn:
                 for datum in data:
