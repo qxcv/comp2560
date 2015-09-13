@@ -82,7 +82,7 @@ for s=1:length(seqs)
             detected_pose_seqs(mov, s, i).bestpose = [];
         end
     end        
-    %show_pose_sequence(seq_dir, frames, detected_poses);
+    show_pose_sequence(seq_dir, frames, detected_poses);
 end
 %
 % evaluate the sequences for pixel error
