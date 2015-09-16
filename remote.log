@@ -1,2 +1,5 @@
 1bf8e19e-4745-43cc-8105-7c4dfb29c19b encryption=none name=laptop type=directory timestamp=1442407633.943785s
+80dcc82d-3c4b-42ac-9196-20b163c6b464 encryption=none name=homefolder type=directory timestamp=1442401568.073016s
+867fae56-d9b3-4d38-96f9-037a212aaef3 encryption=none name=partch rsyncurl=u5568237@partch.anu.edu.au:remotes type=rsync timestamp=1442403526.521404s
 8e48890f-c18d-4ecf-b2b9-f789c714a479 encryption=none name=partch rsyncurl=u5568237@partch.anu.edu.au:remotes type=rsync timestamp=1442402386.527986s
+a42c406c-d930-4b8f-8e14-03022ad722ff encryption=none name=laptop type=directory timestamp=1442407592.182316s
