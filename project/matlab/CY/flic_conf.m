@@ -24,7 +24,7 @@ conf.cnn.cnn_model_file = './cache/flic/flic_iter_60000.caffemodel';
 conf.reference_joints_pair = [6, 7];     % right shoulder and left hip (from observer's perspective)
 conf.symmetry_joint_id = [2,1,7,8,9,10,3,4,5,6];
 conf.show_joint_ids = find(conf.symmetry_joint_id >= 1:10); 
-conf.joint_name = {'Head', 'Shou', 'Elbo', 'Wris', 'Hip'};
+conf.joint_name = {'Head', 'Shou', 'Elbo', 'Wris'};
 
 conf.box2det = @flic_box2det;
 conf.joint2stick = @flic_joint2stick;

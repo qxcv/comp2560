@@ -1,4 +1,4 @@
-startup;
+CY_startup;
 clear mex; 
 global GLOBAL_OVERRIDER;
 GLOBAL_OVERRIDER = @flic_conf;
