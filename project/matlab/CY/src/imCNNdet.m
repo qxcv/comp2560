@@ -1,6 +1,6 @@
-function [pyra, unary_map, idpr_map] = imCNNdet(im, model, useGpu, upS, impyra_fun)
-if ~exist('useGpu', 'var')
-  useGpu = 1;
+function [pyra, unary_map, idpr_map] = imCNNdet(im, model, gpuID, upS, impyra_fun)
+if ~exist('gpuID', 'var')
+  gpuID = -1;
 end
 if ~exist('upS', 'var')
   upS = 1;        % by default, we do not upscale the image
@@ -18,8 +18,9 @@ if caffe('is_initialized') == 0
   end
   caffe('init', cnnpar.cnn_deploy_conv_file, cnnpar.cnn_conv_model_file);
   % set to use GPU or CPU
-  if useGpu
+  if gpuID >= 0
     caffe('set_mode_gpu');
+    caffe('set_device', gpuID);
   else
     caffe('set_mode_cpu');
   end

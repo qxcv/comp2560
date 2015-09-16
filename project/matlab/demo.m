@@ -31,7 +31,7 @@
 % demo code main file to run.
 % for bugs contact anoop.cherian@inria.fr
 %
-warning 'off';
+% warning 'off';
 startup(); % set some paths
 
 % configure. See the function for details. You need to set the cache and
@@ -40,6 +40,15 @@ config = set_algo_parameters();
 
 % load the bodypart model learned using Yang and Ramanan framework.
 load ./data/FLIC_model.mat;% the 13part FLIC human pose model.
+
+% Load trained model from Chen & Yuille
+cy_mat = load('./data/CY/CNN_Deep_13_graphical_model.mat');
+cy_model = cy_mat.model;
+% Set path to trained CNN appropriately
+% TODO: I should move this stuff into config and pass it to imCNNdet
+% directly
+cy_model.cnn.cnn_conv_model_file = './data/CY/fully_conv_net_by_net_surgery.caffemodel';
+cy_model.cnn.cnn_deploy_conv_file = './CY/external/my_models/flic/flic_deploy_conv.prototxt';
 
 % get the dataset and gt annotations
 piw_data = get_piw_data('piw', config.data_path);
@@ -65,7 +74,7 @@ for s=1:length(seqs)
     try        
         load([config.data_store_path 'detected_poses_' seqs(s).name], 'detected_poses'); 
     catch
-        detected_poses = EstimatePosesInVideo(seq_dir, model, 1, config);   
+        detected_poses = EstimatePosesInVideo(seq_dir, model, cy_model, config);   
         save([config.data_store_path '/detected_poses_' seqs(s).name], 'detected_poses');
     end
     
@@ -82,7 +91,7 @@ for s=1:length(seqs)
             detected_pose_seqs(mov, s, i).bestpose = [];
         end
     end        
-    show_pose_sequence(seq_dir, frames, detected_poses);
+    % show_pose_sequence(seq_dir, frames, detected_poses);
 end
 %
 % evaluate the sequences for pixel error

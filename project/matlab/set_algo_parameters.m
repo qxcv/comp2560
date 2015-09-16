@@ -5,7 +5,6 @@ function config = set_algo_parameters()
 % set the cache for storing optical flow and pose candidates. You need a
 % large disk space for this.
 config.cache_path = './cache/';
-%config.cache_path = '/scratch2/bigimbaz/cherian/cherian/temp/cache/IP/';
 
 % this is the place to store the pose candidates
 config.data_store_path = [config.cache_path 'boxes_public1/']; % 
@@ -14,7 +13,6 @@ config.data_store_path = [config.cache_path 'boxes_public1/']; %
 % sequence in a separate folder. If you use poses in the wild, then the
 % path will be something like below.
 config.data_path = './dataset/selected_seqs/';
-%config.data_path = '/scratch2/bigimbaz/cherian/cherian/INRIA-Pose/selected_seqs/';
 
 
 % cache for storing a video of the detections, this might not be
@@ -24,6 +22,8 @@ config.video_store_path = [config.cache_path 'video/'];
 % cache for flow.
 config.data_flow_path = [config.cache_path 'flow/'];
 
+% GPU ID to use for CNN evaluation. -1 to disable GPU
+config.gpuID = -1;
 
 %% some internal parameters for pose estimation
 config.MAX_POSES = 300; % max candidate poses to use per frame

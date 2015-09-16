@@ -1,17 +1,16 @@
-function startup
-if ~exist('./bin', 'dir')
-  mkdir('./bin');
+function CY_startup
+if ~exist('./CY/bin', 'dir')
+  mkdir('./CY/bin');
 end
 
 if ~isdeployed
-  addpath('./dataio');
-  addpath('./bin');
-  addpath('./evaluation');
-  addpath('./visualization');
-  addpath('./src');
-  addpath('./tools');
-  addpath('./external');
-  addpath('./external/qpsolver');
+  addpath('./CY/dataio');
+  addpath('./CY/bin');
+  addpath('./CY/evaluation');
+  addpath('./CY/visualization');
+  addpath('./CY/src');
+  addpath('./CY/tools');
+  addpath('./CY/external');
   % path to DCNN library, e.g., caffe
   conf = global_conf();
   caffe_root = conf.caffe_root;
