@@ -23,7 +23,8 @@ if isempty(keyjoints)
     % Keypoints correspond to upper arm midpoint, elbow, lower arm midpoint
     % and wrist on the left (3 4 5 6) and right (8 9 10 11), respectively.
     % TODO: Change this for my model!
-    keyjoints = [3 4 5 6 8 9 10 11];     
+    % keyjoints = [3 4 5 6 8 9 10 11];
+    keyjoints = [4 5 6 7 12 13 14 15];  
 end
 
 % some special processing for head if it exists.
@@ -57,7 +58,7 @@ skelclr2 = get_patch_descr_Ex(skelpts2, img2, keyjoints, numpts_along_limb, disp
 %skelskin2 = get_clrdist_from_skinclr(skelclr2, skin_color_hist, keyjoints, numpts_along_limb);
 
 f = 1/30;
-wri = [6 11]; % this is for 13 part model and corresponds to the wrist joint
+wri = [7 15]; % this is for 18 part model and corresponds to the wrist joint
 wristidx = intersect(wri, keyjoints); % find which joint are we working with here.
 if ~isempty(wristidx)
     wrist_smooth = 0;

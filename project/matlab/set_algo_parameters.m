@@ -28,10 +28,10 @@ config.gpuID = 1;
 %% some internal parameters for pose estimation
 config.MAX_POSES = 300; % max candidate poses to use per frame
 config.flow_param = 1e-5; % weight to be used in loopy belief propagation between framepairs.
-config.PartIDs = [2 3 5 7 8 10 11]; % part ids for nbest pose estimation
+% config.PartIDs = [2 3 5 7 8 10 11]; % part ids for nbest pose estimation
 config.modeltype = ''; % what model are we working with. default is 13 part.
 config.seqlen = 15; % some internal parameter.
-config.cycled_nodes = [5,10]; % graphical nodes on which the single cycles are added.
+% config.cycled_nodes = [5,10]; % graphical nodes on which the single cycles are added.
 
 %% If using another dataset, you might need to get the respective pose parameters 
 % and set it appropriately in this function.

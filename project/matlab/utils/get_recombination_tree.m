@@ -19,6 +19,6 @@ function pose_joints = get_recombination_tree()
     pose_joints(elbowjoint).weights = [2 1 0.50 0.0 0.1 0.10,5];
         
     pose_joints(wristjoint).keyjoints_left = [14 15]; % [10 11]
-    pose_joints(wristjoint).keyjoints_right = [5 6]; % [5 6]
+    pose_joints(wristjoint).keyjoints_right = [6 7]; % [5 6]
     pose_joints(wristjoint).weights = [2 1 0.01 0.5 0.1 0.05,5];
 end
