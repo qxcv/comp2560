@@ -18,10 +18,15 @@ im = single(imresize(im,upS));  % may upscale image to better handle small objec
 
 step = cnnpar.step;
 
+% interval between scale x and scale 2 * x
 interval = model.interval;
 
+% psize is the size of the window which we convolve over the image (the
+% first CNN layer); padx and pady ensure that (width + padx) / step is an
+% integer---typically padx and pady are tiny.
 padx      = max(ceil((double(psize(1)-1)/2)),0); % more than half is visible
 pady      = max(ceil((double(psize(2)-1)/2)),0); % more than half is visible
+% how much we increase the scale by at each iteration
 sc = 2 ^(1/interval);
 imsize = [size(im, 1), size(im, 2)];
 max_scale = 1 + floor(log(min(imsize)/max(psize))/log(sc));
@@ -30,6 +35,9 @@ max_scale = 1 + floor(log(min(imsize)/max(psize))/log(sc));
 pyra = struct('feat', cell(max_scale,1), 'sizs', cell(max_scale,1), 'scale', cell(max_scale, 1), ...
   'padx', cell(max_scale,1), 'pady', cell(max_scale,1));
 
+% ibatch tells us how big our batch size for forward propagation is; each
+% input in a batch will be the size of the largest input in that batch
+% (which wastes a lot of pixel volume)
 ibatch = interval;    % use smaller ibatch if out of memory
 for i = 1:ibatch:max_scale
   scaled = imresize(im, 1/sc^(i-1));
