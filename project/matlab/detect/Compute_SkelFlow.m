@@ -9,8 +9,7 @@
 % candidates from img1 and n2 from img2.
 %
 function dist = Compute_SkelFlow(b1, b2, imsize, C, opticalflow, img1, img2, ...
-    numpts_along_limb, keyjoints, feat_type, parent_pos)
-global parent;
+    numpts_along_limb, keyjoints, feat_type, parent_pos, parent)
 display_poses = 0;
 pat_size = 8; % size of the patch used for flow computation.
 
@@ -21,6 +20,9 @@ B1=b1(:,end); B2=b2(:,end); % last column is the pose confidence score
 b1 = b1(:,1:end-2); b2 = b2(:,1:end-2); % the last two columns are not keypoint related.
 k1 = get_keypoints(b1); k2 = get_keypoints(b2);
 if isempty(keyjoints)
+    % Keypoints correspond to upper arm midpoint, elbow, lower arm midpoint
+    % and wrist on the left (3 4 5 6) and right (8 9 10 11), respectively.
+    % TODO: Change this for my model!
     keyjoints = [3 4 5 6 8 9 10 11];     
 end
 
@@ -42,8 +44,8 @@ if isempty(skin_color_hist)
 end 
 
 % get extra points on the arms.
-skelpts1 = get_skeleton_pts(img1, x1, y1, pat_size, keyjoints, numpts_along_limb); 
-skelpts2 = get_skeleton_pts(img2, x2, y2, pat_size, keyjoints, numpts_along_limb); 
+skelpts1 = get_skeleton_pts(img1, x1, y1, pat_size, keyjoints, numpts_along_limb, parent); 
+skelpts2 = get_skeleton_pts(img2, x2, y2, pat_size, keyjoints, numpts_along_limb, parent); 
 
 % compute flow along skeletons.
 skelflow = get_motion_from_flow_Ex(skelpts1, opticalflow, keyjoints, numpts_along_limb, display_poses);   
@@ -109,9 +111,8 @@ dist_ranking = (-xi*(kron(B1,ones(1,N2)) + kron(ones(1,N1), B2)'));
 dist = dist + dist_ranking;
 end
 
-function skelpts = get_skeleton_pts(img, x, y, pat_size, keyjoints, numpts_along_limb)
+function skelpts = get_skeleton_pts(img, x, y, pat_size, keyjoints, numpts_along_limb, parent)
 szx = size(img,2); szy=size(img,1);
-global parent;
 n = size(x,1);
 
 skelpts = deal(zeros(n,numpts_along_limb*2*length(keyjoints)));

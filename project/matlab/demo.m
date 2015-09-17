@@ -30,8 +30,6 @@
 % 
 % demo code main file to run.
 % for bugs contact anoop.cherian@inria.fr
-%
-% warning 'off';
 startup(); % set some paths
 
 % configure. See the function for details. You need to set the cache and
@@ -66,17 +64,20 @@ for s=1:length(seqs)
 
     % read the frames and store the respective groundtruth annotations.
     seq_dir = [config.data_path seqs(s).name '/'];    
-    frames = dir([seq_dir '/*.png']);    
+    frames = dir([seq_dir '/*.png']);
+    % TODO: get_groundtruth_for_seq returns a 13-part ground truth rather
+    % than an 18-part one. Need to make the ground truth 18 parts or
+    % convert my own model to 13 parts.
     gt = get_groundtruth_for_seq(frames, piw_data);% extract gt annotations for the frames in seq
     gt_all = [gt_all, gt]; % used for full evaluation.
 
     % now we are ready to compute the part sequences and recombination!               
-    try        
-        load([config.data_store_path 'detected_poses_' seqs(s).name], 'detected_poses'); 
-    catch
+    % try        
+    %     load([config.data_store_path 'detected_poses_' seqs(s).name], 'detected_poses'); 
+    % catch
         detected_poses = EstimatePosesInVideo(seq_dir, model, cy_model, config);   
         save([config.data_store_path '/detected_poses_' seqs(s).name], 'detected_poses');
-    end
+    % end
     
     % fill in some structure for the complete evaluation
     for i=1:length(frames)              
@@ -93,8 +94,8 @@ for s=1:length(seqs)
     end        
     % show_pose_sequence(seq_dir, frames, detected_poses);
 end
-%
+
 % evaluate the sequences for pixel error
-pix_error = evaluate_pose_seqs(detected_pose_seqs, gt_all, config.pix_thresh);  
+pix_error = evaluate_pose_seqs(detected_pose_seqs, gt_all, config.pix_thresh);
 fprintf('pixel error @ %d for Shol=%0.4f Elbow=%0.4f Wrist=%0.4f \n', config.pix_thresh, ...
-                    max(pix_error([2,7])), max(pix_error([4,9])), max(pix_error([6,11])));                
+                    max(pix_error([2,7])), max(pix_error([4,9])), max(pix_error([6,11])));

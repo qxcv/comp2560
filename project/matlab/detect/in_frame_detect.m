@@ -44,7 +44,11 @@ parfor level = levels,
     rscore = parts(1).score;
     
     % Walk back down tree following pointers
-    [Y,X] = find(rscore >= lev_thre);
+    % TODO: Need to make this backtrack only for the scores we want!
+    % I suspect that using 0 as a threshold result in a lot of extra work
+    % which we wouldn't have to do otherwise, but the cost of forward
+    % propagation appears to pale in comparison with this.
+    [Y,X] = find(rscore > 0); % >= lev_thre);
     if ~isempty(X)
       I   = (X-1)*size(rscore,1) + Y;
       box = backtrack(X,Y,parts,pyra(level));

@@ -46,7 +46,6 @@ for i=1:length(gt)
 end
 end
 
-
 function best_box = get_best_box(found_boxes, gt_box)
 parent = [0 1 2 3 4 5 1 7 8 9 10 1 12];
 pose.keypoint = zeros(13,2);
@@ -64,4 +63,3 @@ d=arrayfun(@(x) norm(x.keypoint - gt_box.point, 'fro'), pose);
 [~,idx] = min(d);
 best_box = found_boxes(idx,:);
 end
-%%

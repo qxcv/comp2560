@@ -50,4 +50,3 @@ config.pix_thresh = 15; % absolute threshold for pixerror threshold
 % used in the Y&R algorithm.
 config.pose_joints =  get_recombination_tree();
 end
-

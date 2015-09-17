@@ -10,7 +10,17 @@ conf.test_with_detection = true;  % constraint neck point to be inside a box
 conf.constrainted_pids = 2;  % neck point
 % for full body
 % 18 part
-conf.pa = [0 1 2 3 4 5 6 3 8 9 2 11 12 13 14 11 16 17];
+%          1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+conf.pa = [0 1 2 3 4 5 6 3 8 9  2  11 12 13 14 11 16 17];
+% Rough guide (head and neck are connected, as is neck with both shoulders)
+% Head: 1
+% Neck: 2
+% Shoulder (L?): 3
+% Arm (L?): 3->4->5->6->7
+% Side of torso (L?): 3->8->9->10
+% Shoulder (R?): 11
+% Arm (R?): 11->12->13->14->15
+% Side of torso (R?): 11->16->17->18
 d_step = 5;
 conf.degree = [-35:d_step:-d_step,d_step:d_step:35];
 

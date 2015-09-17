@@ -20,7 +20,9 @@
 function weights = Get_Distance_Weights(boxes, keyjoints)
 n = length(boxes);    
 if isempty(keyjoints)
-    keyjoints = [3 4 5 6 8 9 10 11]; 
+    % Corresponds to midpoint of upper arm (4) down to wrists on left side,
+    % then on right.
+    keyjoints = [4 5 6 7 12 13 14 15]; % [3 4 5 6 8 9 10 11]; 
 end
 
 % weights format:
@@ -34,13 +36,12 @@ end
 
 if keyjoints == 1 % root 
     weights = [0 0 0 0 0 1 0];
-elseif any(intersect(keyjoints, [2 7])) % shoulders
+elseif any(intersect(keyjoints, [3 11])) % shoulders
     weights = [0 2 0.1 0.1 0.1 1, 1];
-elseif any(intersect(keyjoints, [4 9])) % elbows
+elseif any(intersect(keyjoints, [5 13])) % elbows
     weights = [0 2 0.1 0.1 0.1 1, 0.5];
-elseif any(intersect(keyjoints, [6,11])) % wrists
+elseif any(intersect(keyjoints, [7 15])) % wrists
     weights = [2 1 0.1 0.1 0.5 1.3 1];
 end
 
 end
- 
