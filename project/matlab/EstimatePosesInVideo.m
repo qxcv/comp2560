@@ -1,7 +1,7 @@
  function new_merged_poses = EstimatePosesInVideo(src_path, model, cy_model, config)
-    global numpts_along_limb num_path_parts;
+    global num_path_parts;
     global parent keyjoints_right keyjoints_left;
-    global GetDistanceWeightsFn ComputePartPathCostsFn;
+    global GetDistanceWeightsFn;
 
     %% set some parameters!
     flow_param = config.flow_param;
@@ -11,8 +11,6 @@
     max_poses = config.MAX_POSES;
     cycled_nodes = config.cycled_nodes;
     GetDistanceWeightsFn = config.GetDistanceWeightsFn;
-    ComputePartPathCostsFn = config.ComputePartPathCostsFn;
-    numpts_along_limb = config.numpts_along_limb;
     num_path_parts = config.num_path_parts;
     parent = model.pa;
     pose_joints = config.pose_joints; % recombination tree nodes.           
@@ -43,43 +41,59 @@
         frames(:,:,:,i) = im;
     end
     numfiles = numframes;
-    boxes = cell(numfiles,1); allboxes = boxes;        
+    boxes = cell(numfiles,1);      
     img=cell(numframes,1);
 
     %% compute optical flow per frame pair.
     fprintf('optical flow on the frames...\n');
-    fopticalflow=cell(numfiles-1,1); next=1;
-    for i=1:numfiles-1
-        while i+next > numfiles, next  = next - 1; end % adaptive step size selection!
+    fopticalflow=cell(numfiles-1,1);
+    should_save = false(numfiles-1, 1);
+    % These make our indices consistent in the below loop, thereby allowing
+    % parfor to make fewer copies of `frames` and `imglist`.
+    next_frames = frames(:,:,:,2:end);
+    next_imglist = imglist(2:end);
+    dest_mats = cell(numfiles-1, 1);
+    parfor i=1:numfiles-1
+        dest_mats{i} = [data_flow_path strtok(imglist(i).name,'.') ...
+                '-' strtok(next_imglist(i).name,'.') '.mat'];
         try 
-              load([data_flow_path strtok(imglist(i).name,'.') '-' strtok(imglist(i+next).name,'.') '.mat'], 'flow');         
+            loaded_flow = load(dest_mats{i}, 'flow');
+            fopticalflow{i} = loaded_flow.flow;
         catch        
             fprintf('flow: working on file=%d/%d\n',  i, numfiles);
-            flow = 0;
-            [u,v] = LDOF_Wrapper(frames(:,:,:,i), frames(:,:,:,i+next));
-            flow.u= u;
-            flow.v= v;
-            save([data_flow_path strtok(imglist(i).name,'.') '-' strtok(imglist(i+next).name,'.') '.mat'], 'flow'); % cache flow... will take significant space!
+            [u,v] = LDOF_Wrapper(frames(:,:,:,i), next_frames(:,:,:,i));
+            fopticalflow{i}.u = u;
+            fopticalflow{i}.v = v;
+            should_save(i) = true;
         end
-        optflow = flow;
-        fopticalflow{i} = optflow;
+    end
+    
+    % Now save optical flow, if we need to; we couldn't save above because
+    % parfor hates save().
+    save_indices = find(should_save);
+    for s=1:length(save_indices)
+        i = save_indices(s);
+        flow = fopticalflow{i};
+        save(dest_mats{i}, 'flow');
     end
     
     %% run the CNN over each image for part presence
     fprintf('CNN forward propagation and head position estimation on the frames...\n');
-    cnn_out = {};
     for i=1:numfiles-1
         % TODO cache forward propagated values, just like everything else
         % is cached
-        fprintf('CNN forward propagation on image=%d/%d\n', i, numfiles);                                                        
-        current_im = frames(:,:,:,i);
-        [pyra, unary_map, idpr_map] = imCNNdet(current_im, cy_model, config.gpuID, 1, @impyra);
-        cnn_out{i}.pyra = pyra;
-        cnn_out{i}.unary = unary_map;
-        cnn_out{i}.idpr = idpr_map;
+        % fprintf('CNN forward propagation on image=%d/%d\n', i, numfiles);                                                        
+        % current_im = frames(:,:,:,i);
+        % [pyra, unary_map, idpr_map] = imCNNdet(current_im, cy_model, config.gpuID, 1, @impyra);
+        % Cache various statistics derived from model
+        % [components, apps] = modelcomponents(cy_model);
         
         % Now use NMS to get a list of the most promising head positions
-        % TODO
+        % fprintf('Intra-frame detection using graphical model'); 
+        % boxes{i} = in_frame_detect(...
+        %     1000, cy_model, pyra, unary_map, idpr_map, ...
+        %     length(model.components),components, apps ...
+        % );
     end
 
     %% compute the candidate poses for every frame
@@ -99,8 +113,7 @@
             % pairs.
             poseboxes = get_pose_boxes(img1, img2, boxes_loc, data_store_path, data_flow_path, imglist, stidx, enidx, stidx, 1, model, cycled_nodes,PartIDs, flow_param);
         end
-        pose_range = 1:min(length(poseboxes),max_poses);       
-        allboxes{i} = poseboxes;                          
+        pose_range = 1:min(length(poseboxes),max_poses);        
         boxes{i} = poseboxes(pose_range,:);            
     end
     
@@ -130,7 +143,9 @@
                 numpts_along_limb = 3;
             end
             
-            [~, ~, paths_left, paths_right, ~] = kshortest_subpaths(boxes, fopticalflow, img, imsize, new_merged_poses); 
+            [~, ~, paths_left, paths_right, ~] = kshortest_subpaths(...
+                boxes, fopticalflow, img, imsize, new_merged_poses, ...
+                config.numpts_along_limb, config.ComputePartPathCostsFn); 
    
             if ~isempty(paths_right)                   
                 for i=1:numfiles         
@@ -151,28 +166,26 @@
  end
 
 %%
-%function dist = compute_pose_distance_matrix2(b1, b2, chist1, chist2, opticalflow, img1,img2, imsize, keyjoints, feat_type)
-function dist = compute_pose_distance_matrix2(b1, b2, opticalflow1, img1,img2, imsize, keyjoints, feat_type, parent_pos)
-    global numpts_along_limb ComputePartPathCostsFn;    
+function dist = compute_pose_distance_matrix2(b1, b2, opticalflow1, img1,img2, imsize, keyjoints, feat_type, parent_pos, numpts_along_limb, ComputePartPathCostsFn)
     dist = ComputePartPathCostsFn(b1, b2, imsize, [], opticalflow1, img1, img2, numpts_along_limb, keyjoints, feat_type, parent_pos);
 end
 
 %% Dynamic programming algorithm using subpaths each one on each part sequence.
-function [dists, paths, paths_left, paths_right, bxs] = kshortest_subpaths(boxes, opticalflow, img, imsize, parent_tracks)
+function [dists, paths, paths_left, paths_right, bxs] = kshortest_subpaths(boxes, opticalflow, img, imsize, parent_tracks, numpts_along_limb, ComputePartPathCostsFn)
     global keyjoints_left keyjoints_right;
     bxs{1}=boxes;
     [paths_left, paths_right, paths] = deal([]);
 
     %[dists, paths] = compute_sub_paths(boxes, chists, opticalflow, img, imsize, []);
 
-    [dist_left, path_left] = compute_sub_paths(boxes, opticalflow, img, imsize, keyjoints_left, parent_tracks);
-    [dist_right, path_right] = compute_sub_paths(boxes, opticalflow, img, imsize, keyjoints_right, parent_tracks);
+    [dist_left, path_left] = compute_sub_paths(boxes, opticalflow, img, imsize, keyjoints_left, parent_tracks, numpts_along_limb, ComputePartPathCostsFn);
+    [dist_right, path_right] = compute_sub_paths(boxes, opticalflow, img, imsize, keyjoints_right, parent_tracks, numpts_along_limb, ComputePartPathCostsFn);
 
     dists = dist_left + dist_right; paths_left(1,:) = path_left; paths_right(1,:) = path_right;
 end
 
-function [mydist, mypath] = compute_sub_paths(boxes, opticalflow, img, imsize, keyjoints, parent_tracks)
-    global numpts_along_limb num_path_parts dist_weights;
+function [mydist, mypath] = compute_sub_paths(boxes, opticalflow, img, imsize, keyjoints, parent_tracks, numpts_along_limb, ComputePartPathCostsFn)
+    global num_path_parts dist_weights;
     plen = length(img)-1; pps=linspace(1,plen, num_path_parts+1);    
     [mydist, mypath] = deal([]); idx=[];
    
@@ -186,7 +199,8 @@ function [mydist, mypath] = compute_sub_paths(boxes, opticalflow, img, imsize, k
         for m=2:length(ppidx)
              C{m-1} = compute_pose_distance_matrix2(boxes{ppidx(m-1)}, boxes{ppidx(m)}, ... 
                  opticalflow{ppidx(m-1)}, img{ppidx(m-1)}, img{ppidx(m)}, ...
-                 imsize, keyjoints, dist_weights,  parent_tracks(m-1:m,:)); 
+                 imsize, keyjoints, dist_weights,  parent_tracks(m-1:m,:), ...
+                 numpts_along_limb, ComputePartPathCostsFn); 
         end
                           
         [dt, pt] = ksp(C);

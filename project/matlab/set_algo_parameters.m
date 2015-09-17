@@ -23,7 +23,7 @@ config.video_store_path = [config.cache_path 'video/'];
 config.data_flow_path = [config.cache_path 'flow/'];
 
 % GPU ID to use for CNN evaluation. -1 to disable GPU
-config.gpuID = -1;
+config.gpuID = 1;
 
 %% some internal parameters for pose estimation
 config.MAX_POSES = 300; % max candidate poses to use per frame

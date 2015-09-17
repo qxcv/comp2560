@@ -1,5 +1,4 @@
 function hf= get_motion_from_flow(pt, opticalflow, display_poses)
-addpath('/home/lear/cherian/projects/pose/MyCode/sequence/shortest-path/');
 ps = 15;
 u = opticalflow.u; v=opticalflow.v;
 n = size(pt,1);
