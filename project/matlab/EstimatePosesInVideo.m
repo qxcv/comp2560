@@ -41,40 +41,23 @@
     %% compute optical flow per frame pair.
     fprintf('optical flow on the frames...\n');
     fopticalflow=cell(numfiles-1,1);
-    should_save = false(numfiles-1, 1);
     % These make our indices consistent in the below loop, thereby allowing
     % parfor to make fewer copies of `frames` and `imglist`.
     next_frames = frames(:,:,:,2:end);
     next_imglist = imglist(2:end);
-    % filenames to save calculates optical flow data into
-    dest_mats = cell(numfiles-1, 1);
     parfor i=1:numfiles-1
-        dest_mats{i} = [data_flow_path strtok(imglist(i).name,'.') ...
+        dest_mat = [data_flow_path strtok(imglist(i).name,'.') ...
                 '-' strtok(next_imglist(i).name,'.') '.mat'];
         try 
-            loaded_flow = load(dest_mats{i}, 'flow');
+            loaded_flow = load(dest_mat, 'flow');
             fopticalflow{i} = loaded_flow.flow;
         catch        
             fprintf('flow: working on file=%d/%d\n',  i, numfiles);
             [u,v] = LDOF_Wrapper(frames(:,:,:,i), next_frames(:,:,:,i));
             fopticalflow{i}.u = u;
             fopticalflow{i}.v = v;
-            should_save(i) = true;
+            save_flow(dest_mat, flow);
         end
-    end
-    
-    % Now save optical flow, if we need to; we couldn't save above because
-    % parfor hates save(). Edit: looks like this was unnecessary. If you
-    % call save() within some function, then it's quite alright to call
-    % that function from within a parfor. The prohibition on save() is
-    % presumably to stop the save(dest) form from being used, rather than
-    % the more specific save(dest, var1, var2, ...); See
-    % http://ch.mathworks.com/matlabcentral/answers/135285-how-do-i-use-save-with-a-parfor-loop-using-parallel-computing-toolbox
-    save_indices = find(should_save);
-    for s=1:length(save_indices)
-        i = save_indices(s);
-        flow = fopticalflow{i};
-        save(dest_mats{i}, 'flow');
     end
     
     %% run the CNN over each image for part presence
@@ -231,4 +214,10 @@ function [mydist, mypath] = compute_sub_paths(boxes, opticalflow, img, ...
     end
     [~,good_idx] = unique(idx);
     mydist = mydist(good_idx); mypath = mypath(good_idx);
+end
+
+% save_flow() is trivial, but it has the advantage of being able to be
+% called in a parfor (unlike save())
+function save_flow(destination, flow)
+save(destination, 'flow');
 end
