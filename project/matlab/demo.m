@@ -52,7 +52,7 @@ piw_data = get_piw_data('piw', config.data_path);
 % dataset folder. 
 detected_pose_type = struct('seq', {}, 'filename', {}, 'frame', {}, 'bestpose',{});
 detected_pose_seqs = repmat(detected_pose_type, [1,1,1]);
-seqs = dir(config.data_path); seqs = seqs(3:3); % seqs = seqs(3:end);
+seqs = dir(config.data_path); seqs = seqs(3:end);
 all_detections = []; gt_all = []; mov = 1;
 
 % for every sequence in the selected_seqs folder (with the dataset)
