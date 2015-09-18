@@ -25,13 +25,15 @@ config.data_flow_path = [config.cache_path 'flow/'];
 % GPU ID to use for CNN evaluation. -1 to disable GPU
 config.gpuID = 1;
 
-%% some internal parameters for pose estimation
-config.MAX_POSES = 300; % max candidate poses to use per frame
-config.flow_param = 1e-5; % weight to be used in loopy belief propagation between framepairs.
-% config.PartIDs = [2 3 5 7 8 10 11]; % part ids for nbest pose estimation
-config.modeltype = ''; % what model are we working with. default is 13 part.
-config.seqlen = 15; % some internal parameter.
-% config.cycled_nodes = [5,10]; % graphical nodes on which the single cycles are added.
+%% Intra-frame GM parameters
+% max candidate poses to use per frame
+config.MAX_POSES = 300;
+% poses will be ignored if any of the parts in nms_parts have detection
+% boxes overlapping by more than nms_threshold with a higher scoring
+% pose
+config.nms_thresh = 0.95;
+% part IDs to perform NMS on (currently just wrists)
+config.nms_parts = [7 15];
 
 %% If using another dataset, you might need to get the respective pose parameters 
 % and set it appropriately in this function.

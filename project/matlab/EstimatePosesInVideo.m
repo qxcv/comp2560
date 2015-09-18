@@ -99,7 +99,7 @@
             ifdStart = tic;
             box = in_frame_detect(...
                 max_poses, pyra, unary_map, idpr_map, length(cy_model.components), ...
-                components, apps);
+                components, apps, config.nms_thresh, config.nms_parts);
             ifdStop = toc(ifdStart);
             fprintf('IFD took %fs\n', ifdStop);
             save(box_dest_path, 'box');
@@ -112,7 +112,7 @@
     [pose_counts, ~] = cellfun(@size, boxes);
     min_count = min(pose_counts);
     fprintf('Minimum number of pose estimations: %i\n', min_count);
-    assert(min_count >= 100);
+    assert(min_count > 0);
     
     for i=1:length(boxes)
         % ksp.cpp FREAKS OUT if it doesn't get a double array
@@ -143,12 +143,14 @@
             if ~isempty(paths_right)                   
                 for i=1:numfiles         
                     for s=1:length(pose_joints(pp).keyjoints_left)
-                        kj = pose_joints(pp).keyjoints_left(s); kj_range = (kj-1)*4+(1:4);
+                        kj = pose_joints(pp).keyjoints_left(s);
+                        kj_range = (kj-1)*4+(1:4);
                         new_merged_poses(i, kj_range) = boxes{i}(paths_left(1,i), kj_range);
                     end
 
                     for s=1:length(pose_joints(pp).keyjoints_right)
-                        kj = pose_joints(pp).keyjoints_right(s); kj_range = (kj-1)*4+(1:4);
+                        kj = pose_joints(pp).keyjoints_right(s);
+                        kj_range = (kj-1)*4+(1:4);
                         new_merged_poses(i, kj_range) = boxes{i}(paths_right(1,i), kj_range);
                     end
                 end

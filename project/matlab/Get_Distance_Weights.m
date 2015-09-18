@@ -17,8 +17,7 @@
 % For a new pose model, you need to define your own function depending
 % on the keyjoints parameter
 %
-function weights = Get_Distance_Weights(boxes, keyjoints)
-n = length(boxes);    
+function weights = Get_Distance_Weights(~, keyjoints)
 if isempty(keyjoints)
     % Corresponds to midpoint of upper arm (4) down to wrists on left side,
     % then on right.

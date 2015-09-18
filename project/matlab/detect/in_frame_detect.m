@@ -1,4 +1,5 @@
-function boxes = in_frame_detect(count, pyra, unary_map, idpr_map, num_components, components, apps)
+function boxes = in_frame_detect(count, pyra, unary_map, idpr_map, ...
+    num_components, components, apps, nms_thresh, nms_parts)
 % Detect at most `count` poses in input using a given CNN-computed feature
 % pyramid and model.
 %
@@ -44,11 +45,9 @@ parfor level = levels,
     rscore = parts(1).score;
     
     % Walk back down tree following pointers
-    % TODO: Need to make this backtrack only for the scores we want!
-    % I suspect that using 0 as a threshold result in a lot of extra work
-    % which we wouldn't have to do otherwise, but the cost of forward
-    % propagation appears to pale in comparison with this.
-    [Y,X] = find(rscore > 0); % >= lev_thre);
+    % Chen & Yuille actually applied a score threshold in find, instead of
+    % using our silly way of doing things.
+    [Y,X] = find(true(size(rscore)));
     if ~isempty(X)
       I   = (X-1)*size(rscore,1) + Y;
       box = backtrack(X,Y,parts,pyra(level));
@@ -62,6 +61,7 @@ end
 % Join together detections from each level
 boxes = cat(1, boxes{:});
 % Sort the detections descending by score, and return only the count best
+boxes = boxes(nms_pose(boxes, nms_thresh, nms_parts), :);
 [~,idx] = sort(boxes(:,end), 'descend');
 trunc_idx = idx(1:min(length(idx), count));
 boxes = boxes(trunc_idx,:);
