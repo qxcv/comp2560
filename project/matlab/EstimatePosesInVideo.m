@@ -56,7 +56,7 @@
             [u,v] = LDOF_Wrapper(frames(:,:,:,i), next_frames(:,:,:,i));
             fopticalflow{i}.u = u;
             fopticalflow{i}.v = v;
-            save_flow(dest_mat, flow);
+            save_flow(dest_mat, fopticalflow{i});
         end
     end
     
