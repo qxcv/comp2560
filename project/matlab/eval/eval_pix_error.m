@@ -34,7 +34,7 @@
 % anoop.cherian@inria.fr.
 % 
 % 
-function pck = eval_pixel_error(det, gt, thresh)
+function pck = eval_pix_error(det, gt, thresh)
 
 if nargin < 3
   thresh = 0.1;
