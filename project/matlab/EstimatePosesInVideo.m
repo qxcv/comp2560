@@ -81,11 +81,12 @@
                 idpr_map = cnn_output.idpr_map;
             catch % we didn't cache the CNN image pyramid
                 fprintf('CNN forward propagation on image=%d/%d\n', i, numfiles);
-                tic;
+                cnnDetStart = tic;
                 % this pushes our image through the CNN at several scales
                 % to make a feature pyramid for unaries and IDPR terms
                 [pyra, unary_map, idpr_map] = imCNNdet(current_im, cy_model, config.gpuID, 1, @impyra);
-                toc
+                cnnDetStop = toc(cnnDetStart);
+                fprintf('imCNNdet() took %fs\n', cnnDetStop);
                 pyra = rmfield(pyra, 'feat');
                 % This will take a long time and a heap of disk space, but I
                 % don't care
