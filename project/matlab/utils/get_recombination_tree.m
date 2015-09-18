@@ -9,7 +9,7 @@ function pose_joints = get_recombination_tree()
     pose_joints(neckjoint).keyjoints_right = 1;
     % XXX: These don't look like they ever get used. What's up here?
     pose_joints(neckjoint).weights = [0 1 0.50 0.0 0.5 1,5];
-        
+    
     pose_joints(sholjoint).keyjoints_left = 11; % 7 
     pose_joints(sholjoint).keyjoints_right = 3; % 2 
     pose_joints(sholjoint).weights = [0 1 0.50 0.0 0.5 1,5];

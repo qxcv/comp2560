@@ -140,44 +140,6 @@
         boxes{i} = double(boxes{i}(1:min_count, :));
     end
     
-    cnn_boxes = boxes;
-    
-%     %% compute the candidate poses for every frame
-%     % XXX: This next section must be deleted!
-%     fprintf('loopy pose estimation on the frames...\n');
-%     for i=1:numfiles-1                                                        
-%         img1 = frames(:,:,:,i);
-%         img{i} = img1; 
-% 
-%         try
-%             load([data_store_path boxes_loc '/' strtok(imglist(i).name, '.') '.mat']);                               
-%         catch                                 
-%             fprintf('loopy pose estimation on image=%d/%d\n', i, numfiles);
-%             img2 = frames(:,:,:,i+1); 
-%             stidx = i; enidx = i+1;
-% 
-%             % calls our extended pose model using optical flow for frame
-%             % pairs.
-%             poseboxes = get_pose_boxes(img1, img2, boxes_loc, data_store_path, data_flow_path, imglist, stidx, enidx, stidx, 1, model, cycled_nodes,PartIDs, flow_param);
-%         end
-%         pose_range = 1:min(length(poseboxes),max_poses);        
-%         boxes{i} = poseboxes(pose_range,:);            
-%     end
-%     
-%     % for the last frame, we use the previous frame flow links.
-%     try
-%         img2 = frames(:,:,:,numfiles); %imread([file_path files(numfiles).name]); % img1 is the same we got from the loop above.            
-%         img{numfiles} = img2;
-%         load([data_store_path boxes_loc strtok(imglist(i).name, '.') '.mat']);
-%     catch            
-%         stidx = numfiles-1; enidx = numfiles;
-%         poseboxes = get_pose_boxes(img2, img1, boxes_loc, data_store_path, data_flow_path, imglist, stidx, enidx, numfiles, -1, model, cycled_nodes, PartIDs, flow_param);            
-%     end
-%     pose_range = 1:min(length(poseboxes),max_poses);          
-%     boxes{numfiles} = poseboxes(pose_range,:);
-    
-    boxes = cnn_boxes;
-    
     %% now lets do the recombination procedure.
     new_merged_poses = zeros(numfiles, size(boxes{1},2));           
     try
@@ -274,13 +236,3 @@ function [mydist, mypath] = compute_sub_paths(boxes, opticalflow, img, ...
     [~,good_idx] = unique(idx);
     mydist = mydist(good_idx); mypath = mypath(good_idx);
 end
-
-% %% function that computes poses using our new graphical model.
-% function poseboxes = get_pose_boxes(img1, img2, boxes_loc, data_store_path, data_flow_path, imglist, stidx, enidx, save_id, dirfactor, model, cycled_nodes, PartIDs, flow_param)
-%     load([data_flow_path strtok(imglist(stidx).name,'.') '-' strtok(imglist(enidx).name,'.') '.mat'], 'flow');     
-%     fim(:,:,1) = flow.u; fim(:,:,2) = flow.v;
-%     poseboxes = loopy_detect_MM(img1, img2, fim*dirfactor, model, -1, cycled_nodes, PartIDs, flow_param);     
-%     [~,idx] = sort(poseboxes(:,end), 'descend');
-%     idx = idx(1:min(length(idx),1000)); poseboxes = poseboxes(idx,:);
-%     save([data_store_path boxes_loc '/' strtok(imglist(save_id).name, '.') '.mat'], 'poseboxes');    
-% end

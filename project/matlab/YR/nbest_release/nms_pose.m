@@ -28,7 +28,7 @@ for p = 1:length(partI)
 end
 
 s = boxes(:,end);
-[vals, I] = sort(s);
+[~, I] = sort(s);
 pick = [];
 while ~isempty(I)
 
@@ -71,8 +71,4 @@ while ~isempty(I)
 	suppress = [suppress(:) ; last];
 
 	I(suppress) = [];
-
 end
-
-
-

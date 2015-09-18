@@ -23,7 +23,7 @@ for n = 1:length(boxes)
         % [Head, Neck, L-{shoulder, upper arm, elbow, lower arm, wrist,
         % upper torso, mid torso, hip}, R-{shoulder, upper arm, elbow,
         % lower arm, wrist, upper torso, mid torso, hip}]
-        % Here's what PIW contains:
+        % Here's what PIW contains (observer perspective):
         % [Head, R-{shoulder, upper arm, elbow, lower arm, wrist},
         % L-{shoulder, upper arm, elbow, lower arm, wrist}, {upper, lower}
         % torso midpoint]
