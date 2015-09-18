@@ -11,21 +11,21 @@ end
 cnnpar = model.cnn;
 
 % init caffe network (spews logging info)
+persistent convnet;
 
-if caffe('is_initialized') == 0
+if isempty(convnet)
   if ~exist(cnnpar.cnn_deploy_conv_file, 'file') || ~exist(cnnpar.cnn_conv_model_file, 'file')
     error('model files not exist');
   end
-  caffe('init', cnnpar.cnn_deploy_conv_file, cnnpar.cnn_conv_model_file);
   % set to use GPU or CPU
   if gpuID >= 0
-    caffe('set_mode_gpu');
-    caffe('set_device', gpuID);
+    caffe.set_mode_gpu();
+    caffe.set_device(gpuID);
   else
-    caffe('set_mode_cpu');
+    caffe.set_mode_cpu();
   end
-  % put into test mode
-  caffe('set_phase_test');
+  % init net
+  convnet = caffe.Net(cnnpar.cnn_deploy_conv_file, cnnpar.cnn_conv_model_file, 'test');
 end
 
 %
@@ -35,7 +35,7 @@ if upS > 1
   upS = min(upS, 600 / max(imx,imy));
 end
 %
-pyra = impyra_fun(im, model, upS);
+pyra = impyra_fun(im, model, convnet, upS);
 max_scale = numel(pyra);
 FLT_MIN = realmin('single');
 % 0.01;

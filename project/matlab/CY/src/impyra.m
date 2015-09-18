@@ -1,4 +1,4 @@
-function pyra = impyra(im, model, upS)
+function pyra = impyra(im, model, net, upS)
 % Compute feature pyramid.
 %
 % pyra.feat{i} is the i-th level of the feature pyramid.
@@ -62,7 +62,17 @@ for i = 1:ibatch:max_scale
     
     % Convolution is by far the most costly step
     convStart = tic;
-    resp = caffe('conv_forward', {impyra});      % softmax apply in caffe model.
+    % TODO: Do we have the dimension ordering here? matcaffe code said
+    % something about h * w * c * n (which is super weird)
+    % Reshaping the data blob to match our input size will ensure that
+    % forward() works later. Caffe resizes subsequent layers on-the-fly,
+    % only re-allocating memory if it needs to (I don't think it ever frees
+    % anything).
+    data_blob = net.blobs('data');
+    data_blob.reshape(size(impyra));
+    % input is a cell array because some nets have multiple input layers,
+    % as opposed to input blobs (ours doesn't)
+    resp = net.forward({impyra});      % softmax apply in caffe model.
     convStop = toc(convStart);
     fprintf('Forward convolution took %f seconds\n', convStop);
     

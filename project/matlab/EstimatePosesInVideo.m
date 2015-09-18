@@ -1,4 +1,4 @@
- function new_merged_poses = EstimatePosesInVideo(src_path, ~, cy_model, config)
+ function new_merged_poses = EstimatePosesInVideo(src_path, cy_model, config)
     global num_path_parts;
     global keyjoints_right keyjoints_left;
     global GetDistanceWeightsFn;
@@ -96,11 +96,12 @@
             % Now detect poses within the frame using CNN-provided unaries
             % and IDPRs
             fprintf('Intra-frame detection on image=%d/%d\n', i, numfiles);
-            tic;
+            ifdStart = tic;
             box = in_frame_detect(...
                 max_poses, pyra, unary_map, idpr_map, length(cy_model.components), ...
                 components, apps);
-            toc
+            ifdStop = toc(ifdStart);
+            fprintf('IFD took %fs\n', ifdStop);
             save(box_dest_path, 'box');
         end
         

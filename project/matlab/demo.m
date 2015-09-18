@@ -34,10 +34,7 @@ startup(); % set some paths
 
 % configure. See the function for details. You need to set the cache and
 % the sequence paths in the config.
-config = set_algo_parameters();     
-
-% load the bodypart model learned using Yang and Ramanan framework.
-load ./data/FLIC_model.mat;% the 13part FLIC human pose model.
+config = set_algo_parameters();
 
 % Load trained model from Chen & Yuille
 cy_mat = load('./data/CY/CNN_Deep_13_graphical_model.mat');
@@ -55,7 +52,7 @@ piw_data = get_piw_data('piw', config.data_path);
 % dataset folder. 
 detected_pose_type = struct('seq', {}, 'filename', {}, 'frame', {}, 'bestpose',{});
 detected_pose_seqs = repmat(detected_pose_type, [1,1,1]);
-seqs = dir(config.data_path); seqs = seqs(3:end);
+seqs = dir(config.data_path); seqs = seqs(3:3); % seqs = seqs(3:end);
 all_detections = []; gt_all = []; mov = 1;
 
 % for every sequence in the selected_seqs folder (with the dataset)
@@ -75,7 +72,7 @@ for s=1:length(seqs)
     % try        
     %     load([config.data_store_path 'detected_poses_' seqs(s).name], 'detected_poses'); 
     % catch
-        detected_poses = EstimatePosesInVideo(seq_dir, model, cy_model, config);   
+        detected_poses = EstimatePosesInVideo(seq_dir, cy_model, config);   
         save([config.data_store_path '/detected_poses_' seqs(s).name], 'detected_poses');
     % end
     

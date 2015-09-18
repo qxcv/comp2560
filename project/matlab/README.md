@@ -10,8 +10,8 @@ Whilst a lot of code will have to be (or has been) rewritten, those
 modifications are mostly mixing-and-matching of existing code. The one novel
 thing is a Python-based system for doing forward passes through the CNN; I found
 that Chen & Yuille's code leaked memory quite badly when using fully
-convolutional networks, so I rewrote it in Python in the hope that whatever leak
-was present in Chen's Caffe fork was no longer present in BVLC's ``master``.
+convolutional networks, so I rewrote it in the hope that whatever leak was
+present in Chen's Caffe fork is no longer present in BVLC's ``master``.
 
 This code base is forked from Cherian, Mairal, Alahari & Schmid's video pose
 estimation code base, combined with Chen & Yuille's static pose estimation code
