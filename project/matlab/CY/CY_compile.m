@@ -9,5 +9,3 @@ mexcmd = [mexcmd ' -O'];
 mexcmd = [mexcmd ' -L/usr/lib -L/usr/local/lib'];
 
 eval([mexcmd ' CY/src/mex/distance_transform.cpp']);
-eval([mexcmd [' -I', fullfile(caffe_root, 'build/src/'), ' -lprotobuf -llmdb ', ...
-  fullfile(caffe_root, '/build/lib/libcaffe.a'), ' CY/src/mex/store_patch.cpp']]);

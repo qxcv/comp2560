@@ -4,13 +4,9 @@
     global GetDistanceWeightsFn;
 
     %% set some parameters!
-%     flow_param = config.flow_param;
-%     PartIDs = config.PartIDs;
     data_store_path = config.data_store_path;
     data_flow_path = config.data_flow_path;
     max_poses = config.MAX_POSES;
-%     cycled_nodes = config.cycled_nodes;
-%     numpts_along_limb = config.numpts_along_limb;
     GetDistanceWeightsFn = config.GetDistanceWeightsFn;
     num_path_parts = config.num_path_parts;
     pose_joints = config.pose_joints; % recombination tree nodes.           

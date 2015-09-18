@@ -4,12 +4,8 @@ if ~exist('./CY/bin', 'dir')
 end
 
 if ~isdeployed
-  addpath('./CY/dataio');
   addpath('./CY/bin');
-  addpath('./CY/evaluation');
-  addpath('./CY/visualization');
   addpath('./CY/src');
-  addpath('./CY/tools');
   addpath('./CY/external');
   % path to DCNN library, e.g., caffe
   conf = global_conf();
