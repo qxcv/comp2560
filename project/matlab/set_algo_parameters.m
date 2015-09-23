@@ -35,6 +35,10 @@ config.nms_thresh = 0.95;
 % part IDs to perform NMS on (currently just wrists)
 config.nms_parts = [7 15];
 
+%% Eval parameters
+% Which thresholds should we use when calculating PCK statistics?
+config.eval_pix_thresholds = 15:5:40;
+
 %% If using another dataset, you might need to get the respective pose parameters 
 % and set it appropriately in this function.
 config.GetDistanceWeightsFn = @Get_Distance_Weights; % a function that returns 
@@ -45,8 +49,6 @@ config.ComputePartPathCostsFn = @Compute_SkelFlow; % a function that returns
 
 config.numpts_along_limb = 3; % number of extra keypoints per limb--see practical extensions
 config.num_path_parts = 1; % number of sequence paths to compute per body part.
-
-config.pix_thresh = 15; % absolute threshold for pixerror threshold
 
 % recombination tree structure. This will change depending on the skeleton
 % used in the Y&R algorithm.

@@ -30,6 +30,12 @@
 %
 % demo code main file to run.
 % for bugs contact anoop.cherian@inria.fr
+
+% statsPath is an optional argument indicating where to put calculated PCK
+% statistics (in CSV format). If unspecified, statistics will be written to
+% stdout.
+function demo(stats_path)
+
 startup(); % set some paths
 
 % configure. See the function for details. You need to set the cache and
@@ -93,6 +99,31 @@ for s=1:length(seqs)
 end
 
 % evaluate the sequences for pixel error
-pix_error = evaluate_pose_seqs(detected_pose_seqs, gt_all, config.pix_thresh);
-fprintf('pixel error @ %d for Shol=%0.4f Elbow=%0.4f Wrist=%0.4f \n', config.pix_thresh, ...
-                    max(pix_error([2,7])), max(pix_error([4,9])), max(pix_error([6,11])));
+fprintf('evaluating pixel error\n')
+thresholds = config.eval_pix_thresholds;
+pix_error = zeros(length(config.eval_pix_thresholds), 11);
+for i=1:length(config.eval_pix_thresholds) % can be converted to parfor if there are lots of these
+    thresh = thresholds(i);
+    pix_error(i, :) = evaluate_pose_seqs(detected_pose_seqs, gt_all, thresh);
+end
+
+% fprintf('pixel error @ %d for Shol=%0.4f Elbow=%0.4f Wrist=%0.4f \n', thresh, ...
+%         max(pix_error([2,7])), max(pix_error([4,9])), max(pix_error([6,11])));
+out_tab = table(...
+    thresholds', ...
+    max(pix_error(:, [2, 7]), [], 2), ...
+    max(pix_error(:, [4, 9]), [], 2), ...
+    max(pix_error(:, [6, 11]), [], 2), ...
+    'VariableNames', {'Threshold', 'Shoulder', 'Elbow', 'Wrist'});
+
+% It would be nice to have head error, but PIW defines "head" differently
+% to FLIC, so we have to stick with shoulders, elbows and wrists :(
+
+if nargin == 0
+    fprintf('No output file specified, writing stats to console\n');
+    disp(out_tab);
+else
+    fprintf(['Writing stats to ' stats_path '\n']);
+    writetable(out_tab, stats_path);
+end
+end % end function
