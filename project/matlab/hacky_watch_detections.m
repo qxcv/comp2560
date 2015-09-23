@@ -1,3 +1,5 @@
+addpath ./visualization/
+addpath ./utils/
 config = set_algo_parameters();
 seq = 'seq15';
 load([config.data_store_path 'detected_poses_' seq], 'detected_poses');
