@@ -1,0 +1,59 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{latex-kit/wacv}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cite}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+%\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+%\wacvfinalcopy % *** Uncomment this line for the final submission
+
+\def\wacvPaperID{0000} % Fake paper ID for the quasi-conference
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+\ifwacvfinal\pagestyle{empty}\fi
+\setcounter{page}{1}
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Pose Estimation Using Body Part Sequence Mixing and Image-Dependent
+Pairwise Relations}
+
+\author{Sam Toyer\\
+The Australian National University\\
+{\tt\small u5568237@anu.edu.au}
+}
+
+\maketitle
+\ifwacvfinal\thispagestyle{empty}\fi
+
+%%%%%%%%% ABSTRACT
+\begin{abstract}
+    TODO
+\end{abstract}
+
+%%%%%%%%% BODY TEXT
+\section{Introduction}
+
+TODO
+
+\cite{cherian2014mixing}
+
+% NOTE: Only include acknowledgments in the final copy (use \ifwacvstyle ... \fi
+% to do this easily)!
+
+{\small
+\bibliographystyle{latex-kit/ieee}
+\bibliography{citations}
+}
+\end{document}
