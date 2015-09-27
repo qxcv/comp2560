@@ -26,8 +26,8 @@
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{Pose Estimation Using Body Part Sequence Mixing and Image-Dependent
-Pairwise Relations}
+\title{Pose Estimation in Videos Using Convolutional Neural Networks and
+Inter-Frame Recombination}
 
 \author{Sam Toyer\\
 The Australian National University\\
