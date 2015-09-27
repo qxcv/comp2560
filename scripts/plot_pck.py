@@ -2,9 +2,12 @@
 
 from argparse import ArgumentParser
 from itertools import cycle
+from os import path
 from sys import exit, stderr
 
+import matplotlib
 from matplotlib import pyplot as plt
+from matplotlib.ticker import AutoMinorLocator
 from pandas import read_csv
 
 THRESH = 'Threshold'
@@ -14,19 +17,16 @@ parser = ArgumentParser(
     description="Take PCK at different thresholds and plot it nicely"
 )
 parser.add_argument(
-    '--outdir', type=str, default='graphs',
-    help="Output directory to store graphs in"
-)
-parser.add_argument(
-    '--outext', type=str, default='pgf', help="Extension for generated graphs"
-)
-parser.add_argument(
-    '--show', default=False, action='store_true',
-    help="Show the graphs instead of saving them"
+    '--save', metavar='PATH', type=str, default=None,
+    help="Destination file for graph"
 )
 parser.add_argument(
     '--input', nargs=2, metavar=('NAME', 'PATH'), action='append', default=[],
     help='Name (title) and path of CSV to plot; can be specified repeatedly'
+)
+parser.add_argument(
+    '--dims', nargs=2, type=float, metavar=('WIDTH', 'HEIGHT'),
+    default=[6, 3], help="Dimensions (in inches) for saved plot"
 )
 
 def load_data(inputs):
@@ -61,6 +61,13 @@ if __name__ == '__main__':
         print('error: must specify at least one --input', file=stderr)
         exit(1)
 
+    if args.save is not None:
+        matplotlib.rcParams.update({
+            'font.family': 'serif',
+            'pgf.rcfonts': False,
+            'pgf.texsystem': 'pdflatex'
+        })
+
     labels, thresholds, parts = load_data(args.input)
 
     _, subplots = plt.subplots(1, len(parts), sharey=True)
@@ -70,15 +77,20 @@ if __name__ == '__main__':
             subplot.plot(thresholds, 100 * pck, label=label, marker=marker)
         subplot.set_title(part_name)
         subplot.set_xlabel('Threshold (px)')
-        subplot.grid()
+        subplot.grid(which='both')
 
     subplots[0].set_ylabel('PCK (%)')
     subplots[0].set_ylim(ymin=0, ymax=100)
-    subplots[0].set_yticks(range(0, 101, 10))
+    minor_locator = AutoMinorLocator(2)
+    subplots[0].yaxis.set_minor_locator(minor_locator)
+    subplots[0].set_yticks(range(0, 101, 20))
 
     plt.legend(labels, loc='lower right')
 
-    if args.show:
+    if args.save is None:
         plt.show()
     else:
-        raise NotImplementedError()
+        print('Saving figure to', args.save)
+        plt.gcf().set_size_inches(args.dims)
+        plt.tight_layout()
+        plt.savefig(args.save)
