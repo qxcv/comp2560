@@ -15,7 +15,7 @@
 % run, let it finish, and you should be clear).
 %\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
 
-%\wacvfinalcopy % *** Uncomment this line for the final submission
+%{\wacvfinalcopy} % *** Uncomment this line for the final submission
 
 \def\wacvPaperID{0000} % Fake paper ID for the quasi-conference
 \def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
@@ -37,6 +37,59 @@ The Australian National University\\
 \maketitle
 \ifwacvfinal\thispagestyle{empty}\fi
 
+% Random notes about stuff go here.
+%
+% Figures which I can include:
+% - Diagram showing entire pipeline
+% - Correct detections
+% - Incorrect detections
+% - Illustration of recombination candidate set
+% - PCK on PIW for elbows/wrists/shoulders, compared with the same papers which
+%   Anoop compares with.
+%
+% Things I can put in the introduction (not all required; just looking through
+% other papers to get ideas):
+% - What pose estimation is and why it is important.
+% - Challenges in pose estimation
+% - Explain different classes of approaches to pose estimation (possibly
+%   including their disadvantages). Just need to be careful not to tread on the
+%   related work section.
+% - Abstractly discuss the approach taken in the paper.
+% - Summarise experiments performed and the results of those experiments.
+%
+% Things I can put in the related work section:
+% - Talk about existing approaches and how they compare with one another in
+%   terms of results and in terms of the computer vision tools used.
+% - Explain why my approach is better (technically rather than empirically)
+%
+% Contents of the intra-frame part:
+% - Talk about Yang & Ramanan's articulated model.
+% - Discuss the type-based approach to part detection, and its advantages and
+%   disadvantages.
+% - Mention how the CNN works (esp. the fact that it's a fully convolutional
+%   network, and also the way we produce a feature pyramid).
+% - Graphical model and inference.
+% - Candidate pose generation with NMS at each scale.
+% - How do we use distance transforms to make GM inference more efficient? This
+%   was something I didn't fully understand, so I might try to write about it in
+%   the hope that I come to grok it better.
+% - Talk about training.
+%
+% Contents of the inter-frame part:
+% - Just explain how smoothing and recombination works, from optical flow down
+%   to producing the final pose.
+% - Should also explain whichever extensions I use from Anoop's paper.
+% - How do we find our hyperparameters? This is hard, since we don't train
+%   hyperparameters; really, we're just fiddling with them until they give us
+%   something we want. I could say that I just started with Anoop's parameters,
+%   then removed colour tracking and the skin histogram check, which really
+%   shows that I have nothing up my sleeves. I could also mention that it's
+%   theoretically possible to do a grid search for better parameters (maybe even
+%   run such a search and show the results, with the disclaimer that we're
+%   training on the test set).
+%
+% Might also want to put in a future work section.
+
 %%%%%%%%% ABSTRACT
 \begin{abstract}
     TODO
@@ -48,14 +101,6 @@ The Australian National University\\
 TODO
 
 \cite{cherian2014mixing}
-
-% Figures which I can include:
-% - Diagram showing entire pipeline
-% - Correct detections
-% - Incorrect detections
-% - Illustration of recombination candidate set
-% - PCK on PIW for elbows/wrists/shoulders, compared with the same papers which
-%   Anoop compares with.
 
 \section{Related work}
 
@@ -69,6 +114,14 @@ TODO
 
 % NOTE: Only include acknowledgments in the final copy (use \ifwacvstyle ... \fi
 % to do this easily)!
+
+\ifwacvfinal{%
+\noindent\textbf{Acknowledgements}\quad
+% XXX: I think that using [number] as a substitute for the paper name and year
+% is considered poor style (was that what Steve complained about last semester?)
+I would like to thank the authors of~\cite{chen2014articulated} and
+\cite{cherian2014mixing} for making their code publicly available.
+}\fi
 
 {\small
 \bibliographystyle{latex-kit/ieee}

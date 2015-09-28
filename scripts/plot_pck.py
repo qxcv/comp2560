@@ -12,6 +12,15 @@ from pandas import read_csv
 
 THRESH = 'Threshold'
 MARKERS = ['<', 'o', '^', 'x', '>', '+', 'v', 's']
+# List of matplotlib.artist.Artist properties which we should copy between
+# subplots
+COMMON_PROPS = {
+    'linestyle', 'marker', 'visible', 'drawstyle', 'linewidth',
+    'markeredgewidth', 'markeredgecolor', 'markerfacecoloralt',
+    'dash_joinstyle', 'zorder', 'markersize', 'solid_capstyle',
+    'dash_capstyle', 'markevery', 'fillstyle', 'markerfacecolor', 'label',
+    'alpha', 'path_effects', 'color', 'solid_joinstyle'
+}
 
 parser = ArgumentParser(
     description="Take PCK at different thresholds and plot it nicely"
@@ -61,20 +70,38 @@ if __name__ == '__main__':
         print('error: must specify at least one --input', file=stderr)
         exit(1)
 
-    if args.save is not None:
-        matplotlib.rcParams.update({
-            'font.family': 'serif',
-            'pgf.rcfonts': False,
-            'pgf.texsystem': 'pdflatex'
-        })
+    matplotlib.rcParams.update({
+        'font.family': 'serif',
+        'pgf.rcfonts': False,
+        'pgf.texsystem': 'pdflatex',
+        'xtick.labelsize': 'small',
+        'ytick.labelsize': 'small',
+        'legend.fontsize': 'small',
+        'axes.labelsize': 'medium',
+        'axes.titlesize': 'medium',
+    })
 
     labels, thresholds, parts = load_data(args.input)
 
     _, subplots = plt.subplots(1, len(parts), sharey=True)
-    for part_name, subplot in zip(parts, subplots):
+    common_handles = None
+    for part_name, subplot in zip(sorted(parts), subplots):
         pcks = parts[part_name]
-        for pck, label, marker in zip(pcks, labels, cycle(MARKERS)):
-            subplot.plot(thresholds, 100 * pck, label=label, marker=marker)
+        if common_handles is None:
+            # Record first lot of handles for reuse
+            common_handles = []
+            for pck, label, marker in zip(pcks, labels, cycle(MARKERS)):
+                handle, = subplot.plot(
+                    thresholds, 100 * pck, label=label, marker=marker
+                )
+                common_handles.append(handle)
+        else:
+            for pck, handle in zip(pcks, common_handles):
+                props = handle.properties()
+                kwargs = {k: v for k, v in props.items() if k in COMMON_PROPS}
+                subplot.plot(thresholds, 100 * pck, **kwargs)
+
+        # Labels, titles
         subplot.set_title(part_name)
         subplot.set_xlabel('Threshold (px)')
         subplot.grid(which='both')
@@ -84,8 +111,9 @@ if __name__ == '__main__':
     minor_locator = AutoMinorLocator(2)
     subplots[0].yaxis.set_minor_locator(minor_locator)
     subplots[0].set_yticks(range(0, 101, 20))
-
-    plt.legend(labels, loc='lower right')
+    plt.figlegend(
+        common_handles, labels, 'lower right', bbox_to_anchor=(0.98, 0.12)
+    )
 
     if args.save is None:
         plt.show()
