@@ -49,6 +49,24 @@ TODO
 
 \cite{cherian2014mixing}
 
+% Figures which I can include:
+% - Diagram showing entire pipeline
+% - Correct detections
+% - Incorrect detections
+% - Illustration of recombination candidate set
+% - PCK on PIW for elbows/wrists/shoulders, compared with the same papers which
+%   Anoop compares with.
+
+\section{Related work}
+
+\section{Single-frame candidate generation}
+
+\section{Inter-frame recombination}
+
+\section{Experiments}
+
+\section{Conclusion}
+
 % NOTE: Only include acknowledgments in the final copy (use \ifwacvstyle ... \fi
 % to do this easily)!
 
