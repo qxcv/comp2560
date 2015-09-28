@@ -88,29 +88,67 @@ The Australian National University\\
 %   run such a search and show the results, with the disclaimer that we're
 %   training on the test set).
 %
-% Might also want to put in a future work section.
+% Things to consider putting in the conclusion and future work section (other
+% than a summary, obviously):
+% - Anoop's suggestion of using a CNN-based regressor to fine-tune joint
+%   location estimates. Need to find some prior art on this; did Anoop just make
+%   that up when I was talking to him? It seems like a useful insight, so
+%   perhaps someone has tried it already.
+% - Anoop's other suggestion about using an R-CNN-style approach to CNN forward
+%   prop. Not totally convinced about the merits of that (you really only need
+%   to identify windows in which there's definitely no human present at all,
+%   which isn't what the R-CNN is doing with its semantic segmentation and
+%   region joining steps), so I might leave it out.
+% - Improve the CNN by using a newer model (e.g. ILSVRC '15 winners) or
+%   decreasing the number of output layers from ~10,000 to a few hundred by
+%   doing K-means on entire sets of outgoing limbs attached to a single joint.
+%   Perhaps there's also a good PCA-based method hiding somewhere in there.
+% - Diverse M-best for candidate generation, instead of the crap I'm using at
+%   the moment.
+% - Using LBP and optical flow to improve pairwise pose estimation.
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-    TODO
+    This paper presents a method for estimation of articulated human poses in
+    video frames. Our approach is comprised of a Convolutional Neural Network
+    (CNN) and tree-structured graphical model for independent generation of
+    candidate pose sets in each frame, followed by a recombination step which
+    makes use of optical flow and pairwise deformation features to produce a
+    single, consistent series of poses across an entire sequence. Evaluation on
+    the Poses in the Wild dataset validates the usefulness of inter-frame pose
+    recombination over single-frame pose estimation alone, and suggests that our
+    method significantly improves upon the state-of-the-art in localising
+    difficult body parts like wrists and elbows.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
 \section{Introduction}
 
-TODO
-
-\cite{cherian2014mixing}
+The aim of human pose estimation is to take a sequence of static images or video
+frames and output a series of two-dimensional ``skeletons'' representing the
+locations of the limbs of any humans in those images. Pose estimation is useful
+for higher-level computer vision tasks like identifying clothing
+items~\cite{liu2012street,liu2012hi,yamaguchi2012parsing}, recognising
+actions~\cite{yao2011does}, or even classifying objects which people interact
+with~\cite{delaitre2012scene}.
 
 \section{Related work}
 
 \section{Single-frame candidate generation}
 
+\subsection{Candidate set generation}
+
+\subsection{Learning}
+
 \section{Inter-frame recombination}
+
+\subsection{Choosing parameters}
 
 \section{Experiments}
 
-\section{Conclusion}
+\subsection{Discussion}
+
+\section{Conclusion and future work}
 
 % NOTE: Only include acknowledgments in the final copy (use \ifwacvstyle ... \fi
 % to do this easily)!
