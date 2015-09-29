@@ -107,6 +107,10 @@ The Australian National University\\
 %   the moment.
 % - Using LBP and optical flow to improve pairwise pose estimation.
 
+% Macros which I find useful:
+\renewcommand{\vec}{\mathbf}
+\newcommand{\mat}{\mathbf}
+
 %%%%%%%%% ABSTRACT
 \begin{abstract}
     This paper presents a method for estimation of articulated human poses in
@@ -136,14 +140,103 @@ with~\cite{delaitre2012scene}.
 
 \section{Single-frame candidate set generation}
 
-Our method for generating a candidate pose set in each frame mostly follows
-that of Chen and Yuille~\cite{chen2014articulated} % TODO
+Our method for generating a candidate pose set in each frame mostly follows that
+of Chen and Yuille~\cite{chen2014articulated}, although we will describe the
+relevant parts of their method in full.
 
-\subsection{Inference}
+\subsection{Model}
+
+% TODO: Complete figure
+\begin{figure}[t]
+\begin{center}
+\fbox{\rule{0pt}{1.5in} \rule{0.9\linewidth}{0pt}}
+\end{center}
+\caption{Illustration of the skeleton used to represent candidate poses within
+each frame. This figure shows an 18-joint upper-body skeleton, as used for
+evaluation in Section~\ref{sec:experiments}}
+\label{fig:skeleton}
+\end{figure}
+
+Skeletons are represented by a graph consisting of a $\mathcal G = (\mathcal V,
+\mathcal E)$ consisting of a set of vertices (also known as ``parts'' or
+``joints'') $\mathcal V$ and a set of edges (commonly referred to as ``limbs'')
+$\mathcal E \subseteq \mathcal V \times \mathcal V$, as illustrated in
+Figure~\ref{fig:skeleton}. A complete pose $\vec{p} = (\vec l, \vec t)$ is
+represented by a location $\vec{l_u}$ within an image $\mat I$ for each joint $u
+\in \mathcal V$, and discrete ``types'' $t_{uv}$ and $t_{vu}$ for each limb $(u,
+v) \in \mathcal E$.
+
+Limb types, as popularised by Yang and Ramanan~\cite{yang2011articulated}, are
+used to express the orientation and length of limbs. For example, long forearms
+running from left to right might be assigned their own discrete type, as might
+short, vertical forearms, medium-length diagonal forearms, and so on. During
+inference, these types can be introduced as latent variables, in which case they
+can be used to encourage the relative positions of body parts to take
+anatomically reasonable values through the use of type-dependent limb
+deformation costs.
+% TODO: Clean this up
+Further evidence for the type of a limb can be gleaned by inspecting small patches
+of an image around the endpoints of that limb: for instance, an image of a
+shoulder might give clues as to the direction in which the attached upper arm is
+pointing. Both type-dependent deformation costs and IDPRs are discussed at
+greater length in Section~\ref{sec:pairwise}.
+
+Given a pose $\vec p = (\vec l, \vec t)$, and an image $\mat I$, the full score
+$C(\mat l, \mat t \mid \mat I)$ can be decomposed into a sum of unary costs and
+pairwise costs, like so:
+
+\begin{equation}
+\begin{split}
+C(\vec l, \vec t \mid \mat I)
+= &\sum_{u \in \mathcal V} \phi_u(\vec l_u \mid \mat I)\\
++ &\sum_{(u, v) \in \mathcal E}
+    \psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)
+\end{split}
+\end{equation}
+
+Since $\mathcal G$ is a tree-structured graph, this cost can be minimised
+efficiently using dynamic programming and distance transforms.
+
+\subsection{Pairwise costs and IDPRs}
+\label{sec:pairwise}
+
+The pairwise cost $\phi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)$
+can itself be decomposed into the sum of type-dependent deformation costs and
+Image-Dependent Pairwise Relations (IDPRs), as expressed by the following
+equation:
+
+\begin{equation}
+\begin{split}
+\psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu})
+= &\vec w_{uvt_{uv}}^T d(\vec l_v - \vec l_u - \vec r_{uv t_{uv}})\\
++ &\vec w_{vut_{vu}}^T d(\vec l_u - \vec l_v - \vec r_{vu t_{vu}})\\
++ &w_{uv} \log p() % TODO
+\end{split}
+\end{equation}
+
+Where $d(\vec v) = \begin{bmatrix}v_x^2 & v_y^2 & v_x & v_y\end{bmatrix}^T$ is a
+deformation feature.
+
+\subsection{Unary costs}
+\label{sec:unary}
+
+% TODO
+The appearance term $\phi(\vec l_u \mid I) = \log(p(c = i) \mid \mat I)$
 
 \subsection{Learning}
 
 \section{Inter-frame recombination}
+
+% TODO: Complete figure
+\begin{figure*}[t]
+\begin{center}
+\fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
+\end{center}
+\caption{Diagram showing the recombination process. First, a fixed number of
+candidates are generated in each frame, % TODO
+}
+\label{fig:recombination}
+\end{figure*}
 
 Given a set of candidate poses in each frame, the approach of Cherian
 \etal~\cite{cherian2014mixing} can be used to produce a consistent series of
@@ -154,6 +247,19 @@ poses across an entire video sequence. % TODO
 \subsection{Choosing parameters}
 
 \section{Experiments}
+\label{sec:experiments}
+
+% TODO: Complete figure
+\begin{figure*}[t]
+\begin{center}
+\fbox{\rule{0pt}{2in} \rule{0.9\linewidth}{0pt}}
+\end{center}
+\caption{Comparison of accurate and inaccurate pose estimates. The top row shows
+several consecutive frames of a challenging sequence on which the model performs
+well. The top row shows a number of individual frames in which the model
+performed poorly.}
+\label{fig:recombination}
+\end{figure*}
 
 \subsection{Discussion}
 
