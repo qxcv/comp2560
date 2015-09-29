@@ -134,13 +134,22 @@ with~\cite{delaitre2012scene}.
 
 \section{Related work}
 
-\section{Single-frame candidate generation}
+\section{Single-frame candidate set generation}
 
-\subsection{Candidate set generation}
+Our method for generating a candidate pose set in each frame mostly follows
+that of Chen and Yuille~\cite{chen2014articulated} % TODO
+
+\subsection{Inference}
 
 \subsection{Learning}
 
 \section{Inter-frame recombination}
+
+Given a set of candidate poses in each frame, the approach of Cherian
+\etal~\cite{cherian2014mixing} can be used to produce a consistent series of
+poses across an entire video sequence. % TODO
+
+\subsection{Use of optical flow}
 
 \subsection{Choosing parameters}
 
