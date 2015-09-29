@@ -10,4 +10,5 @@
     --input "No skin/colour weights" "../stats/no-skin-or-colour-100-poses.csv" \
     --input "No skin/colour, tweaked" "../stats/no-skin-or-colour-1-shoulder-sumflow-100-poses.csv" \
     --input "No skin/colour, tweaked 2" "../stats/no-skin-or-colour-no-shoulder-motion-100-poses.csv" \
+    --input "No skin/colour/motion" "../stats/no-skin-no-colour-no-motion-100-poses.csv" \
     $@
