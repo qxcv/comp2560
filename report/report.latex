@@ -13,7 +13,7 @@
 % If you comment hyperref and then uncomment it, you should delete
 % egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
 % run, let it finish, and you should be clear).
-%\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
 
 %{\wacvfinalcopy} % *** Uncomment this line for the final submission
 
@@ -28,6 +28,9 @@
 \renewcommand{\vec}{\mathbf}
 \newcommand{\mat}{\mathbf}
 \DeclareMathOperator{\nb}{nb}
+% This is just to stop Syntastic from complaining. Grumble grumble
+% fixing your tools...
+\newcommand{\cyte}[1]{\cite{#1}}
 
 \begin{document}
 
@@ -157,10 +160,11 @@ with~\cite{delaitre2012scene}.
 \section{Related work}
 
 \section{Single-frame candidate set generation}
+\label{sec:intraframe}
 
 Our method for generating a candidate pose set in each frame mostly follows that
-of Chen and Yuille~\cite{chen2014articulated}, although we will describe the
-relevant parts of their method in full.
+of \cyte{chen2014articulated}, although we will describe the relevant parts of
+their method in full.
 
 \subsection{Model}
 
@@ -184,19 +188,18 @@ represented by a location $\vec{l_u}$ within an image $\mat I$ for each joint $u
 \in \mathcal V$, and discrete ``types'' $t_{uv} \in \{1, \ldots, T_{uv}\}$ and
 $t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v) \in \mathcal E$.
 
-Limb types, as popularised by Yang and Ramanan~\cite{yang2011articulated}, are
-used to express the orientation and length of limbs. For example, long forearms
-running from left to right might be assigned their own discrete type, as might
-short, vertical forearms, medium-length diagonal forearms, and so on. During
-inference, these types can be introduced as latent variables, in which case they
-can be used to encourage the relative positions of body parts to take
-anatomically reasonable values through the use of type-dependent limb
-deformation costs.
+Limb types, as popularised by \cyte{yang2011articulated}, are used to express
+the orientation and length of limbs. For example, long forearms running from
+left to right might be assigned their own discrete type, as might short,
+vertical forearms, medium-length diagonal forearms, and so on. During inference,
+these types can be introduced as latent variables, in which case they can be
+used to encourage the relative positions of body parts to take anatomically
+reasonable values through the use of type-dependent limb deformation costs.
 % TODO: Clean this up
-Further evidence for the type of a limb can be gleaned by inspecting small patches
-of an image around the endpoints of that limb: for instance, an image of a
-shoulder might give clues as to the direction in which the attached upper arm is
-pointing. Both type-dependent deformation costs and IDPRs are discussed at
+Further evidence for the type of a limb can be gleaned by inspecting small
+patches of an image around the endpoints of that limb: for instance, an image of
+a shoulder might give clues as to the direction in which the attached upper arm
+is pointing. Both type-dependent deformation costs and IDPRs are discussed at
 greater length in Section~\ref{sec:pairwise}.
 
 Given a complete pose $(\vec l, \vec t)$ consisting of a vector part locations
@@ -275,9 +278,11 @@ patch of the image centered at $\vec{l_u}$ contains the joint $u$:
 \subsection{Computing unaries and IDPR terms}
 \label{sec:cnn}
 
-To compute the unaries defined by Equation~\ref{eqn:unary} and the IDPRs defined
-by Equation~\ref{eqn:idpr}, we train a CNN to predict the joint distribution
-over $J$ and $L$ given $\mat I$:
+To compute the unaries defined by (\ref{eqn:unary}) and the IDPRs defined
+by (\ref{eqn:idpr}), we train a CNN to output the joint distribution
+over part locations and neighbouring limb types for a given image $\mat I$. If
+we let %TODO
+, then this distribution is:
 
 \begin{equation}
 \label{eqn:cnn-output}
@@ -289,8 +294,8 @@ p(J(\vec l, \mat I) = u, L(\vec l, u, I) = t_{uv} \mid \mat I)
 The unaries and IDPRs may be obtained from this distribution by marginalisation.
 
 Our CNN architecture closely follows that of
-AlexNet~\cite{krizhevsky2012imagenet}, and is identical to that
-of~\cite{chen2014articulated}. At a high level, the network begins with a
+AlexNet~\cite{krizhevsky2012imagenet}, and is identical to that of
+\cyte{chen2014articulated}. At a high level, the network begins with a
 convolution over the input, followed by two convolutional layers coupled with
 max pooling and local response normalisation, after which three convolutional
 layers are applied before two 4096-neuron fully-connected layers which feed into
@@ -298,7 +303,7 @@ the softmax output layer.
 
 To minimise wasted computation, we convert the final fully connected layers of
 the network to $1 \times 4096$ convolutions after the network has been trained.
-This allows us to evaluate Equation~\ref{eqn:cnn-output} over a full-resolution
+This allows us to evaluate (\ref{eqn:cnn-output}) over a full-resolution
 image in a single pass, rather than having to pass appropriately-sized crops
 of the image through the network one at a time.
 
@@ -307,6 +312,7 @@ of the image through the network one at a time.
 \subsection{Learning}
 
 \section{Inter-frame recombination}
+\label{sec:interframe}
 
 % TODO: Complete figure
 \begin{figure*}[t]
@@ -318,15 +324,65 @@ candidate poses are generated in each frame, sorted descending by score. Next,
 non-maximum suppression is performed on wrists and elbows to increase the
 diversity of the top $N$ candidates. Finally, the top $N$ candidates in each
 frame are fed to the recombination procedure, which greedily recombines limbs in
-a top-down fashion whilst trying to minimise Equation~\ref{eqn:recomb-cost}.
-% TODO: Reference actual equation
-}
+a top-down fashion whilst trying to minimise (\ref{eqn:recomb-cost}).}
+
 \label{fig:recombination}
 \end{figure*}
 
-Given a set of candidate poses in each frame, the approach of Cherian
-\etal~\cite{cherian2014mixing} can be used to produce a consistent series of
-poses across an entire video sequence. % TODO
+% XXX: WTF? Reading about Anoop's method makes it sound like I've totally
+% misapplied it in my code. The entire point of recombination is to construct a
+% new series of poses which minimise the original cost plus some additional cost
+% which acts like a spring between different limbs. Since doing this directly is
+% intractible (or something), we use a greedy which finds a minimal-cost head
+% sequence using the unary and temporal links through each frame, then do a
+% similar thing for each remaining part in turn, except the unaries for
+% subsequent parts have the path cost to the (already chosen) parent added on to
+% them. However, instead of starting with actual unaries, it looks like Anoop is
+% starting with a complete pose cost as an "approximation". Yes, this is really
+% fast, but intuitively it seems like it ought to give totally different results
+% to the ones which are expected.
+
+% TODO: Man, it would be cool if we could enforce some sort of temporal
+% consistency between limb types.
+
+We have already seen in Section~\ref{sec:intraframe} how we can use a graphical
+model to do pose estimation within a single frame. Pose estimation in videos is
+similar to pose estimation in static images, except that we wish to enforce some
+sort of temporal consistency between the poses corresponding to successive
+frames. The obvious approach to this problem is to apply our existing graphical
+model to each frame, but to additionally add some temporal consistency term
+$\theta(p_t, p_{t+1}) = \sum_{u \in \mathcal V} \theta_u(l_{u,t}, l_{u,t+1})$, where
+$l_{u,t}$ denotes the location of part $u$ at time $t$. If we had $F$ frames in
+total, then the full cost would be something like the following:
+
+\begin{equation}\label{eqn:hypo-interframe}
+C(p_F, \mat I_F) + \sum_{t=1}^{F-1}
+\left[C(p_t, \mat I_t) + \theta(p_t, p_{t+1})\right]
+\end{equation}
+
+This equation corresponds to a complex, highly loopy graph, which makes it
+infeasible to find the $p_1, \ldots, p_F$ which minimises
+(\ref{eqn:hypo-interframe}) for any nontrivial choice of $\theta$. One way to
+reduce this computational burden is to restrict the set of poses which we
+consider to some limited set $\mathcal P_t$ in each frame; if we have exactly
+$|\mathcal P|$ candidate poses in each frame, then dynamic programming would
+allow us to minimise ($\ref{eqn:hypo-interframe}$) in $O(|\mathcal P|^2 F)$
+time. $|\mathcal P|^2$ can still be colossal when a large number of poses are
+considered in each frame, which restricts the applicability of this technique to
+situations in which $|\mathcal P|$ is small.
+
+Unfortunately, whilst a small set of poses might, for each part, contain at
+least one pose in which the location of that part is close its best possible
+location, it's possible that the set will not contain a single pose in which
+\emph{all} parts are close to their best locations. \cyte{cherian2014mixing}
+avoids this problem by taking a small, diverse set of $|\mathcal P|$ candidate
+poses and then considering all possible combinations of limbs from each of those
+poses. Given $|\mathcal P|$ poses and $K$ limbs, this results in an effective
+candidate set of $K^{|\mathcal P|}$ poses in each frame, and ensures that the
+best joints in the candidate pose set, rather than just the best poses, are
+considered.
+
+% TODO: Rest of how this works.
 
 \begin{equation}\label{eqn:recomb-cost}
 % TODO
@@ -351,6 +407,9 @@ performed poorly.}
 \label{fig:qualitative}
 \end{figure*}
 
+Code for these experiments is available
+online.\footnote{\url{https://github.com/qxcv/comp2560/tree/master/project/matlab}}
+
 \subsection{Discussion}
 
 \subsection{Future work}
@@ -362,10 +421,8 @@ performed poorly.}
 
 \ifwacvfinal{%
 \noindent\textbf{Acknowledgements}\quad
-% XXX: I think that using [number] as a substitute for the paper name and year
-% is considered poor style (was that what Steve complained about last semester?)
-I would like to thank the authors of~\cite{chen2014articulated} and
-\cite{cherian2014mixing} for making their code publicly available.
+We would like to thank the authors of \cyte{chen2014articulated} and
+\cyte{cherian2014mixing} for making their code publicly available.
 }\fi
 
 {\small
