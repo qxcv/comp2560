@@ -27,7 +27,7 @@ config.gpuID = 1;
 
 %% Intra-frame GM parameters
 % max candidate poses to use per frame
-config.MAX_POSES = 300;
+config.MAX_POSES = 150;
 % poses will be ignored if any of the parts in nms_parts have detection
 % boxes overlapping by more than nms_threshold with a higher scoring
 % pose
@@ -37,6 +37,11 @@ config.nms_parts = [7 15];
 
 %% Eval parameters
 % Which thresholds should we use when calculating PCK statistics?
+% Cherian et al. use 15:5:40, but some people use different thresholds. For
+% example, Pfister et al. use 0:X:20, where X is a really small step. I think
+% I'll ultimately extend the below to 0:5:40. Perhaps 0:2.5:40? The only
+% challenge is getting others' results; getting Anoop's results are easy, but I
+% also want to compare to Pifster et al., Yang & Ramanan, etc.
 config.eval_pix_thresholds = 15:5:40;
 
 %% If using another dataset, you might need to get the respective pose parameters 
