@@ -23,6 +23,12 @@
 % Pages are numbered in submission mode, and unnumbered in camera-ready
 \ifwacvfinal\pagestyle{empty}\fi
 \setcounter{page}{1}
+
+% Macros which I find useful:
+\renewcommand{\vec}{\mathbf}
+\newcommand{\mat}{\mathbf}
+\DeclareMathOperator{\nb}{nb}
+
 \begin{document}
 
 %%%%%%%%% TITLE
@@ -106,10 +112,22 @@ The Australian National University\\
 % - Diverse M-best for candidate generation, instead of the crap I'm using at
 %   the moment.
 % - Using LBP and optical flow to improve pairwise pose estimation.
-
-% Macros which I find useful:
-\renewcommand{\vec}{\mathbf}
-\newcommand{\mat}{\mathbf}
+%
+% Remember the Heilmeier Catechism! Jochen said that most of these points should
+% be addressed in the discussion:
+%
+% - What are you trying to do? Articulate your objectives using absolutely no
+%   jargon.
+% - How is it done today, and what are the limits of current practice?
+% - What's new in your approach and why do you think it will be successful?
+% - Who cares? If you're successful, what difference will it make?
+%
+% The Heilmeier Catechism also includes the following questions, although they
+% are less relevant for our discussion:
+%
+% - What are the risks and the payoffs?
+% - How much will it cost? How long will it take?
+% - What are the midterm and final "exams" to check for success?
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
@@ -163,8 +181,8 @@ Skeletons are represented by a graph consisting of a $\mathcal G = (\mathcal V,
 $\mathcal E \subseteq \mathcal V \times \mathcal V$, as illustrated in
 Figure~\ref{fig:skeleton}. A complete pose $\vec{p} = (\vec l, \vec t)$ is
 represented by a location $\vec{l_u}$ within an image $\mat I$ for each joint $u
-\in \mathcal V$, and discrete ``types'' $t_{uv}$ and $t_{vu}$ for each limb $(u,
-v) \in \mathcal E$.
+\in \mathcal V$, and discrete ``types'' $t_{uv} \in \{1, \ldots, T_{uv}\}$ and
+$t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v) \in \mathcal E$.
 
 Limb types, as popularised by Yang and Ramanan~\cite{yang2011articulated}, are
 used to express the orientation and length of limbs. For example, long forearms
@@ -181,9 +199,10 @@ shoulder might give clues as to the direction in which the attached upper arm is
 pointing. Both type-dependent deformation costs and IDPRs are discussed at
 greater length in Section~\ref{sec:pairwise}.
 
-Given a pose $\vec p = (\vec l, \vec t)$, and an image $\mat I$, the full score
-$C(\mat l, \mat t \mid \mat I)$ can be decomposed into a sum of unary costs and
-pairwise costs, like so:
+Given a complete pose $(\vec l, \vec t)$ consisting of a vector part locations
+$l$ and a vector of limb types $t$, and an image $\mat I$, the full score
+$C(\mat l, \mat t \mid \mat I)$ of the pose can be decomposed into a sum of
+unary costs and pairwise costs, like so:
 
 \begin{equation}
 \begin{split}
@@ -194,6 +213,11 @@ C(\vec l, \vec t \mid \mat I)
 \end{split}
 \end{equation}
 
+% TODO: This is obviously not a tree (since we have one type variable in each
+% direction for each limb), so how are we doing inference? Are we just forcing
+% t_{ij} = t_{ji}? I should read Chen & Yuille's code to understand this. Should
+% also put a precise complexity on the recombination procedure. Oh, and an
+% explanation of how distance transforms are used would be super handy!
 Since $\mathcal G$ is a tree-structured graph, this cost can be minimised
 efficiently using dynamic programming and distance transforms.
 
@@ -202,26 +226,83 @@ efficiently using dynamic programming and distance transforms.
 
 The pairwise cost $\phi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)$
 can itself be decomposed into the sum of type-dependent deformation costs and
-Image-Dependent Pairwise Relations (IDPRs), as expressed by the following
-equation:
+IDPRs, as expressed by the following equation:
 
 \begin{equation}
 \begin{split}
 \psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu})
 = &\vec w_{uvt_{uv}}^T d(\vec l_v - \vec l_u - \vec r_{uv t_{uv}})\\
 + &\vec w_{vut_{vu}}^T d(\vec l_u - \vec l_v - \vec r_{vu t_{vu}})\\
-+ &w_{uv} \log p() % TODO
++ &w_{uv} \mathcal I(\vec l_u, t_{uv}, \mat I)\\
++ &w_{vu} \mathcal I(\vec l_v, t_{vu}, \mat I)
 \end{split}
 \end{equation}
 
 Where $d(\vec v) = \begin{bmatrix}v_x^2 & v_y^2 & v_x & v_y\end{bmatrix}^T$ is a
-deformation feature.
+deformation feature, and $\mathcal I$ gives an IDPR term, explained below.
+
+Given a $K$-joint skeleton, we can define $J(\vec l, \mat I) \in \{0, \ldots,
+K\}$ to indicate which of the $K$ joints is present at location $l$ in the image
+$I$, with the special value of $J(\vec l, \mat I) = 0$ indicating that no joint
+is present. Further, given that $J(\vec l, I) = u$, we can define $L(\vec l, u,
+\mat I) \in \prod_{v \in \nb(u)} \{1, \ldots, T_{uv}\}$ to be a function
+specifying the types of each limb connected to the joint $v$, where $\nb(u)$
+denotes the neighbours of joint $u$ in the graph $\mathcal G$. Using this
+notation, we can define $\mathcal I$ as:
+
+\begin{equation}
+\label{eqn:idpr}
+\mathcal I(\vec l_u, t_{uv}, \mat I)
+= \log p(L(\vec l_u, u, \mat I) = t_{uv} \mid J(\vec l_u, \mat I) = u)
+\end{equation}
+
+The inclusion of both $\mathcal I(\vec l_u, t_{uv}, \mat I)$ and $\mathcal
+I(\vec l_v, t_{vu}, \mat I)$ ensures that the visual cues given by the parts at
+either end of a limb can be used to infer the type of that limb.
 
 \subsection{Unary costs}
 \label{sec:unary}
 
-% TODO
-The appearance term $\phi(\vec l_u \mid I) = \log(p(c = i) \mid \mat I)$
+The appearance term $\phi_u$ gives the log likelihood that a small, fixed-size
+patch of the image centered at $\vec{l_u}$ contains the joint $u$:
+
+\begin{equation}
+\label{eqn:unary}
+\phi_u(\vec l_u \mid \mat I)
+= \log p(J(\vec l_u, \mat I) = u \mid \mat I)
+\end{equation}
+
+\subsection{Computing unaries and IDPR terms}
+\label{sec:cnn}
+
+To compute the unaries defined by Equation~\ref{eqn:unary} and the IDPRs defined
+by Equation~\ref{eqn:idpr}, we train a CNN to predict the joint distribution
+over $J$ and $L$ given $\mat I$:
+
+\begin{equation}
+\label{eqn:cnn-output}
+% XXX: Yeah, this notation isn't as elegant as I expected. Chen & Yuille's isn't
+% very elegant either, but now I see why.
+p(J(\vec l, \mat I) = u, L(\vec l, u, I) = t_{uv} \mid \mat I)
+\end{equation}
+
+The unaries and IDPRs may be obtained from this distribution by marginalisation.
+
+Our CNN architecture closely follows that of
+AlexNet~\cite{krizhevsky2012imagenet}, and is identical to that
+of~\cite{chen2014articulated}. At a high level, the network begins with a
+convolution over the input, followed by two convolutional layers coupled with
+max pooling and local response normalisation, after which three convolutional
+layers are applied before two 4096-neuron fully-connected layers which feed into
+the softmax output layer.
+
+To minimise wasted computation, we convert the final fully connected layers of
+the network to $1 \times 4096$ convolutions after the network has been trained.
+This allows us to evaluate Equation~\ref{eqn:cnn-output} over a full-resolution
+image in a single pass, rather than having to pass appropriately-sized crops
+of the image through the network one at a time.
+
+\subsection{Multi-scale detection}
 
 \subsection{Learning}
 
@@ -233,7 +314,12 @@ The appearance term $\phi(\vec l_u \mid I) = \log(p(c = i) \mid \mat I)$
 \fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
 \end{center}
 \caption{Diagram showing the recombination process. First, a fixed number of
-candidates are generated in each frame, % TODO
+candidate poses are generated in each frame, sorted descending by score. Next,
+non-maximum suppression is performed on wrists and elbows to increase the
+diversity of the top $N$ candidates. Finally, the top $N$ candidates in each
+frame are fed to the recombination procedure, which greedily recombines limbs in
+a top-down fashion whilst trying to minimise Equation~\ref{eqn:recomb-cost}.
+% TODO: Reference actual equation
 }
 \label{fig:recombination}
 \end{figure*}
@@ -241,6 +327,10 @@ candidates are generated in each frame, % TODO
 Given a set of candidate poses in each frame, the approach of Cherian
 \etal~\cite{cherian2014mixing} can be used to produce a consistent series of
 poses across an entire video sequence. % TODO
+
+\begin{equation}\label{eqn:recomb-cost}
+% TODO
+\end{equation}
 
 \subsection{Use of optical flow}
 
@@ -258,12 +348,14 @@ poses across an entire video sequence. % TODO
 several consecutive frames of a challenging sequence on which the model performs
 well. The top row shows a number of individual frames in which the model
 performed poorly.}
-\label{fig:recombination}
+\label{fig:qualitative}
 \end{figure*}
 
 \subsection{Discussion}
 
-\section{Conclusion and future work}
+\subsection{Future work}
+
+\section{Conclusion}
 
 % NOTE: Only include acknowledgments in the final copy (use \ifwacvstyle ... \fi
 % to do this easily)!
