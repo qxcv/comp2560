@@ -208,6 +208,7 @@ $C(\mat l, \mat t \mid \mat I)$ of the pose can be decomposed into a sum of
 unary costs and pairwise costs, like so:
 
 \begin{equation}
+\label{eqn:full-cost}
 \begin{split}
 C(\vec l, \vec t \mid \mat I)
 = &\sum_{u \in \mathcal V} \phi_u(\vec l_u \mid \mat I)\\
@@ -309,9 +310,14 @@ of the image through the network one at a time.
 
 \subsection{Multi-scale detection}
 
+% TODO: How does GM inference work at different scales? I know that the CNN code
+% needs to build a feature pyramid, and that the extracted features are
+% typically quite different at different scales, but I'm not sure how those
+% features are actually used by the graphical model.
+
 \subsection{Learning}
 
-\section{Inter-frame recombination}
+\section{Pose estimation in videos}
 \label{sec:interframe}
 
 % TODO: Complete figure
@@ -325,7 +331,6 @@ non-maximum suppression is performed on wrists and elbows to increase the
 diversity of the top $N$ candidates. Finally, the top $N$ candidates in each
 frame are fed to the recombination procedure, which greedily recombines limbs in
 a top-down fashion whilst trying to minimise (\ref{eqn:recomb-cost}).}
-
 \label{fig:recombination}
 \end{figure*}
 
@@ -333,7 +338,7 @@ a top-down fashion whilst trying to minimise (\ref{eqn:recomb-cost}).}
 % misapplied it in my code. The entire point of recombination is to construct a
 % new series of poses which minimise the original cost plus some additional cost
 % which acts like a spring between different limbs. Since doing this directly is
-% intractible (or something), we use a greedy which finds a minimal-cost head
+% intractable (or something), we use a greedy which finds a minimal-cost head
 % sequence using the unary and temporal links through each frame, then do a
 % similar thing for each remaining part in turn, except the unaries for
 % subsequent parts have the path cost to the (already chosen) parent added on to
@@ -382,13 +387,26 @@ candidate set of $K^{|\mathcal P|}$ poses in each frame, and ensures that the
 best joints in the candidate pose set, rather than just the best poses, are
 considered.
 
-% TODO: Rest of how this works.
+The precise way in which this is achieved is explained in the following
+sections.
+
+\subsection{Cost functions}
+
+\subsection{Inference}
+
+In order to make this problem tractable, limbs are recombined starting at the
+head---which is typically the easiest part to detect---then moving on to the
+neck, the shoulders, and so on until the full pose has been estimated in all
+frames. Specifically, the algorithm starts by choosing a head position
+$\vec{l_{h,t}}$ at each time $t = 1, \ldots, F$ by choosing a head position from
+the set $\mathcal P_t$ in each frame such that the temporal sequence of heads
+minimises the following cost, which corresponds to the parts of
+(\ref{eqn:hypo-interframe}) involving the head and any temporal links between
+heads in different frames:
 
 \begin{equation}\label{eqn:recomb-cost}
 % TODO
 \end{equation}
-
-\subsection{Use of optical flow}
 
 \subsection{Choosing parameters}
 
