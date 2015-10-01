@@ -333,12 +333,21 @@ of the image through the network one at a time.
 
 \subsection{Multi-scale detection}
 
-% TODO: How does GM inference work at different scales? I know that the CNN code
-% needs to build a feature pyramid, and that the extracted features are
-% typically quite different at different scales, but I'm not sure how those
-% features are actually used by the graphical model.
+% XXX: This section can definitely be rolled into a previous section, or put
+% into the experiments section.
+
+Since training (Section~\ref{sec:intra-learning}) is performed on images which
+have an (approximately) equal scale, it is often necessary to apply the complete
+static pose estimation pipeline to test images at multiple scales in order to
+generate a sensible pose candidate set, especially when the training and test
+sets are not chosen from the same dataset.
+
+We perform multi-scale detection on each test frame by first passing the test
+frame through our CNN at a series of fixed scales to produce a feature pyramid
+of probabilities for part presence and limb types. % TODO: How does the GM work?
 
 \subsection{Learning}
+\label{sec:intra-learning}
 
 The single-frame pose estimation model has several sets of parameters:
 % TODO
