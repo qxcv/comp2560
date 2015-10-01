@@ -339,6 +339,9 @@ of the image through the network one at a time.
 
 \subsection{Learning}
 
+The single-frame pose estimation model has several sets of parameters:
+% TODO
+
 \section{Pose estimation in videos}
 \label{sec:interframe}
 
@@ -355,6 +358,8 @@ frame are fed to the recombination procedure, which greedily recombines limbs in
 a top-down fashion whilst trying to minimise (\ref{eqn:recomb-cost}).}
 \label{fig:recombination}
 \end{figure*}
+
+\subsection{Motivation}
 
 We have already seen in Section~\ref{sec:intraframe} how we can use a graphical
 model to do pose estimation within a single frame. Pose estimation in videos is
@@ -401,19 +406,21 @@ situations in which $|\mathcal P|$ is small.
 Unfortunately, whilst a small set of poses might, for each part, contain at
 least one pose in which the location of that part is close its best possible
 location, it's possible that the set will not contain a single pose in which
-\emph{all} parts are close to their best locations. \cyte{cherian2014mixing}
-avoids this problem by taking a small, diverse set of $|\mathcal P|$ candidate
-poses and then considering all possible combinations of limbs from each of those
-poses. Given $|\mathcal P|$ poses and $K$ limbs, this results in an effective
-candidate set of $K^{|\mathcal P|}$ poses in each frame, and ensures that the
-best joints in the candidate pose set, rather than just the best poses, are
-considered.
+\emph{all} parts are close to their best locations.
 
-% TODO: Explain this
+\subsection{Recombination}
 
-We use introduce temporal smoothing links between each part $u \in \mathcal V$
-in the pose at time $t$ and its counterpart at time $t+1$ using a cost $\tau_u$
-of the following form:
+\cyte{cherian2014mixing} avoid the penalty incurred by large candidate pose sets
+by taking a small, diverse set of $|\mathcal P|$ candidate poses and then
+considering all possible combinations of limbs from each of those poses. Given
+$|\mathcal P|$ poses and $K$ limbs, this results in an effective candidate set
+of $K^{|\mathcal P|}$ poses in each frame, and ensures that the best joints in
+the candidate pose set, rather than just the best poses, are considered.
+
+Now that we know we can efficiently perform inference on a large effective pose
+set, we can introduce temporal smoothing links between each part $u \in \mathcal
+V$ in the pose at time $t$ and its counterpart at time $t+1$ using a cost
+$\tau_u$ of the following form:
 
 \begin{equation}\label{eqn:temporal-cost}
 \begin{split}
@@ -457,7 +464,7 @@ the following cost, which corresponds to the parts of the full cost
 (\ref{eqn:hypo-interframe}) that involve the head or any temporal links between
 heads in adjacent frames:
 
-\begin{equation}\label{eqn:head-costs}
+\begin{equation}\label{eqn:head-cost}
 \phi_h(\vec l_{h,F}, \mid \mat I_F)
 + \sum_{t=1}^{F-1} \left[
     \phi_h(\vec l_{h,t}, \mid \mat I_t)
@@ -474,14 +481,14 @@ way, except that we must also include pairwise costs from the single-frame cost
 $C$, as well as recombination costs relative to the (previously localise) parent
 part, yielding a full cost of
 
-\begin{equation}\label{eqn:subsequent-part-costs}
+\begin{equation}\label{eqn:subsequent-part-cost}
 \begin{split}
 C_{uv}(l_{u,F}, &\vec l_{v, F}, \vec t \mid \mat I_F)
 + \rho_u(\vec l_{u,F}, \vec l_{u,F}')\\
 + \sum_{t=1}^{F-1} &\bigl[
     C_{uv}(l_{u,t}, \vec l_{v,t}, \vec t \mid \mat I_F)\\
     &\ + \rho_u(\vec l_{u,t}, \vec l_{u,t}') + \tau_u(\vec l_{u,t}, \vec l_{u,t+1})
-\bigl]
+\bigr]
 \end{split}
 \end{equation}
 
@@ -494,7 +501,52 @@ remaining part can be done in $O(|\mathcal P|^2 F)$ time with dynamic
 programming, meaning that the total runtime of the minimisation procedure is
 $O(K |\mathcal P|^2 F)$ for a $K$-part skeleton.
 
-\subsection{Choosing parameters}
+\subsection{Approximations and heuristics}
+
+In practice, the unary terms in the head sequence cost (\ref{eqn:head-cost}) and
+the cost (\ref{eqn:subsequent-part-cost}) for subsequent parts can be
+approximated by the full, single-frame inference score $C(\vec l, \vec t \mid
+\mat I)$ for the specific candidate pose being considered. This not only makes
+implementation easier, but improves performance due to the fact that the
+single-frame inference scores are already computed during candidate set
+generation.
+
+In addition to the costs listed above, we have used the ``practical extensions''
+of \cyte{cherian2014mixing}, which include:
+
+\begin{itemize}
+    % Dense temporal regularisation along limbs
+    \item Additional temporal regularisation terms in the head cost
+    (\ref{eqn:head-cost}) and subsequent part cost
+    (\ref{eqn:subsequent-part-cost}) of the form $\tau_{u'}(\vec l_{u',t},
+    \vec{l}_{u't+1}, \mat I_t, \mat I_{t+1})$, where $\vec l_{u'}$ is is a
+    position at a fixed distance along some specific limb. These additional
+    regularisation terms could be introduced to penalise the motion of the
+    midpoint of the forearm, for instance, without having to introduce an
+    entirely new joint at the midpoint of the forearm.
+
+    % Enriched wrists
+    \item A term $\lambda_f F_t^{-1} \|f(\vec l_{w,t}, \mat I_t, \mat
+    I_{t+1})\|$ for each wrist $w$, where $F_t$ is the maximum magnitude of the
+    optical flow between frames $\mat I_t$ and $\mat I_{t+1}$. This encourages
+    wrists to occupy regions of high motion.
+
+    To combine this extension with the previous one, we can replace the
+    magnitude of the flow at a wrist with sum of the magnitudes of the flow at
+    that wrist and at all intermediate temporal regularisation points between
+    the wrist and its parent joint.
+
+    % Limiting motion
+    \item A regularisation term of the form $\lambda_m \|\vec l_{u,t} -
+    \vec{l}_{u,t+1}\|^2$ which can be used to reduce the impact of erroneously
+    large flow vectors.
+\end{itemize}
+
+Note that $\lambda_\tau$, $\lambda_\rho$, $\lambda_f$ and $\lambda_m$ are all
+challenging to learn in a structured way. We have opted to tune the
+recombination parameters in \cyte{cherian2014mixing} by hand, although in
+principle it should also be possible to obtain reasonable results with grid
+search.
 
 \section{Experiments}
 \label{sec:experiments}
