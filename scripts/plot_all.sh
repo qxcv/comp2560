@@ -8,4 +8,5 @@
     --input "1 pose" "../stats/default-conf-1-pose.csv" \
     --input "No skin/colour weights" "../stats/no-skin-or-colour-100-poses.csv" \
     --input "No skin/colour/motion" "../stats/no-skin-no-colour-no-motion-100-poses.csv" \
+    --input "Best shoulders" "../stats/no-skin-or-colour-best-shoulders-150-poses.csv" \
     $@
