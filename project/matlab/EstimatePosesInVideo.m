@@ -71,6 +71,8 @@
         try
             loaded_box = load(box_dest_path);
             box = loaded_box.box;
+            % Next line will throw error if we don't have enough poses
+            box = box(1:max_poses, :);
         catch % there are no cached pose boxes available
             cnn_dest_path = [data_store_path boxes_loc '/cnn_pyra_' strtok(imglist(i).name, '.') '.mat'];
             
