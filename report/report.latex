@@ -9,6 +9,7 @@
 \usepackage{cite}
 % This makes floats actually float in the right god-damn place
 \usepackage{dblfloatfix}
+\usepackage{microtype}
 
 % Include other packages here, before hyperref.
 
@@ -564,7 +565,7 @@ performed poorly.}
 \end{figure*}
 
 Code for these experiments is available
-online.\footnote{\url{https://github.com/qxcv/comp2560/tree/master/project/matlab}}
+online.\footnote{\url{https://github.com/qxcv/comp2560}}
 
 \subsection{Discussion}
 
