@@ -27,7 +27,7 @@ config.gpuID = 1;
 
 %% Intra-frame GM parameters
 % max candidate poses to use per frame
-config.MAX_POSES = 150;
+config.MAX_POSES = 100;
 % poses will be ignored if any of the parts in nms_parts have detection
 % boxes overlapping by more than nms_threshold with a higher scoring
 % pose

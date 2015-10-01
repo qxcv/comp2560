@@ -36,7 +36,7 @@ end
 if keyjoints == 1 % root 
     weights = [0 0 0 0 0 1 0];
 elseif any(intersect(keyjoints, [3 11])) % shoulders
-    weights = [0 2 0 0 0.1 1, 1];
+    weights = [0 0 0 0 0 1 0];
 elseif any(intersect(keyjoints, [5 13])) % elbows
     weights = [0 2 0 0 0.1 1, 0.5];
 elseif any(intersect(keyjoints, [7 15])) % wrists
