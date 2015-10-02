@@ -218,12 +218,11 @@ vertical forearms, medium-length diagonal forearms, and so on. During inference,
 these types can be introduced as latent variables, in which case they can be
 used to encourage the relative positions of body parts to take anatomically
 reasonable values through the use of type-dependent limb deformation costs.
-% TODO: Clean this up
 Further evidence for the type of a limb can be gleaned by inspecting small
 patches of an image around the endpoints of that limb: for instance, an image of
 a shoulder might give clues as to the direction in which the attached upper arm
 is pointing. Both type-dependent deformation costs and IDPRs are discussed at
-greater length in Section~\ref{sec:pairwise}.
+greater length in Section~\ref{sec:img-dep}.
 
 Given a complete pose $(\vec l, \vec t)$ consisting of a vector part locations
 $l$ and a vector of limb types $t$, and an image $\mat I$, the full score
@@ -309,10 +308,14 @@ p(j = u, t_u = t \mid \mat I(\vec l))
 \end{equation}
 for any location $\vec l$ in $\mat I$ and any part $u \in \{1, \ldots, K\}$.
 
-We have $K$ parts, plus one extra value of $j$ to denote that no part is present
-in an image patch, % TODO
-. In practice, this yields a large
-(many-thousand-dimensional) output vector, although 
+If we discard combinations of $u$ and $t$ for which the joint probability is
+always zero, then this becomes a discrete distribution over
+\begin{equation}
+\sum_{u \in \mathcal V} T^{|\{(u, v) : (u, v) \in \mathcal E\}|} + 1
+\end{equation}
+values, where $\nb(u)$ denotes the neighbours of part $u$ and we assume that
+$T_{uv} = T \in \mathbb N$ for all $(u, v) \in \mathcal E$. The extra value is
+for when no part is present ($j = 0$).
 
 Our CNN architecture closely follows that of
 AlexNet~\cite{krizhevsky2012imagenet}, and is identical to that of
