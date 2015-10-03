@@ -49,7 +49,9 @@ parfor level = levels,
     
     % Walk back down tree following pointers
     % Chen & Yuille actually applied a score threshold in find, instead of
-    % using our silly way of doing things.
+    % using our silly way of doing things. It really wouldn't be that much
+    % effort to implement Ramanan's (much more efficient) diverse n-best
+    % algorithm...
     [Y,X] = find(true(size(rscore)));
     if ~isempty(X)
       I   = (X-1)*size(rscore,1) + Y;
