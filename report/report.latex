@@ -389,8 +389,24 @@ from producing a set of poses which differ only by several pixels.
 \subsection{Learning}
 \label{sec:intra-learning}
 
-The single-frame pose estimation model has several sets of parameters:
-% TODO
+Training for the single-frame candidate generation model begins with derivation
+of the mean limb deformation $\vec r_{uv t_{uv}}$ for each limb $(u, v) \in
+\mathcal E$ and each type $t_{uv} \in \{1, \ldots, T\}$ for that limb, where we
+have assumed for simplicity that each limb has the same number of types $T$.
+For a limb $(u, v)$, this is achieved by calculating the displacement $\vec l_v
+- \vec l_u$ associated with each pose in the training set, then running
+$K$-means to find $T$ centroids for the calculated displacements.
+
+Having assigned a type to each limb in the training set, an image crop is made
+around each joint and labelled with the joint type and the types of all
+neighbouring limbs. This set of examples is augmented rotating all patches
+containing a limb through a range of angles, and we also include a set of
+patches not containing any people which are labelled with a special negative
+label. The final patch set is used to find parameters for the neural network
+described in Section~\ref{sec:} using a near-identical training regime to that
+of \cyte{krizhevsky2012imagenet}.
+
+% TODO: GM training. Frig, this is the hard part D:
 
 \section{Pose estimation in videos}
 \label{sec:interframe}
