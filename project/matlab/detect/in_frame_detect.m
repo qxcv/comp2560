@@ -6,13 +6,14 @@ function boxes = in_frame_detect(count, pyra, unary_map, idpr_map, ...
 % The function returns a matrix with one row per detected object.  The
 % last column of each row gives the score of the detection.  The
 % column before last specifies the component used for the detection.
-% Each set of the first 4 columns specify the bounding box for a part
+% Each set of the first 4 columns specify the bounding box for a part.
 
 levels = 1:length(pyra);
 boxes = cell(numel(levels), 1);
 
 % Iterate over scales and components,
 parfor level = levels,
+  % As far as I can tell, num_components is always 1
   for c  = 1:num_components,
     parts    = components{c};
     p_no = length(parts);
@@ -23,6 +24,8 @@ parfor level = levels,
       parts(p).appMap = unary_map{level}{p};
       
       f = parts(p).appid;
+      % These are just the unaries for each location in the grid. We'll
+      % modify the elements of .score in passmsg.
       parts(p).score = parts(p).appMap * apps{f};
       parts(p).level = level;
     end
@@ -84,7 +87,7 @@ for k = 1:numparts,
     % I = sub2ind(size(p.Ix),yptr(:,par),xptr(:,par),mptr(:,par));
     par = p.parent;
     [h,~,~] = size(p.Ix);
-    I   = (xptr(:,par)-1)*h + yptr(:,par);
+    I = (xptr(:,par)-1)*h + yptr(:,par);
     xptr(:,k) = p.Ix(I);
     yptr(:,k) = p.Iy(I);
     

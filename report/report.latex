@@ -182,6 +182,16 @@ with~\cite{delaitre2012scene}.
 
 \section{Related work}
 
+% Papers that I want to cover:
+% - Yang & Ramanan
+% - Chen & Yuille
+% - DeepPose
+% - Anoop's paper
+% - "Flowing convnets" paper
+% - Something on CNN-based part regressors...
+% Also some stuff on pictorial structure models (no type information), and any
+% more recent stuff that I can find, especially if said stuff is CNN-related.
+
 \section{Single-frame candidate set generation}
 \label{sec:intraframe}
 
@@ -221,7 +231,7 @@ reasonable values through the use of type-dependent limb deformation costs.
 Further evidence for the type of a limb can be gleaned by inspecting small
 patches of an image around the endpoints of that limb: for instance, an image of
 a shoulder might give clues as to the direction in which the attached upper arm
-is pointing. Both type-dependent deformation costs and IDPRs are discussed at
+is pointing. Both type-dependent deformation costs and IDPR terms are discussed at
 greater length in Section~\ref{sec:img-dep}.
 
 Given a complete pose $(\vec l, \vec t)$ consisting of a vector part locations
@@ -251,7 +261,7 @@ efficiently using dynamic programming and distance transforms.
 
 The pairwise cost $\phi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)$
 can itself be decomposed into the sum of type-dependent deformation costs and
-IDPRs, as expressed by
+IDPR terms, as expressed by
 \begin{equation}
 \begin{split}
 \psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu})
@@ -295,13 +305,13 @@ fixed-size patch of the image centered at $\vec{l_u}$ contains the joint $u$:
 \subsection{Computing unaries and IDPR terms}
 \label{sec:cnn}
 
-To compute the unaries defined by (\ref{eqn:unary}) and the IDPRs defined
-by (\ref{eqn:idpr}), we train a CNN to output the joint distribution
-over part locations and neighbouring limb types for a given image $\mat I$, from
-which we may obtain the appearance and IDPR terms by marginalisation.
-If we let $t_u \in \prod_{(u, v) \in \mathcal E} \{1, \ldots, T_{uv}\}$ denote a
-part type---as opposed to a limb type---which defines a type for all parts
-neighbouring part $u$, then we can write this distribution as
+To compute the unaries defined by (\ref{eqn:unary}) and the IDPR terms defined
+by (\ref{eqn:idpr}), we train a CNN to output the joint distribution over part
+locations and neighbouring limb types for a given image $\mat I$, from which we
+may obtain the appearance and IDPR terms by marginalisation. If we let $t_u \in
+\prod_{(u, v) \in \mathcal E} \{1, \ldots, T_{uv}\}$ denote a part type---as
+opposed to a limb type---which defines a type for all parts neighbouring part
+$u$, then we can write this distribution as
 \begin{equation}
 \label{eqn:cnn-output}
 p(j = u, t_u = t \mid \mat I(\vec l))
@@ -331,20 +341,9 @@ This allows us to evaluate (\ref{eqn:cnn-output}) over a full-resolution image
 in a single pass, rather than having to pass appropriately-sized crops of the
 image through the network one at a time.
 
-\subsection{Multi-scale detection}
+\subsection{Producing the candidate set}
 
-% XXX: This section can definitely be rolled into a previous section, or put
-% into the experiments section.
-
-Since training (Section~\ref{sec:intra-learning}) is performed on images which
-have an (approximately) equal scale, it is often necessary to apply the complete
-static pose estimation pipeline to test images at multiple scales in order to
-generate a sensible pose candidate set, especially when the training and test
-sets are not chosen from the same dataset.
-
-We perform multi-scale detection on each test frame by first passing the test
-frame through our CNN at a series of fixed scales to produce a feature pyramid
-of probabilities for part presence and limb types. % TODO: How does the GM work?
+% TODO
 
 \subsection{Learning}
 \label{sec:intra-learning}
@@ -571,14 +570,25 @@ performed poorly.}
 Code for these experiments is available
 online.\footnote{\url{https://github.com/qxcv/comp2560}}
 
+\subsection{Multi-scale detection}
+
+Since training (Section~\ref{sec:intra-learning}) is performed on images which
+have an (approximately) equal scale, we have found it advantageous to perform
+candidate set generation at several scales. We perform multi-scale detection on
+each test frame by first passing the test frame through our CNN at a series of
+fixed scales to produce a feature pyramid of probabilities for part presence and
+limb types. Graphical model inference is then performed independently at each
+scale, and the set of % TODO
+
+Note that, since we have only evaluated our full pipeline on the approximately
+uniformly-scaled poses in Poses in the Wild, we have not adjusted the
+recombination stage to account for multiple scales.
+
 \subsection{Discussion}
 
 \subsection{Future work}
 
 \section{Conclusion}
-
-% NOTE: Only include acknowledgments in the final copy (use \ifwacvstyle ... \fi
-% to do this easily)!
 
 \ifwacvfinal{%
 \noindent\textbf{Acknowledgements}\quad

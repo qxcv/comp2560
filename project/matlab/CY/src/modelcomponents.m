@@ -1,5 +1,21 @@
 % Cache various statistics from the model data structure for later use
+% "apps{p}" gives the appearance (unary term) weights for the part p.
+% "components{1}{p}" is a cell array with the following attributes;
+%   - .Im
+%   - .b
+%   - .biasI
+%   - .appI
+%   - .sizx
+%   - .sizy
+%   - .pdw(n) for neighbour n
+%   - .pdefI(n) for neighbour n
+%   - ...a bunch of other stuff which I'll write about when I need to,
+%     since this code takes a looong time to understand (WTF is a "gau"?)
 function [components,apps] = modelcomponents(model)
+% For a K-joint skeleton, model.components is a K-dimensional struct
+% giving, for each component, a parent, a part ID, a set of neighbours, a
+% set of indices for relevant terms in the CNN output (app_global_ids), and
+% so on.
 components = cell(length(model.components),1);
 for c = 1:length(model.components)
   for k = 1:length(model.components{c})

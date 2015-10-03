@@ -62,7 +62,21 @@ void dt1d(double *src, double *dst, int *ptr, int step, int len,
 
 
 // matlab entry point
+// original signature:
 // [M, Ix, Iy] = distance_transform(vals, ax, bx, ay, by)
+// current signature:
+// [score0, Ix0, Iy0] = distance_transform(
+//    deltas, child_def_weights, parent_def_weights,
+//    child_mean, child_var, parent_mean, parent_var,
+//    Nx, Ny)
+// I think that "deltas" includes x and y displacements, or something in
+// that vein. As near as I can
+// tell, "variance" is always [1 1], and "mean" is just the deformation
+// centroid for the combinations of types being considered by the caller.
+// The variables are referred to as "mean" and "variance" in analogy with a
+// one-dimensional Gaussian, since the deformation cost is kinda sorta like
+// the sum of logarithms of Gaussians (one in the x dimension and one in
+// the y dimension).
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (nrhs != 9)
     mexErrMsgTxt("Wrong number of inputs");
