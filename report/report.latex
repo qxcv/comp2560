@@ -32,6 +32,7 @@
 \newcommand{\mat}{\mathbf}
 \DeclareMathOperator{\nb}{nb}
 \DeclareMathOperator{\pa}{pa}
+\DeclareMathOperator{\ch}{ch}
 % This is just to stop Syntastic from complaining. Grumble grumble
 % fixing your tools...
 \newcommand{\cyte}[1]{\cite{#1}}
@@ -200,6 +201,7 @@ of \cyte{chen2014articulated}, although we will describe the relevant parts of
 their method in full.
 
 \subsection{Model}
+\label{sec:model}
 
 % TODO: Complete figure
 \begin{figure}[t]
@@ -343,13 +345,68 @@ image through the network one at a time.
 
 \subsection{Producing the candidate set}
 
-% TODO
+Having evaluated appearance and IDPR terms for all joints and all locations in
+the image, we can now produce a set of high-scoring pose candidates for use in
+the recombination procedure (Section~\ref{sec:interframe}). Recall from
+Section~\ref{sec:model} that poses are modelled as trees rooted at the head. In
+this case, the score of any subtree of the full pose tree rooted at part $u$ in
+location $\vec l_u$ is:
+
+\begin{equation}\label{eqn:gm-local-score}
+\begin{split}
+S_u(\vec l_u, \mat I) =
+&\sum_{pa(v) = u} \max_{\vec l_v, t_{uv}, t_{vu}} \left[
+\psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)
++ S(\vec l_v, \mat I)
+\right]\\
+&+ \phi_u(\vec l_u \mid \mat I).
+\end{split}
+\end{equation}
+
+At the leaves, this formula becomes $S_v(\vec l_v, \mat I) = \phi_v(\vec l_v
+\mid \mat I)$, which is trivial to compute for all locations in the image.
+Otherwise, given child scores $S_{v_1}(\vec l_{v_1}, \mat I), \ldots,
+S_{v_C}(\vec l_{v_C}, \mat I)$ for the children $\{v : \pa(v) = u\}$ of some
+non-leaf part $u$, it is possible to evaluate $S_u(\vec l_u, \mat I)$ for all
+locations $\vec l_u$ in linear time using a distance
+transform~\cite{felzenszwalb2012distance}. If we have $T_{uv} = T$ for each $(u,
+v) \in \mathcal E$, then we must also perform maximisation over $T^2$ limb label
+combinations at each joint. Since this maximisation must be performed at a total
+of $K$ joints, the overall time complexity of calculating the score $S_h(\vec
+l_h, \mat I)$ of the root component for all locations $\vec l_h$ is $O(T^2 N
+K)$, where $N$ is the number of grid locations.
+
+Given the maximum scores $S_h(\vec l_h, \mat I)$ for a pose rooted at each
+possible head location $\vec l_h$, we can produce a set of $M$ pose candidates
+by choosing the $M$ highest-scoring head positions and backtracking to find the
+remainder of the pose. However, since recombination
+benefits from a diverse set of poses, we apply
+non-maximum suppression to ensure that our returned candidate pool contains only
+poses for which the pairwise intersection-over-union for detected wrists is no
+greater than some threshold. This prevents the candidate generation algorithm
+from producing a set of poses which differ only by several pixels.
 
 \subsection{Learning}
 \label{sec:intra-learning}
 
-The single-frame pose estimation model has several sets of parameters:
-% TODO
+Training for the single-frame candidate generation model begins with derivation
+of the mean limb deformation $\vec r_{uv t_{uv}}$ for each limb $(u, v) \in
+\mathcal E$ and each type $t_{uv} \in \{1, \ldots, T\}$ for that limb, where we
+have assumed for simplicity that each limb has the same number of types $T$.
+For a limb $(u, v)$, this is achieved by calculating the displacement $\vec l_v
+- \vec l_u$ associated with each pose in the training set, then running
+$K$-means to find $T$ centroids for the calculated displacements.
+
+Having assigned a type to each limb in the training set, an image crop is made
+around each joint and labelled with the joint type and the types of all
+neighbouring limbs. This set of examples is augmented rotating all patches
+containing a limb through a range of angles, and we also include a set of
+patches not containing any people which are labelled with a special negative
+label. The final patch set is used to find parameters for the neural network
+described in Section~\ref{sec:} using a near-identical training regime to that
+of \cyte{krizhevsky2012imagenet}.
+
+% TODO: GM training. Frig, this is the hard part D:
 
 \section{Pose estimation in videos}
 \label{sec:interframe}
