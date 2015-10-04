@@ -156,9 +156,12 @@ for level = levels
       
       boxes(cnt,:) = [box c rscore(y,x)];
       if write && (~latent || label < 0)
+        % we're expected to update qp, and we have a non-latent node //or// a
+        % negative sample (there's not actually a pose in the image)
         qp_write(ex);
         qp.ub = qp.ub + qp.Cneg*max(1+rscore(y,x),0);
       elseif latent && label > 0
+        % otherwise, if we have a latent positive
         if isempty(best_box)
           best_box = boxes(cnt,:);
           best_ex = ex;
