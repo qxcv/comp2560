@@ -155,6 +155,11 @@ The Australian National University\\
 % surrounding sentences. If you follow this rule, you won't be including colons
 % and the like before equations, nor "introducing" equations ("...as follows:",
 % "...the equation:", etc.)
+%
+% Random note on first-person pronouns: in COMP2550, I used "royal we"
+% (referring to yourself as "we"), and it worked okay, so I think I'll do that
+% again for this paper. I'm unnaturally attached to scientific "we", so I don't
+% want to throw it away :-)
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
@@ -181,6 +186,38 @@ items~\cite{liu2012street,liu2012hi,yamaguchi2012parsing}, recognising
 actions~\cite{yao2011does}, or even classifying objects which people interact
 with~\cite{delaitre2012scene}.
 
+Human pose estimation is complicated by a number of factors, including the wide
+range of physically allowable human poses, the varied appearance of human bodies
+and clothing, occlusion of body parts by objects in the scene or by other body
+parts, background clutter which resembles body parts, and so on. Use of video
+frames---rather than static image data---for pose estimation introduces another
+layer of complexity to an already challenging problem by requiring algorithms to
+accommodate a wide range of camera and body motion whilst producing consistent
+labellings between frames.
+
+We deal with this complexity by dividing our video pose estimation pipeline into
+two distinct phases. Initially, a pose estimation procedure is applied
+independently to each frame in the video sequence. This procedure implicitly
+scores all possible poses in each video frame and returns a selection of the
+highest-scoring poses, which is pruned through non-maximum suppression to ensure
+that the returned set contains a diverse selection of poses. After a candidate
+pose set has been generated for each frame, the parts of each candidate pose in
+each frame are recombined to reduce each frame's candidate set down to a single
+high-scoring pose. This recombination procedure takes into account the optical
+flow in each frame, the score of the poses associated with each limb used in
+recombination, and the displacements of recombined limbs to increase the
+accuracy of the produced pose sequence relative to simply using the
+highest-scoring pose in each frame's candidate set without recombination.
+
+Our candidate set generation procedure follows the approach of
+\cyte{chen2014articulated}, which combines features from a deep CNN with a
+graphical model to estimate poses in a static image. The CNN yields features
+which are much more informative than the histogram-of-gradients features used in
+previous work, whilst the graphical model encourages parts to take on
+anatomically reasonable positions relative to one another.
+
+Recombination is performed using the method of \cyte{cherian2014mixing} % TODO
+
 \section{Related work}
 
 % Papers that I want to cover:
@@ -189,7 +226,13 @@ with~\cite{delaitre2012scene}.
 % - DeepPose
 % - Anoop's paper
 % - "Flowing convnets" paper
-% - Something on CNN-based part regressors...
+% - MODEC
+% - MoDeep
+% - DeepPose
+% - Early PSM papers (including that one from 1973, and the one from 2005 which
+%   introduces distance transforms as a way of doing DP efficiently)
+% - Some stuff on random forests
+% - Possibly some tracking papers, if I can find them
 % Also some stuff on pictorial structure models (no type information), and any
 % more recent stuff that I can find, especially if said stuff is CNN-related.
 
@@ -406,18 +449,19 @@ with the limb locations $\vec l_n$, image $\mat I_n$ and limb types $\vec t_n$
 detected from the $n$th training sample can be represented as an inner product
 between a weight vector $\vec w$ and a feature vector $\mat \Phi_n$ composed of
 all appearance, IDPR and deformation terms, with a constant bias concatenated to
-the end. % XXX: When is y_n = 1? When is it -1? WTF?
-
-Thus, we can view this problem as finding the weight vector $\vec w^*$
-satisfying the following definition:
-
+the end. We label the $n$th training sample with $y_n = 1$ if the training
+sample corresponds to a labelled pose with correctly detected type labels, and
+$y_n = -1$ if the training sample corresponds to a negative image with no pose
+or if the type labels are not correctly inferred. We can now cast learning of
+the graphical model weights as an optimisation problem in which we must find the
+weight vector $\vec w^*$ satisfying
 \begin{align}
-\vec w^* &= \min_{\vec w}\left[ \frac 12 \|\vec w\|^2 + C \sum_n E_n(\vec w)\right]\\
-E_n(\vec w) &= \max(0, 1 - y_n \vec w^T \mat \Phi_n)
+\vec w^* &= \min_{\vec w}\left[ \frac 12 \|\vec w\|^2 + C \sum_n E_n(\vec w)\right],\\
+E_n(\vec w) &= \max(0, 1 - y_n \vec w^T \mat \Phi_n).
 \end{align}
 
-$\vec w^*$ can be found efficiently using the dual coordinate descent solver of
-\cyte{yang2011articulated}.
+In our case, we calculate $\vec w^*$ efficiently using the dual coordinate
+descent approach described in \cyte{yang2011articulated}.
 
 \section{Pose estimation in videos}
 \label{sec:interframe}
