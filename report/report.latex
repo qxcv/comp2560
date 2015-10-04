@@ -209,14 +209,29 @@ recombination, and the displacements of recombined limbs to increase the
 accuracy of the produced pose sequence relative to simply using the
 highest-scoring pose in each frame's candidate set without recombination.
 
-Our candidate set generation procedure follows the approach of
+Our candidate set generation procedure, described in
+Section~\ref{sec:intraframe}, follows the approach of
 \cyte{chen2014articulated}, which combines features from a deep CNN with a
 graphical model to estimate poses in a static image. The CNN yields features
-which are much more informative than the histogram-of-gradients features used in
-previous work, whilst the graphical model encourages parts to take on
+which are much more informative than the Histogram-of-Gradients (HoG) features
+used in previous work, whilst the graphical model encourages parts to take on
 anatomically reasonable positions relative to one another.
 
-Recombination is performed using the method of \cyte{cherian2014mixing} % TODO
+As explained in Section~\ref{sec:interframe}, incorporating temporal edges into
+graphical model-based pose estimation methods can result in an intractable
+inference problem because of the loopiness of the resulting graph. Independently
+generating a small set of candidate poses in each frame and using temporal edges
+to find an optimal selection of candidates from each frame partially alleviates
+this problem by reducing the number of poses which must be considered. The
+recombination method which we employ, as described in \cyte{cherian2014mixing},
+improves efficiency even further by allowing parts to be mixed-and-matched from
+different poses in the candidate sets, thereby increasing the effective size of
+the candidate sets without yielding an intractable problem.
+
+In Section~\ref{sec:experiments}, we show that this combination of techniques
+significantly increases performance over the use of single-frame pose detection
+alone or of recombination of poses produced by a graphical model making use of
+less expressive HoG features.
 
 \section{Related work}
 
@@ -466,19 +481,19 @@ descent approach described in \cyte{yang2011articulated}.
 \section{Pose estimation in videos}
 \label{sec:interframe}
 
-% TODO: Complete figure
-\begin{figure*}[t]
-\begin{center}
-\fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
-\end{center}
-\caption{Diagram showing the recombination process. First, a fixed number of
-candidate poses are generated in each frame, sorted descending by score. Next,
-non-maximum suppression is performed on wrists and elbows to increase the
-diversity of the top $N$ candidates. Finally, the top $N$ candidates in each
-frame are fed to the recombination procedure, which greedily recombines limbs in
-a top-down fashion whilst trying to minimise (\ref{eqn:recomb-cost}).}
-\label{fig:recombination}
-\end{figure*}
+% % TODO: Complete figure
+% \begin{figure*}[t]
+% \begin{center}
+% \fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
+% \end{center}
+% \caption{Diagram showing the recombination process. First, a fixed number of
+% candidate poses are generated in each frame, sorted descending by score. Next,
+% non-maximum suppression is performed on wrists and elbows to increase the
+% diversity of the top $N$ candidates. Finally, the top $N$ candidates in each
+% frame are fed to the recombination procedure, which greedily recombines limbs in
+% a top-down fashion whilst trying to minimise (\ref{eqn:recomb-cost}).}
+% \label{fig:recombination}
+% \end{figure*}
 
 \subsection{Motivation}
 
