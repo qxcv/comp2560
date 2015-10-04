@@ -402,18 +402,22 @@ training regime to that of \cyte{krizhevsky2012imagenet}.
 Finally, we can learn the weights $\{\vec w_{uv t_{uv}}, w_{uv} : (u, v) \in
 \mathcal E\} \cup \{w_u : u \in \mathcal V\} \cup \{w_0\}$ of the pose cost
 (\ref{eqn:full-cost}). The cost $C(\vec l_n, \vec t_n \mid \mat I_n)$ associated
-with the limb locations $\vec l_n$, image $\mat I_n$ and inferred limb types
-$\vec t_n$ included with the $n$th training sample can be represented as an
-inner product between a weight vector $\vec w$ and a feature vector $\Phi_n$
-composed of all appearance, IDPR and deformation terms, with a constant bias
-concatenated to the end. We can define $y_n \in \{-1, 1\}$ to be 1 if % TODO
+with the limb locations $\vec l_n$, image $\mat I_n$ and limb types $\vec t_n$
+detected from the $n$th training sample can be represented as an inner product
+between a weight vector $\vec w$ and a feature vector $\mat \Phi_n$ composed of
+all appearance, IDPR and deformation terms, with a constant bias concatenated to
+the end. % XXX: When is y_n = 1? When is it -1? WTF?
+
+Thus, we can view this problem as finding the weight vector $\vec w^*$
+satisfying the following definition:
 
 \begin{align}
-\vec w^* &= \min_{\vec w} \frac 12 \|w\|^2 + C \sum_n \xi_n\\
-\xi_n &= \max(0, 1 - y_n \vec w^T \Phi_N)
+\vec w^* &= \min_{\vec w}\left[ \frac 12 \|\vec w\|^2 + C \sum_n E_n(\vec w)\right]\\
+E_n(\vec w) &= \max(0, 1 - y_n \vec w^T \mat \Phi_n)
 \end{align}
 
-% XXX: Still not sure what this is doing. When is y_n = 1?
+$\vec w^*$ can be found efficiently using the dual coordinate descent solver of
+\cyte{yang2011articulated}.
 
 \section{Pose estimation in videos}
 \label{sec:interframe}
