@@ -244,19 +244,12 @@ unary costs and pairwise costs, as in
 \label{eqn:full-cost}
 \begin{split}
 C(\vec l, \vec t \mid \mat I)
-= &\sum_{u \in \mathcal V} \phi_u(\vec l_u \mid \mat I)\\
+= w_0 + &\sum_{u \in \mathcal V} \phi_u(\vec l_u \mid \mat I)\\
 + &\sum_{(u, v) \in \mathcal E}
-    \psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I).
+    \psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I),
 \end{split}
 \end{equation}
-
-% TODO: This is obviously not a tree (since we have one type variable in each
-% direction for each limb), so how are we doing inference? Are we just forcing
-% t_{ij} = t_{ji}? I should read Chen & Yuille's code to understand this. Should
-% also put a precise complexity on the recombination procedure. Oh, and an
-% explanation of how distance transforms are used would be super handy!
-Since $\mathcal G$ is a tree-structured graph, this cost can be minimised
-efficiently using dynamic programming and distance transforms.
+where $\phi_u$ and $\psi_{uv}$ are described below, and $w_0$ is a bias term.
 
 \subsection{Image-dependent terms}
 \label{sec:img-dep}
@@ -301,7 +294,7 @@ fixed-size patch of the image centered at $\vec{l_u}$ contains the joint $u$:
 \begin{equation}
 \label{eqn:unary}
 \phi_u(\vec l \mid \mat I)
-= \log p(j = u \mid \mat I(\vec l)).
+= w_u \log p(j = u \mid \mat I(\vec l)).
 \end{equation}
 
 \subsection{Computing unaries and IDPR terms}
@@ -354,7 +347,7 @@ location $\vec l_u$ is:
 
 \begin{equation}\label{eqn:gm-local-score}
 \begin{split}
-S_u(\vec l_u, \mat I) =
+S_u&(\vec l_u, \mat I) =\\
 &\sum_{pa(v) = u} \max_{\vec l_v, t_{uv}, t_{vu}} \left[
 \psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)
 + S(\vec l_v, \mat I)
@@ -402,11 +395,25 @@ around each joint and labelled with the joint type and the types of all
 neighbouring limbs. This set of examples is augmented rotating all patches
 containing a limb through a range of angles, and we also include a set of
 patches not containing any people which are labelled with a special negative
-label. The final patch set is used to find parameters for the neural network
-described in Section~\ref{sec:} using a near-identical training regime to that
-of \cyte{krizhevsky2012imagenet}.
+label. The produced set of patches and labels is used to find parameters for the
+neural network described in Section~\ref{sec:cnn} using a near-identical
+training regime to that of \cyte{krizhevsky2012imagenet}.
 
-% TODO: GM training. Frig, this is the hard part D:
+Finally, we can learn the weights $\{\vec w_{uv t_{uv}}, w_{uv} : (u, v) \in
+\mathcal E\} \cup \{w_u : u \in \mathcal V\} \cup \{w_0\}$ of the pose cost
+(\ref{eqn:full-cost}). The cost $C(\vec l_n, \vec t_n \mid \mat I_n)$ associated
+with the limb locations $\vec l_n$, image $\mat I_n$ and inferred limb types
+$\vec t_n$ included with the $n$th training sample can be represented as an
+inner product between a weight vector $\vec w$ and a feature vector $\Phi_n$
+composed of all appearance, IDPR and deformation terms, with a constant bias
+concatenated to the end. We can define $y_n \in \{-1, 1\}$ to be 1 if % TODO
+
+\begin{align}
+\vec w^* &= \min_{\vec w} \frac 12 \|w\|^2 + C \sum_n \xi_n\\
+\xi_n &= \max(0, 1 - y_n \vec w^T \Phi_N)
+\end{align}
+
+% XXX: Still not sure what this is doing. When is y_n = 1?
 
 \section{Pose estimation in videos}
 \label{sec:interframe}
@@ -476,12 +483,13 @@ location, it's possible that the set will not contain a single pose in which
 
 \subsection{Recombination}
 
-\cyte{cherian2014mixing} avoid the penalty incurred by large candidate pose sets
-by taking a small, diverse set of $|\mathcal P|$ candidate poses and then
-considering all possible combinations of limbs from each of those poses. Given
-$|\mathcal P|$ poses and $K$ limbs, this results in an effective candidate set
-of $K^{|\mathcal P|}$ poses in each frame, and ensures that the best joints in
-the candidate pose set, rather than just the best poses, are considered.
+The method in \cyte{cherian2014mixing} avoids the penalty incurred by large
+candidate pose sets by taking a small, diverse set of $|\mathcal P|$ candidate
+poses and then considering all possible combinations of limbs from each of those
+poses. Given $|\mathcal P|$ poses and $K$ limbs, this results in an effective
+candidate set of $K^{|\mathcal P|}$ poses in each frame, and ensures that the
+best joints in the candidate pose set, rather than just the best poses, are
+considered.
 
 Now that we know we can efficiently perform inference on a large effective pose
 set, we can introduce temporal smoothing links between each part $u \in \mathcal
