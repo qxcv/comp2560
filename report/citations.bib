@@ -247,3 +247,50 @@ the one used in MODEC) which is known at evaluation time.
   year={2012},
   organization={IEEE}
 }
+
+This paper tries to track faces by detecting a face in an initial frame and then
+tracking it through subsequent frames by detecting pupils using a near IR camera
+with IR light and applying a Kalman filter (or similar) for smoothing
+@article{ji20023d,
+  title={{3D} Face pose estimation and tracking from a monocular camera},
+  author={Ji, Qiang},
+  journal={Image and vision computing},
+  volume={20},
+  number={7},
+  pages={499--511},
+  year={2002},
+  publisher={Elsevier}
+}
+
+Another detect-in-each-frame-then-track paper. This one uses a HMM applied to
+detected pose bounding boxes for the tracking part.
+@inproceedings{andriluka2010monocular,
+  title={Monocular {3D} pose estimation and tracking by detection},
+  author={Andriluka, Mykhaylo and Roth, Stefan and Schiele, Bernt},
+  booktitle={Computer Vision and Pattern Recognition (CVPR), 2010 IEEE Conference on},
+  pages={623--630},
+  year={2010},
+  organization={IEEE}
+}
+
+GM with some other hacks which uses LBP to perform inference in the presence of
+temporal links.
+@inproceedings{ferrari2008progressive,
+  title={Progressive search space reduction for human pose estimation},
+  author={Ferrari, Vittorio and Marin-Jimenez, Manuel and Zisserman, Andrew},
+  booktitle={Computer Vision and Pattern Recognition, 2008. CVPR 2008. IEEE Conference on},
+  pages={1--8},
+  year={2008},
+  organization={IEEE}
+}
+
+More approximate GM inference here
+@inproceedings{sigal2004tracking,
+  title={Tracking loose-limbed people},
+  author={Sigal, Leonid and Bhatia, Sidharth and Roth, Stefan and Black, Michael J and Isard, Michael},
+  booktitle={Computer Vision and Pattern Recognition, 2004. CVPR 2004. Proceedings of the 2004 IEEE Computer Society Conference on},
+  volume={1},
+  pages={I--421},
+  year={2004},
+  organization={IEEE}
+}

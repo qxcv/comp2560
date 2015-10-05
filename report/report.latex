@@ -74,7 +74,7 @@ The Australian National University\\
 % Things I can put in the related work section:
 % - Talk about existing approaches and how they compare with one another in
 %   terms of results and in terms of the computer vision tools used.
-% - Explain why my approach is better (technically rather than empirically)
+% - Explain why my approach is better (theoretically rather than empirically)
 %
 % Contents of the intra-frame part:
 % - Talk about Yang & Ramanan's articulated model.
@@ -210,9 +210,9 @@ accuracy of the produced pose sequence relative to simply using the
 highest-scoring pose in each frame's candidate set without recombination.
 
 Our candidate set generation procedure, described in
-Section~\ref{sec:intraframe}, follows the approach of
-\cyte{chen2014articulated}, which combines features from a deep CNN with a
-graphical model to estimate poses in a static image. The CNN yields features
+Section~\ref{sec:intraframe}, follows the approach of Chen and
+Yuille~\cite{chen2014articulated}, which combines features from a deep CNN with
+a graphical model to estimate poses in a static image. The CNN yields features
 which are much more informative than the Histogram-of-Gradients (HoG) features
 used in previous work, whilst the graphical model encourages parts to take on
 anatomically reasonable positions relative to one another.
@@ -223,10 +223,11 @@ inference problem because of the loopiness of the resulting graph. Independently
 generating a small set of candidate poses in each frame and using temporal edges
 to find an optimal selection of candidates from each frame partially alleviates
 this problem by reducing the number of poses which must be considered. The
-recombination method which we employ, as described in \cyte{cherian2014mixing},
-improves efficiency even further by allowing parts to be mixed-and-matched from
-different poses in the candidate sets, thereby increasing the effective size of
-the candidate sets without yielding an intractable problem.
+recombination method which we employ, as described by Cherian
+\etal~\cite{cherian2014mixing}, improves efficiency even further by allowing
+parts to be mixed-and-matched from different poses in the candidate sets,
+thereby increasing the effective size of the candidate sets without yielding an
+intractable problem.
 
 In Section~\ref{sec:experiments}, we show that this combination of techniques
 significantly increases performance over the use of single-frame pose detection
@@ -235,22 +236,6 @@ less expressive HoG features.
 
 \section{Related work}
 
-% Papers that I want to cover:
-% - Yang & Ramanan
-% - Chen & Yuille
-% - DeepPose
-% - Anoop's paper
-% - "Flowing convnets" paper
-% - MODEC
-% - MoDeep
-% - DeepPose
-% - Early PSM papers (including that one from 1973, and the one from 2005 which
-%   introduces distance transforms as a way of doing DP efficiently)
-% - Some stuff on random forests
-% - Possibly some tracking papers, if I can find them
-% Also some stuff on pictorial structure models (no type information), and any
-% more recent stuff that I can find, especially if said stuff is CNN-related.
-
 Early approaches to pose estimation used pictorial structure
 models~\cite{fischler1973representation,felzenszwalb2005pictorial}. Pictorial
 structure models are a type of graphical mode, and can can be intuitively
@@ -258,16 +243,26 @@ understood as employing an appearance model to determine the likelihood that a
 given part of an object lies at a given location, then attaching a series of
 ``springs'' to adjacent parts which encourage the attached parts to stay within
 a certain range of distances of one another. One notable extension to this
-approach is that of Yang and Ramanan~\cite{yang2011articulated}, who % TODO
+approach is that of Yang and Ramanan~\cite{yang2011articulated}, who introduced
+the notion of part types to capture the different appearances which a part can
+have depending on whether it's open or closed (in the case of hands), extended
+or folded (arms), rotated, and so on. By treating the types of each part as
+latent variables in their graphical model, and augmenting their deformation
+terms to take into account the parts on either end of a limb, Yang and Ramanan
+were able to obtain a significant increase in accuracy. In this paper, we use a
+similar setup for generating candidate pose sets within frames, except that we
+assign types to limbs instead of joints.
+% A similar mode-based approach was taken by Sapp and
+% Taskar~\cite{sapp2013modec} to improve the performance of a graphical model
+% composed of a chain conditional random field for each side of the body.
 
-\cite{sapp2013modec}
-\cite{sun2012conditional}
-\cite{cherian2014mixing}
-
-% TODO: Explain usefulness of graphical models as opposed to regressors
-Use of graphical models can increase accuracy by eliminating pose candidates in
-which predicted joint positions are individually likely, but collectively
-implausible due to anatomical constraints.
+Another common approach is to attempt to regress the $(x, y)$ coordinates of
+parts directly from an image~\cite{toshev2014deeppose,sun2012conditional},
+although this can lead to implausible poses being generated unless some
+constraints on the relative positions of limbs or overall pose are used. Use of
+graphical models can increase accuracy by eliminating pose candidates in which
+predicted joint positions are individually likely, but collectively implausible
+due to anatomical constraints imposed by a human limbs.
 
 More recently, deep neural networks have been successfully applied to pose
 estimation in a variety of ways. One common approach is to attempt to regress
@@ -281,11 +276,23 @@ nonlinear mapping than that from images to joint coordinates. The heatmap
 approach makes it straightforward to incorporate graphical models later in the
 pose estimation pipeline, since the heatmap values at different locations can be
 used as potentials for graphical model
-inference~\cite{chen2014articulated,tompson2014joint}.
+inference~\cite{chen2014articulated,tompson2014joint}, as explained further in
+Section~\ref{sec:img-dep}.
 
-The motion information available in videos has previously been exploited
-% TODO talk about tracking-by-detection, temporal edges in graphical models and
-% fully NN-based approaches to using motion "features" (like MoDeep)
+The motion information available in videos has previously been exploited by
+tracking detected poses throughout a video
+sequence~\cite{ji20023d,andriluka2010monocular} or by extending graphical models
+for single-frame prediction with temporal links between parts in different
+frames~\cite{ferrari2008progressive,cherian2014mixing,sigal2004tracking}. Motion
+information has also been incorporated into CNN-based detectors by introducing
+motion features like optical flow at the input layers, which can sometimes
+increase accuracy over single-frame pose estimation~\cite{jain2014modeep}. As
+alluded to in Section~\ref{sec:introduction}, incorporating temporal links into
+graphical models tends to result in intractable inference problems, and so past
+approaches in this area have generally used approximate methods for inference.
+We avoid this problem by generating candidate pose sets independently and taking
+the recombination approach mentioned in the previous
+section~\cite{cherian2014mixing}.
 
 \section{Single-frame candidate set generation}
 \label{sec:intraframe}
@@ -716,20 +723,22 @@ recombination parameters in \cyte{cherian2014mixing} by hand, although in
 principle it should also be possible to obtain reasonable results with grid
 search.
 
-\section{Experiments}
-\label{sec:experiments}
-
-% TODO: Complete figure
-\begin{figure*}[t]
+% TODO: Complete figure. Also explain why the poor performance was witnessed.
+% XXX: This has been taken out of the normal page flow so that it appears in the
+% right place. This should be corrected before submission.
+\begin{figure*}[ht!]
 \begin{center}
-\fbox{\rule{0pt}{2in} \rule{0.9\linewidth}{0pt}}
+\fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
 \end{center}
-\caption{Comparison of accurate and inaccurate pose estimates. The top row shows
-several consecutive frames of a challenging sequence on which the model performs
-well. The top row shows a number of individual frames in which the model
-performed poorly.}
+\caption{Comparison of accurate and inaccurate pose estimates. The left columns
+show several consecutive frames of a challenging sequence on which the model
+performs well. The right columns a number of individual frames in which the
+model performed poorly.}
 \label{fig:qualitative}
 \end{figure*}
+
+\section{Experiments}
+\label{sec:experiments}
 
 Code for these experiments is available
 online.\footnote{\url{https://github.com/qxcv/comp2560}}
@@ -760,7 +769,7 @@ We would like to thank the authors of \cyte{chen2014articulated} and
 \cyte{cherian2014mixing} for making their code publicly available.
 }\fi
 
-\ifwacvfinal\else\newpage\fi
+\ifwacvfinal\else\clearpage\fi
 {\small
 \bibliographystyle{latex-kit/ieee}
 \bibliography{citations}
