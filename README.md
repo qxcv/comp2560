@@ -19,19 +19,22 @@ Contents of this repository:
   Model with Image Dependent Pairwise
   Relations](http://www.stat.ucla.edu/~xianjie.chen/projects/pose_estimation/pose_estimation.html).
 
-  My understanding of Chen & Yuille's reference implementation is that it uses a
-  sliding window to create a heatmap for each body part. This technique is
-  inefficient, since it requires multiple passes through the convnet for each
-  input image. The aim of my implementation is to replace this
-  naively-implemented sliding window with a fully convolutional network which
-  will output the heat map directly. Hopefully this will make the network much
-  faster to train.
+  Initially, I attempted to re-implement Chen & Yuille's method in Python, but
+  this proved to be too much work for a single-term project, so I instead opted
+  to extend their Matlab code, along with that of a few other researchers. The
+  result
+  is in `project/matlab/`.
 - `thirdparty/` is for papers, code and data sets from other researchers. Some
   of those data sets are large, so I've used `git-annex` to store them.
 
 ## Copyright
 
-It's Apache v2! Hallelujah!
+Copyright is complicated. Stuff in `thirdparty/` was written by other
+researchers, and licenses vary. The same goes for things in `project/matlab`,
+which was largely written by other researchers (Chen, Yuille, Yang, Ramanan,
+Cherian, etc.) and adapted by me, so licensing varies there, too. Everything
+else (including the Python code in `project/` and the stuff in `report/`) is
+Apache v2 licensed:
 
 > Copyright 2015 Sam Toyer
 >
