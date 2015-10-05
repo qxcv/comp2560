@@ -80,11 +80,11 @@ if __name__ == '__main__':
         'font.family': 'serif',
         'pgf.rcfonts': False,
         'pgf.texsystem': 'pdflatex',
-        'xtick.labelsize': 'small',
-        'ytick.labelsize': 'small',
-        'legend.fontsize': 'small',
-        'axes.labelsize': 'medium',
-        'axes.titlesize': 'medium',
+        'xtick.labelsize': 'x-small',
+        'ytick.labelsize': 'x-small',
+        'legend.fontsize': 'x-small',
+        'axes.labelsize': 'small',
+        'axes.titlesize': 'small',
     })
 
     labels, thresholds, parts = load_data(args.input)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     subplots[0].yaxis.set_minor_locator(minor_locator)
     subplots[0].set_yticks(range(0, 101, 20))
     plt.figlegend(
-        common_handles, labels, 'lower right', bbox_to_anchor=(0.98, 0.12)
+        common_handles, labels, 'lower right', bbox_to_anchor=(0.98, 0.2)
     )
 
     if args.save is None:
@@ -128,4 +128,4 @@ if __name__ == '__main__':
         print('Saving figure to', args.save)
         plt.gcf().set_size_inches(args.dims)
         plt.tight_layout()
-        plt.savefig(args.save)
+        plt.savefig(args.save, bbox_inches='tight')

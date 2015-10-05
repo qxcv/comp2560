@@ -13,6 +13,7 @@
 % to.
 \usepackage{microtype}
 \usepackage{siunitx}
+\usepackage{pgf}
 
 % Include other packages here, before hyperref.
 
@@ -736,10 +737,9 @@ model performed poorly.}
 \label{fig:qualitative}
 \end{figure*}
 
-% XXX: Same notes about flow and incomplete figure apply here.
 \begin{figure*}[ht!]
 \begin{center}
-\fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
+\input{plots/accuracy.pgf}
 \end{center}
 \caption{Percentage of correct detections over the entire Poses in the Wild
 dataset for different body parts. A part is considered to be correctly detected
