@@ -21,6 +21,11 @@ COMMON_PROPS = {
     'dash_capstyle', 'markevery', 'fillstyle', 'markerfacecolor', 'label',
     'alpha', 'path_effects', 'color', 'solid_joinstyle'
 }
+PRIORITIES = {
+    'Shoulder': 0,
+    'Elbow': 1,
+    'Wrist': 2
+}
 
 parser = ArgumentParser(
     description="Take PCK at different thresholds and plot it nicely"
@@ -37,6 +42,7 @@ parser.add_argument(
     '--dims', nargs=2, type=float, metavar=('WIDTH', 'HEIGHT'),
     default=[6, 3], help="Dimensions (in inches) for saved plot"
 )
+
 
 def load_data(inputs):
     labels = []
@@ -85,7 +91,8 @@ if __name__ == '__main__':
 
     _, subplots = plt.subplots(1, len(parts), sharey=True)
     common_handles = None
-    for part_name, subplot in zip(sorted(parts), subplots):
+    part_keys = sorted(parts.keys(), key=lambda s: PRIORITIES.get(s, -1))
+    for part_name, subplot in zip(part_keys, subplots):
         pcks = parts[part_name]
         if common_handles is None:
             # Record first lot of handles for reuse
