@@ -41,8 +41,11 @@ config.nms_parts = [7 15];
 % example, Pfister et al. use 0:X:20, where X is a really small step. I think
 % I'll ultimately extend the below to 0:5:40. Perhaps 0:2.5:40? The only
 % challenge is getting others' results; getting Anoop's results are easy, but I
-% also want to compare to Pifster et al., Yang & Ramanan, etc.
-config.eval_pix_thresholds = 15:5:40;
+% also want to compare to Pfister et al., Yang & Ramanan, etc. Pfister doesn't
+% seem to have published detections *or* code for PIW (although detections for
+% BBC pose are available), which complicates matters. I guess that all I can do
+% is shoot an email off to someone on the authors list :/
+config.eval_pix_thresholds = 0:2.5:40;
 
 %% If using another dataset, you might need to get the respective pose parameters 
 % and set it appropriately in this function.
