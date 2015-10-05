@@ -9,7 +9,11 @@
 \usepackage{cite}
 % This makes floats actually float in the right god-damn place
 \usepackage{dblfloatfix}
+% microtype is so pretty, but pads out the paper a bit. Take it out if you need
+% to.
 \usepackage{microtype}
+% Lets us have an actual degree symbol
+\usepackage{siunitx}
 
 % Include other packages here, before hyperref.
 
@@ -39,14 +43,12 @@
 
 \begin{document}
 
-%%%%%%%%% TITLE
 \title{Pose Estimation in Videos Using Convolutional Neural Networks and
 Inter-Frame Recombination}
 
 \author{Sam Toyer\\
 The Australian National University\\
-{\tt\small u5568237@anu.edu.au}
-}
+{\tt\small u5568237@anu.edu.au}}
 
 \maketitle
 \ifwacvfinal\thispagestyle{empty}\fi
@@ -161,7 +163,6 @@ The Australian National University\\
 % again for this paper. I'm unnaturally attached to scientific "we", so I don't
 % want to throw it away :-)
 
-%%%%%%%%% ABSTRACT
 \begin{abstract}
     This paper presents a method for estimation of articulated human poses in
     video frames. Our approach is comprised of a Convolutional Neural Network
@@ -175,8 +176,8 @@ The Australian National University\\
     difficult body parts like wrists and elbows.
 \end{abstract}
 
-%%%%%%%%% BODY TEXT
 \section{Introduction}
+\label{sec:introduction}
 
 The aim of human pose estimation is to take a sequence of static images or video
 frames and output a series of two-dimensional ``skeletons'' representing the
@@ -208,6 +209,17 @@ flow in each frame, the score of the poses associated with each limb used in
 recombination, and the displacements of recombined limbs to increase the
 accuracy of the produced pose sequence relative to simply using the
 highest-scoring pose in each frame's candidate set without recombination.
+
+% TODO: Complete figure
+\begin{figure}[t]
+\begin{center}
+\fbox{\rule{0pt}{1.5in} \rule{0.9\linewidth}{0pt}}
+\end{center}
+\caption{Typical output of a pose detector on a video sequence. This figure
+shows an 18-joint upper-body skeleton, as used for evaluation in
+Section~\ref{sec:experiments}.}
+\label{fig:skeleton}
+\end{figure}
 
 Our candidate set generation procedure, described in
 Section~\ref{sec:intraframe}, follows the approach of Chen and
@@ -303,17 +315,6 @@ their method in full.
 
 \subsection{Model}
 \label{sec:model}
-
-% TODO: Complete figure
-\begin{figure}[t]
-\begin{center}
-\fbox{\rule{0pt}{1.5in} \rule{0.9\linewidth}{0pt}}
-\end{center}
-\caption{Illustration of the skeleton used to represent candidate poses within
-each frame. This figure shows an 18-joint upper-body skeleton, as used for
-evaluation in Section~\ref{sec:experiments}}
-\label{fig:skeleton}
-\end{figure}
 
 Skeletons are represented by a graph consisting of a $\mathcal G = (\mathcal V,
 \mathcal E)$ consisting of a set of vertices (also known as ``parts'' or
@@ -737,13 +738,44 @@ model performed poorly.}
 \label{fig:qualitative}
 \end{figure*}
 
+% XXX: Same notes about flow and incomplete figure apply here.
+\begin{figure*}[ht!]
+\begin{center}
+\fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
+\end{center}
+\caption{Percentage of correct detections over the entire Poses in the Wild
+dataset for different body parts. A part is considered to be correctly detected
+in a single frame if the distance between its predicted position and its true
+position is less than the pixel distance threshold indicated on the $x$ axis of
+the graph.}
+\label{fig:quantitative}
+\end{figure*}
+
 \section{Experiments}
 \label{sec:experiments}
 
-Code for these experiments is available
-online.\footnote{\url{https://github.com/qxcv/comp2560}}
+\subsection{Setup}
 
-\subsection{Multi-scale detection}
+To evaluate the performance of our model, we tested it on the Poses in the
+Wild~\cite{cherian2014mixing} data set, which consists of a series of 16-30
+frame sequences extracted from movies. Sequences in this data set include
+challenging aspects like a large degree of camera motion, rapidly moving
+subjects, realistic backgrounds and occlusion of body parts.
+
+Rather than training single-frame pose estimation model on a subset of Poses in
+the Wild, we train it on the training and validation portions of the similar
+Frames Labelled in Cinema (FLIC) data set~\cite{sapp2013modec}, with negatives
+drawn from the INRIA person dataset.\footnotemark The data set is augmented by
+rotating images through a \SI{70}{\degree} range in \SI{5}{\degree} increments,
+as done in \cyte{chen2014articulated}.
+
+\footnotetext{\url{http://pascal.inrialpes.fr/data/human/}}
+
+For recombination, we choose the parameters % XXX TODO get these later
+, which are almost identical to those used in \cyte{cherian2014mixing}. At test
+time, 100 candidate poses are used in each frame and NMS is performed at a
+threshold of 0.95 intersection-over-union on each wrist to ensure that those
+poses are reasonably diverse.
 
 Since training (Section~\ref{sec:intra-learning}) is performed on images which
 have an (approximately) equal scale, we have found it advantageous to perform
@@ -751,11 +783,18 @@ candidate set generation at several scales. We perform multi-scale detection on
 each test frame by first passing the test frame through our CNN at a series of
 fixed scales to produce a feature pyramid of probabilities for part presence and
 limb types. Graphical model inference is then performed independently at each
-scale, and the set of % TODO
+scale. The candidate sets at each scale are then concatenated, sorted descending
+by score, and truncated to ensure that the appropriate number of poses are used
+in recombination.
 
 Note that, since we have only evaluated our full pipeline on the approximately
 uniformly-scaled poses in Poses in the Wild, we have not adjusted the
 recombination stage to account for multiple scales.
+
+Code for all experiments is available
+online.\footnote{\url{https://github.com/qxcv/comp2560}}
+
+\subsection{Results}
 
 \subsection{Discussion}
 
