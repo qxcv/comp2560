@@ -730,10 +730,7 @@ search.
 \begin{center}
 \fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
 \end{center}
-\caption{Comparison of accurate and inaccurate pose estimates. The left columns
-show several consecutive frames of a challenging sequence on which the model
-performs well. The right columns a number of individual frames in which the
-model performed poorly.}
+\caption{Common types of errors encountered on the Poses in the Wild data set.}
 \label{fig:qualitative}
 \end{figure*}
 
@@ -745,7 +742,7 @@ model performed poorly.}
 dataset for different body parts. A part is considered to be correctly detected
 in a single frame if the distance between its predicted position and its true
 position is less than the pixel distance threshold indicated on the $x$ axis of
-the graph.}
+the graph. Cherian \etal is \cyte{cherian2014mixing}.}
 \label{fig:quantitative}
 \end{figure*}
 
@@ -837,6 +834,8 @@ available.}
 \subsection{Discussion}
 
 \subsection{Future work}
+
+\cyte{park2011n}
 
 \section{Conclusion}
 
