@@ -251,6 +251,42 @@ less expressive HoG features.
 % Also some stuff on pictorial structure models (no type information), and any
 % more recent stuff that I can find, especially if said stuff is CNN-related.
 
+Early approaches to pose estimation used pictorial structure
+models~\cite{fischler1973representation,felzenszwalb2005pictorial}. Pictorial
+structure models are a type of graphical mode, and can can be intuitively
+understood as employing an appearance model to determine the likelihood that a
+given part of an object lies at a given location, then attaching a series of
+``springs'' to adjacent parts which encourage the attached parts to stay within
+a certain range of distances of one another. One notable extension to this
+approach is that of Yang and Ramanan~\cite{yang2011articulated}, who % TODO
+
+\cite{sapp2013modec}
+\cite{sun2012conditional}
+\cite{cherian2014mixing}
+
+% TODO: Explain usefulness of graphical models as opposed to regressors
+Use of graphical models can increase accuracy by eliminating pose candidates in
+which predicted joint positions are individually likely, but collectively
+implausible due to anatomical constraints.
+
+More recently, deep neural networks have been successfully applied to pose
+estimation in a variety of ways. One common approach is to attempt to regress
+joint coordinates directly; Toshev \etal~\cite{toshev2014deeppose} do this with
+a cascade of regressors, where the first regressor outputs an approximate
+location for each joint, and subsequent regressors are used to refine those
+approximations. Alternative
+approaches~\cite{jain2013learning,jain2014modeep,pfister2015flowing} instead map
+images to heatmaps for each joint, which has the advantage of being a less
+nonlinear mapping than that from images to joint coordinates. The heatmap
+approach makes it straightforward to incorporate graphical models later in the
+pose estimation pipeline, since the heatmap values at different locations can be
+used as potentials for graphical model
+inference~\cite{chen2014articulated,tompson2014joint}.
+
+The motion information available in videos has previously been exploited
+% TODO talk about tracking-by-detection, temporal edges in graphical models and
+% fully NN-based approaches to using motion "features" (like MoDeep)
+
 \section{Single-frame candidate set generation}
 \label{sec:intraframe}
 
@@ -423,9 +459,9 @@ locations $\vec l_u$ in linear time using a distance
 transform~\cite{felzenszwalb2012distance}. If we have $T_{uv} = T$ for each $(u,
 v) \in \mathcal E$, then we must also perform maximisation over $T^2$ limb label
 combinations at each joint. Since this maximisation must be performed at a total
-of $K$ joints, the overall time complexity of calculating the score $S_h(\vec
-l_h, \mat I)$ of the root component for all locations $\vec l_h$ is $O(T^2 N
-K)$, where $N$ is the number of grid locations.
+of $K$ joints, the overall time complexity of calculating the score
+$S_h(\vec{l}_h, \mat I)$ of the root component for all locations $\vec l_h$ is
+$O(T^2 N K)$, where $N$ is the number of grid locations.
 
 Given the maximum scores $S_h(\vec l_h, \mat I)$ for a pose rooted at each
 possible head location $\vec l_h$, we can produce a set of $M$ pose candidates
@@ -724,6 +760,7 @@ We would like to thank the authors of \cyte{chen2014articulated} and
 \cyte{cherian2014mixing} for making their code publicly available.
 }\fi
 
+\ifwacvfinal\else\newpage\fi
 {\small
 \bibliographystyle{latex-kit/ieee}
 \bibliography{citations}

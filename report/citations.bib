@@ -125,7 +125,7 @@ Here's AlexNet!
   year={2012}
 }
 
-% Distance transforms for graphical models
+Distance transforms for graphical models
 @article{felzenszwalb2012distance,
   title={Distance Transforms of Sampled Functions.},
   author={Felzenszwalb, Pedro F and Huttenlocher, Daniel P},
@@ -136,12 +136,12 @@ Here's AlexNet!
   year={2012}
 }
 
-% Following seems to be the original PSM article. Good god, their energy
-% function is trivial; they seem to be assigning infinite energy to
-% configurations in which *any* part lies outside a part-specific box defined by
-% them, and zero energy to configurations in which no part is in that position!
-% Nevertheless, they deserve kudos for being so far ahead of their time in their
-% use of "springs" to describe ideal configurations.
+Following seems to be the original PSM article. Good god, their energy function
+is trivial; they seem to be assigning infinite energy to configurations in which
+*any* part lies outside a part-specific box defined by them, and zero energy to
+configurations in which no part is in that position! Nevertheless, they deserve
+kudos for being so far ahead of their time in their use of "springs" to describe
+ideal configurations.
 @article{fischler1973representation,
   title={The representation and matching of pictorial structures},
   author={Fischler, Martin A and Elschlager, Robert A},
@@ -150,4 +150,100 @@ Here's AlexNet!
   pages={67--92},
   year={1973},
   publisher={IEEE}
+}
+
+Another pictorial structures paper. I could replace the "Distance Transforms of
+Sampled Functions" paper with this one, but I prefer the DToSF paper since it's
+more concise.
+@article{felzenszwalb2005pictorial,
+  title={Pictorial structures for object recognition},
+  author={Felzenszwalb, Pedro F and Huttenlocher, Daniel P},
+  journal={International Journal of Computer Vision},
+  volume={61},
+  number={1},
+  pages={55--79},
+  year={2005},
+  publisher={Springer}
+}
+
+Here are some NN pose estimation papers
+
+This one compares the use of a variety of "motion features", including optical
+flow, at the input layer of a DCNN
+@incollection{jain2014modeep,
+  title={{MoDeep}: A deep learning framework using motion features for human pose estimation},
+  author={Jain, Arjun and Tompson, Jonathan and LeCun, Yann and Bregler, Christoph},
+  booktitle={Computer Vision--ACCV 2014},
+  pages={302--315},
+  year={2014},
+  publisher={Springer}
+}
+
+Probably the first application of CNNs to pose estimation. Uses direct
+coordinate regression with refinement CNNs. Good results relative to what came
+before, poor results relative to what came after.
+@inproceedings{toshev2014deeppose,
+  title={{DeepPose}: Human pose estimation via deep neural networks},
+  author={Toshev, Alexander and Szegedy, Christian},
+  booktitle={Computer Vision and Pattern Recognition (CVPR), 2014 IEEE Conference on},
+  pages={1653--1660},
+  year={2014},
+  organization={IEEE}
+}
+
+Uses heatmaps rather than coordinate regression, which they criticise on the
+basis that coordinate mappings are highly nonlinear and get confused by pooling
+(which throws away spatial information)
+@article{jain2013learning,
+  title={Learning human pose estimation features with convolutional networks},
+  author={Jain, Arjun and Tompson, Jonathan and Andriluka, Mykhaylo and Taylor, Graham W and Bregler, Christoph},
+  journal={arXiv preprint arXiv:1312.7302},
+  year={2013}
+}
+
+Kind-of meh paper from Zisserman group. Looks like an attempt to just get
+*some* results (any results!) and publish them. The flowing convnets paper
+builds on the ideas in this one and is, in my opinion, more interesting.
+@incollection{pfister2015deep,
+  title={Deep Convolutional Neural Networks for Efficient Pose Estimation in Gesture Videos},
+  author={Pfister, Tomas and Simonyan, Karen and Charles, James and Zisserman, Andrew},
+  booktitle={Computer Vision--ACCV 2014},
+  pages={538--552},
+  year={2015},
+  publisher={Springer}
+}
+
+@article{pfister2015flowing,
+  title={Flowing ConvNets for Human Pose Estimation in Videos},
+  author={Pfister, Tomas and Charles, James and Zisserman, Andrew},
+  journal={arXiv preprint arXiv:1506.02897},
+  year={2015}
+}
+
+Miscellaneous pose estimation papers
+
+Chain-structured CRFs on the left and right side of the body, with a "mode"
+setting for each side corresponding to some quality like gender, height, whether
+sitting or standing, arms folded, arms raised, etc. The left and right mode
+nodes are connected. Anoop's paper explained this as "...a strategy where the
+model is represented as a convex combination of tree-structured graphs linked
+with dual variables, and solve it with a dual decomposition algorithm."
+@inproceedings{sapp2013modec,
+  title={{MODEC}: Multimodal decomposable models for human pose estimation},
+  author={Sapp, Brian and Taskar, Ben},
+  booktitle={Computer Vision and Pattern Recognition (CVPR), 2013 IEEE Conference on},
+  pages={3674--3681},
+  year={2013},
+  organization={IEEE}
+}
+
+Using random forest-based regressors, conditioned on a "global variable" (like
+the one used in MODEC) which is known at evaluation time.
+@inproceedings{sun2012conditional,
+  title={Conditional regression forests for human pose estimation},
+  author={Sun, Min and Kohli, Pushmeet and Shotton, Jamie},
+  booktitle={Computer Vision and Pattern Recognition (CVPR), 2012 IEEE Conference on},
+  pages={3394--3401},
+  year={2012},
+  organization={IEEE}
 }
