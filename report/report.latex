@@ -808,6 +808,12 @@ online.\footnote{\url{https://github.com/qxcv/comp2560}}
 % I'll probably put part of it in the introduction so that people can see what
 % I'm on about.
 
+Timings for the different stages of the pose estimation pipeline during the test
+phase are given in Table~\ref{tab:runtime}. All experiments were performed on a
+using two Intel Xeon E5-2620 processors and an NVIDIA K80 GPU, although the
+parallelism offered by the CPUs is not factored into the runtimes listed in
+Table~\ref{tab:runtime}.
+
 \begin{table}
 \begin{center}
 \begin{tabular}{|l|c|}
@@ -825,6 +831,7 @@ Recombination & XXX s\\
 flow and candidate set generation can be performed in parallel, which can
 significantly increase performance when parallel computing resources are
 available.}
+\label{tab:runtime}
 \end{table}
 
 \subsection{Discussion}
