@@ -12,7 +12,6 @@
 % microtype is so pretty, but pads out the paper a bit. Take it out if you need
 % to.
 \usepackage{microtype}
-% Lets us have an actual degree symbol
 \usepackage{siunitx}
 
 % Include other packages here, before hyperref.
@@ -215,9 +214,8 @@ highest-scoring pose in each frame's candidate set without recombination.
 \begin{center}
 \fbox{\rule{0pt}{1.5in} \rule{0.9\linewidth}{0pt}}
 \end{center}
-\caption{Typical output of a pose detector on a video sequence. This figure
-shows an 18-joint upper-body skeleton, as used for evaluation in
-Section~\ref{sec:experiments}.}
+\caption{Exemplar showing the detections produced by our algorithm on a sequence
+from Poses in the Wild~\cite{cherian2014mixing}.}
 \label{fig:skeleton}
 \end{figure}
 
@@ -319,11 +317,11 @@ their method in full.
 Skeletons are represented by a graph consisting of a $\mathcal G = (\mathcal V,
 \mathcal E)$ consisting of a set of vertices (also known as ``parts'' or
 ``joints'') $\mathcal V$ and a set of edges (commonly referred to as ``limbs'')
-$\mathcal E \subseteq \mathcal V \times \mathcal V$, as illustrated in
-Figure~\ref{fig:skeleton}. A complete pose $\vec{p} = (\vec l, \vec t)$ is
-represented by a location $\vec{l_u}$ within an image $\mat I$ for each joint $u
-\in \mathcal V$, and discrete ``types'' $t_{uv} \in \{1, \ldots, T_{uv}\}$ and
-$t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v) \in \mathcal E$.
+$\mathcal E \subseteq \mathcal V \times \mathcal V$. A complete pose $\vec{p} =
+(\vec l, \vec t)$ is represented by a location $\vec{l_u}$ within an image $\mat
+I$ for each joint $u \in \mathcal V$, and discrete ``types'' $t_{uv} \in \{1,
+\ldots, T_{uv}\}$ and $t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v)
+\in \mathcal E$.
 
 Limb types, as popularised by \cyte{yang2011articulated}, are used to express
 the orientation and length of limbs. For example, long forearms running from
@@ -757,7 +755,7 @@ the graph.}
 \subsection{Setup}
 
 To evaluate the performance of our model, we tested it on the Poses in the
-Wild~\cite{cherian2014mixing} data set, which consists of a series of 16-30
+Wild~\cite{cherian2014mixing} data set, which consists of a series of 16--30
 frame sequences extracted from movies. Sequences in this data set include
 challenging aspects like a large degree of camera motion, rapidly moving
 subjects, realistic backgrounds and occlusion of body parts.
@@ -765,7 +763,7 @@ subjects, realistic backgrounds and occlusion of body parts.
 Rather than training single-frame pose estimation model on a subset of Poses in
 the Wild, we train it on the training and validation portions of the similar
 Frames Labelled in Cinema (FLIC) data set~\cite{sapp2013modec}, with negatives
-drawn from the INRIA person dataset.\footnotemark The data set is augmented by
+drawn from the INRIA person dataset.{\footnotemark} The data set is augmented by
 rotating images through a \SI{70}{\degree} range in \SI{5}{\degree} increments,
 as done in \cyte{chen2014articulated}.
 
@@ -795,6 +793,39 @@ Code for all experiments is available
 online.\footnote{\url{https://github.com/qxcv/comp2560}}
 
 \subsection{Results}
+
+% Results I plan to include:
+% - My code, final config (100 poses)
+% - My code, no NMS (100 poses)
+% - My code, final config (1 pose)
+% - Anoop's code in its published configuration
+% I also want to figure out the average time for candidate set generation, in
+% each image, the average time for optical flow for each frame (well, except the
+% last one in each sequence), and the average time for recombination (normalised
+% to the number of frames in each set).
+% Finally, I want some qualitative results in the form of a set of wildly
+% incorrect pose estimates which I can yap about. If I have a correct sequence,
+% I'll probably put part of it in the introduction so that people can see what
+% I'm on about.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+Task & Mean time per frame\\
+\hline\hline
+Optical flow & XXX s\\
+CNN evaluation & XXX s\\
+GM inference & XXX s\\
+Recombination & XXX s\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Runtime cost of different stages of the pipeline. In practise, optical
+flow and candidate set generation can be performed in parallel, which can
+significantly increase performance when parallel computing resources are
+available.}
+\end{table}
 
 \subsection{Discussion}
 
