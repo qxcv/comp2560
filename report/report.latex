@@ -213,7 +213,10 @@ highest-scoring pose in each frame's candidate set without recombination.
 % TODO: Complete figure
 \begin{figure}[t]
 \begin{center}
-\fbox{\rule{0pt}{1.5in} \rule{0.9\linewidth}{0pt}}
+\includegraphics[width=0.4\linewidth]{good-shots/frame-1.png}%
+\includegraphics[width=0.4\linewidth]{good-shots/frame-2.png}\\%
+\includegraphics[width=0.4\linewidth]{good-shots/frame-3.png}%
+\includegraphics[width=0.4\linewidth]{good-shots/frame-4.png}
 \end{center}
 \caption{Exemplar showing the detections produced by our algorithm on a sequence
 from Poses in the Wild~\cite{cherian2014mixing}.}
@@ -728,7 +731,15 @@ search.
 % right place. This should be corrected before submission.
 \begin{figure*}[ht!]
 \begin{center}
-\fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
+\begin{tabular}{@{}c@{}c@{}c@{}c@{}c@{}c@{}}
+\includegraphics[height=0.14\linewidth]{bad-shots/seq-50-frame-26.png}\,&
+\includegraphics[height=0.14\linewidth]{bad-shots/seq-70-frame-30.png}\,&
+\includegraphics[height=0.14\linewidth]{bad-shots/seq-62-frame-2.png}\,&
+\includegraphics[height=0.14\linewidth]{bad-shots/seq-63-frame-9.png}\,&
+\includegraphics[height=0.14\linewidth]{bad-shots/seq-39-frame-14.png}\,&
+\includegraphics[height=0.14\linewidth]{bad-shots/seq-73-frame-30.png}\\
+(a) & (b) & (c) & (d) & (e) & (f)
+\end{tabular}
 \end{center}
 \caption{Common types of errors encountered on the Poses in the Wild data set.}
 \label{fig:qualitative}
