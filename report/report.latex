@@ -55,82 +55,32 @@ The Australian National University\\
 
 % Random notes about stuff go here.
 %
-% Figures which I can include:
-% - Diagram showing entire pipeline
-% - Correct detections
-% - Incorrect detections
-% - Illustration of recombination candidate set
-% - PCK on PIW for elbows/wrists/shoulders, compared with the same papers which
-%   Anoop compares with.
-%
-% Things I can put in the introduction (not all required; just looking through
-% other papers to get ideas):
-% - What pose estimation is and why it is important.
-% - Challenges in pose estimation
-% - Explain different classes of approaches to pose estimation (possibly
-%   including their disadvantages). Just need to be careful not to tread on the
-%   related work section.
-% - Abstractly discuss the approach taken in the paper.
-% - Summarise experiments performed and the results of those experiments.
-%
-% Things I can put in the related work section:
-% - Talk about existing approaches and how they compare with one another in
-%   terms of results and in terms of the computer vision tools used.
-% - Explain why my approach is better (theoretically rather than empirically)
-%
-% Contents of the intra-frame part:
-% - Talk about Yang & Ramanan's articulated model.
-% - Discuss the type-based approach to part detection, and its advantages and
-%   disadvantages.
-% - Mention how the CNN works (esp. the fact that it's a fully convolutional
-%   network, and also the way we produce a feature pyramid).
-% - Graphical model and inference.
-% - Candidate pose generation with NMS at each scale.
-% - How do we use distance transforms to make GM inference more efficient? This
-%   was something I didn't fully understand, so I might try to write about it in
-%   the hope that I come to grok it better.
-% - Talk about training.
-%
-% Contents of the inter-frame part:
-% - Just explain how smoothing and recombination works, from optical flow down
-%   to producing the final pose.
-% - Should also explain whichever extensions I use from Anoop's paper.
-% - How do we find our hyperparameters? This is hard, since we don't train
-%   hyperparameters; really, we're just fiddling with them until they give us
-%   something we want. I could say that I just started with Anoop's parameters,
-%   then removed colour tracking and the skin histogram check, which really
-%   shows that I have nothing up my sleeves. I could also mention that it's
-%   theoretically possible to do a grid search for better parameters (maybe even
-%   run such a search and show the results, with the disclaimer that we're
-%   training on the test set).
-%
-% Things to consider putting in the conclusion and future work section (other
-% than a summary, obviously):
-% - Anoop's suggestion of using a CNN-based regressor to fine-tune joint
-%   location estimates. Need to find some prior art on this; did Anoop just make
-%   that up when I was talking to him? It seems like a useful insight, so
-%   perhaps someone has tried it already.
-% - Anoop's other suggestion about using an R-CNN-style approach to CNN forward
-%   prop. Not totally convinced about the merits of that (you really only need
-%   to identify windows in which there's definitely no human present at all,
-%   which isn't what the R-CNN is doing with its semantic segmentation and
-%   region joining steps), so I might leave it out.
-% - Improve the CNN by using a newer model (e.g. ILSVRC '15 winners) or
-%   decreasing the number of output layers from ~10,000 to a few hundred by
-%   doing K-means on entire sets of outgoing limbs attached to a single joint.
-%   Perhaps there's also a good PCA-based method hiding somewhere in there.
-% - Diverse M-best for candidate generation, instead of the crap I'm using at
-%   the moment.
-% - Using LBP and optical flow to improve pairwise pose estimation.
-%
-% Remember the Heilmeier Catechism! Jochen said that most of these points should
-% be addressed in the discussion:
+% Remember the Heilmeier Catechism! Jochen said that most of its points should
+% be addressed in the discussion. I'll keep track of what I have addressed:
 %
 % - What are you trying to do? Articulate your objectives using absolutely no
 %   jargon.
+%   --> Did this in the intro! I have a pretty diagram of our pose detector and
+%       everything.
 % - How is it done today, and what are the limits of current practice?
+%   --> Sort-of did this in related work. Not sure that fully qualifies, though,
+%       because I don't talk about what specific limitations which my algorithm
+%       addresses.
+%   --> Actually, looking at the introduction and related work sections, I
+%       really do address this. I just feel uneasy about not talking about the
+%       Big Problems in pose estimation, since I feel as though "limitations of
+%       current practice" should refer to the limitations of the field *as a
+%       whole*, not the limitations of specific algorithms. My algorithm doesn't
+%       really address any of open HPE problems, or improve on the state of the
+%       art (which is an implicit limitation of the field as a whole), so I'm
+%       not sure what to write there.
 % - What's new in your approach and why do you think it will be successful?
+%   --> Need to do this. Could really merge it with the previous part. Heck, I
+%       could even put it in the abstract.
+%   ---> Yeah, I sort-of do this already. Perhaps saying "we extend <blah> with
+%        <blah>, which to the best of our knowledge is novel" might help.
 % - Who cares? If you're successful, what difference will it make?
+%   --> Kind-of did this in the intro with the "what are you trying to do" bit.
 %
 % The Heilmeier Catechism also includes the following questions, although they
 % are less relevant for our discussion:
@@ -138,25 +88,6 @@ The Australian National University\\
 % - What are the risks and the payoffs?
 % - How much will it cost? How long will it take?
 % - What are the midterm and final "exams" to check for success?
-%
-% The IEEE conference guidelines recommend "Mermin's guide" to typesetting
-% mathematics. There are a few interesting rules in it:
-% 1) Number everything, whether you intend to refer to it or not. This makes it
-%    easier for subsequent readers and people citing your work to find
-%    equations, and also makes it easier to describe errata.
-% 2) In addition to a number, refer to each equation by some useful name. For
-%    example, instead of writing "substituting (7) into (10)", we could write
-%    "substituting the temporal cost (7) into the inter-frame cost (10)". This
-%    makes it much easier for readers to understand WTF you're talking about.
-% 3) End equations with punctuation. Pretend that the equation is prose; if you
-%    would normally end that prose with a comma (for example), then you should
-%    end the equation with a comma. This rule can be skipped when your equation
-%    is embedded in the surrounding text in such a way that, even if it were
-%    prose, it would require no trailing punctuation.
-% Also, Mermin generally recommends that equations be treated as part of their
-% surrounding sentences. If you follow this rule, you won't be including colons
-% and the like before equations, nor "introducing" equations ("...as follows:",
-% "...the equation:", etc.)
 %
 % Random note on first-person pronouns: in COMP2550, I used "royal we"
 % (referring to yourself as "we"), and it worked okay, so I think I'll do that
@@ -168,11 +99,11 @@ The Australian National University\\
     of video frames. Our approach is comprised of a Convolutional Neural Network
     (CNN) and graphical model for independent generation of pose candidate sets
     in each frame, followed by a recombination step which makes use of optical
-    flow and pairwise deformation features to produce a single, consistent
-    sequence of poses. Evaluation on the Poses in the Wild data set validates the
-    usefulness of inter-frame pose recombination over single-frame pose
-    estimation alone, and shows that our method significantly improves upon past
-    work in localisation of wrists and elbows.
+    flow and limb deformation costs to produce a single, consistent sequence of
+    poses. Evaluation on the Poses in the Wild data set validates the usefulness
+    of inter-frame pose recombination over single-frame pose estimation alone,
+    and shows that our method significantly improves upon past work in
+    localisation of wrists and elbows.
 \end{abstract}
 
 \section{Introduction}
@@ -180,7 +111,8 @@ The Australian National University\\
 
 The aim of human pose estimation is to take a sequence of static images or video
 frames and output a series of two-dimensional ``skeletons'' representing the
-locations of the limbs of any humans in those images. Pose estimation is useful
+locations of the limbs of any humans in those images, as depicted in
+Figure~\ref{fig:skeleton}. Skeletons produced through pose estimation are useful
 for higher-level computer vision tasks like identifying clothing
 items~\cite{liu2012street,liu2012hi,yamaguchi2012parsing}, recognising
 actions~\cite{yao2011does}, and even classifying inanimate objects through a
@@ -193,6 +125,7 @@ resembles body parts, and so on. Taking advantage of the motion information
 present in video sequences introduces another layer of complexity to this
 already challenging problem.
 
+% CUT: "This recombination procedure takes..." onwards.
 We deal with this complexity by dividing our video pose estimation pipeline into
 two phases. Initially, a pose estimation procedure is applied independently to
 each frame in the video sequence. This procedure implicitly scores all possible
@@ -243,7 +176,7 @@ temporal edges to select a candidate from each frame partially alleviates this
 problem by reducing the number of poses which must be considered. The
 recombination method which we employ, as described by Cherian
 \etal~\cite{cherian2014mixing}, improves efficiency even further by allowing
-parts to be mixed-and-matched from different poses in the candidate sets in a
+parts to be mixed-and-matched from different poses in each candidate set in a
 top-down fashion, thereby increasing the effective size of the candidate sets
 under consideration whilst maintaining low algorithmic complexity.
 
@@ -269,7 +202,7 @@ lead to implausible poses being generated unless some constraints on the
 relative positions of limbs or on the overall pose are introduced. Use of
 graphical models can increase accuracy by eliminating pose candidates in which
 predicted joint positions are individually likely, but collectively implausible
-due to the anatomical constraints imposed by a human limbs.
+due to the anatomical constraints imposed by human limbs.
 
 More recently, deep neural networks have been successfully applied to pose
 estimation in a variety of ways. One common approach is to attempt to regress
@@ -312,9 +245,9 @@ Our method for generating pose candidate sets largely follows that of
 relevant parts of their method in full.
 
 Pose skeletons are represented by a graph $\mathcal G = (\mathcal V, \mathcal
-E)$ consisting of a set of vertices (also known as ``parts'' or ``joints'')
-$\mathcal V$ and a set of edges (commonly referred to as ``limbs'') $\mathcal E
-\subseteq \mathcal V \times \mathcal V$. A complete pose $\vec{p} = (\vec l,
+E)$ consisting of a set of vertices (which we refer to as ``parts'' or
+``joints'') $\mathcal V$ and a set of edges (which we call ``limbs'') $\mathcal
+E \subseteq \mathcal V \times \mathcal V$. A complete pose $\vec{p} = (\vec l,
 \vec t)$ is represented by a location $\vec{l_u}$ within an image $\mat I$ for
 each joint $u \in \mathcal V$, and discrete ``types'' $t_{uv} \in \{1, \ldots,
 T_{uv}\}$ and $t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v) \in
@@ -410,13 +343,13 @@ p(j = u, t_u = t \mid \mat I(\vec l))
 \end{equation}
 for any location $\vec l$ in $\mat I$ and any part $u \in \{1, \ldots, K\}$.
 
-If we discard combinations of $u$ and $t$ for which the joint probability is
+If we disregard combinations of $u$ and $t$ for which the joint probability is
 always zero, then this becomes a discrete distribution over
 \begin{equation}
 \sum_{u \in \mathcal V} T^{|\{(u, v) : (u, v) \in \mathcal E\}|} + 1
 \end{equation}
-values, where $\nb(u)$ denotes the neighbours of part $u$ and we assume that
-$T_{uv} = T \in \mathbb N$ for all $(u, v) \in \mathcal E$.
+values, where we assume that $T_{uv} = T \in \mathbb N$ for all $(u, v) \in
+\mathcal E$.
 
 Our CNN architecture closely follows that of
 AlexNet~\cite{krizhevsky2012imagenet}, and is identical to that of
@@ -424,7 +357,8 @@ AlexNet~\cite{krizhevsky2012imagenet}, and is identical to that of
 fully connected layers of the network to $1 \times 4096$ convolutions after the
 network has been trained. This allows us to evaluate (\ref{eqn:cnn-output}) over
 a set of uniformly spaced patches of a full-resolution image in a single pass,
-rather than having to pass patches through the network one at a time.
+rather than having to pass patches through the network one at a
+time~\cite{sermanet2013overfeat}.
 
 \subsection{Producing the candidate set}
 
@@ -433,8 +367,7 @@ the image, we can now produce a set of high-scoring pose candidates for use in
 the recombination procedure (Section~\ref{sec:interframe}). Recall from
 Section~\ref{sec:model} that poses are modelled as trees rooted at the head. In
 this case, the score of any subtree of the full pose tree rooted at part $u$ in
-location $\vec l_u$ is:
-
+location $\vec l_u$ is
 \begin{equation}\label{eqn:gm-local-score}
 \begin{split}
 S_u&(\vec l_u, \mat I) =\\
@@ -442,20 +375,21 @@ S_u&(\vec l_u, \mat I) =\\
 \psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)
 + S(\vec l_v, \mat I)
 \right]\\
-&+ \phi_u(\vec l_u \mid \mat I).
+&+ \phi_u(\vec l_u \mid \mat I),
 \end{split}
 \end{equation}
+where $\pa(v) = u$ iff $u$ is the parent of $v$ in the full pose tree.
 
 At the leaves, this formula becomes $S_v(\vec l_v, \mat I) = \phi_v(\vec l_v
 \mid \mat I)$, which is trivial to compute for all locations in the image.
 Otherwise, given child scores $S_{v_1}(\vec l_{v_1}, \mat I), \ldots,
 S_{v_C}(\vec l_{v_C}, \mat I)$ for the children $\{v : \pa(v) = u\}$ of some
 non-leaf part $u$, it is possible to evaluate $S_u(\vec l_u, \mat I)$ for all
-locations $\vec l_u$ in linear time using a distance
-transform~\cite{felzenszwalb2012distance}. If we have $T_{uv} = T$ for each $(u,
-v) \in \mathcal E$, then we must also perform maximisation over $T^2$ limb label
-combinations at each joint. Since this maximisation must be performed at a total
-of $K$ joints, the overall time complexity of calculating the score
+locations $\vec l_u$ in linear time using distance
+transforms~\cite{felzenszwalb2012distance}. If we have $T_{uv} = T$ for each
+$(u, v) \in \mathcal E$, then we must also perform maximisation over $T^2$ limb
+label combinations at each joint. Since this maximisation must be performed at a
+total of $K$ joints, the overall time complexity of calculating the score
 $S_h(\vec{l}_h, \mat I)$ of the root component for all locations $\vec l_h$ is
 $O(T^2 N K)$, where $N$ is the number of grid locations.
 
@@ -735,9 +669,9 @@ the recombination stage to produce a final pose sequence.
 The mean Percentage Correct Keypoints (PCK) for our algorithm, averaged over all
 sequences in Poses in the Wild, is given in Figure~\ref{fig:qualitative}. For
 comparison, we have included the results of our algorithm in its previously
-described evaluation configuration (``Default config'') and the results of our
-algorithm when only one candidate pose is generated for each frame (``Static
-only''). For comparison, we have also included the results of Cherian
+described evaluation configuration (``Default config.'') and the results of our
+algorithm when only one candidate pose is generated for each frame
+(``Static-only''). For comparison, we have also included the results of Cherian
 \etal~\cite{cherian2014mixing} on the same sequence.
 
 % \footnote{The results of Pfister \etal~\cite{pfister2015flowing}---which
