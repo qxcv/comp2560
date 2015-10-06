@@ -669,41 +669,10 @@ single-frame inference scores are already computed during candidate set
 generation.
 
 In addition to the costs listed above, we have used the ``practical extensions''
-of \cyte{cherian2014mixing}, which include:
-
-\begin{itemize}
-    % Dense temporal regularisation along limbs
-    \item Additional temporal regularisation terms in the head cost
-    (\ref{eqn:head-cost}) and subsequent part cost
-    (\ref{eqn:subsequent-part-cost}) of the form $\tau_{u'}(\vec l_{u',t},
-    \vec{l}_{u't+1}, \mat I_t, \mat I_{t+1})$, where $\vec l_{u'}$ is is a
-    position at a fixed distance along some specific limb. These additional
-    regularisation terms could be introduced to penalise the motion of the
-    midpoint of the forearm, for instance, without having to introduce an
-    entirely new joint at the midpoint of the forearm.
-
-    % Enriched wrists
-    \item A term $\lambda_f F_t^{-1} \|f(\vec l_{w,t}, \mat I_t, \mat
-    I_{t+1})\|$ for each wrist $w$, where $F_t$ is the maximum magnitude of the
-    optical flow between frames $\mat I_t$ and $\mat I_{t+1}$. This encourages
-    wrists to occupy regions of high motion.
-
-    To combine this extension with the previous one, we can replace the
-    magnitude of the flow at a wrist with sum of the magnitudes of the flow at
-    that wrist and at all intermediate temporal regularisation points between
-    the wrist and its parent joint.
-
-    % Limiting motion
-    \item A regularisation term of the form $\lambda_m \|\vec l_{u,t} -
-    \vec{l}_{u,t+1}\|^2$ which can be used to reduce the impact of erroneously
-    large flow vectors.
-\end{itemize}
-
-Note that $\lambda_\tau$, $\lambda_\rho$, $\lambda_f$ and $\lambda_m$ are all
-challenging to learn in a structured way. We have opted to tune the
-recombination parameters in \cyte{cherian2014mixing} by hand, although in
-principle it should also be possible to obtain reasonable results with grid
-search.
+of \cyte{cherian2014mixing}, which include additional keypoints along limbs to
+constrain motion further, an additional term for wrists which encourages them to
+occupy regions of high motion, and a regularisation term which acts to constrain
+the absolute difference between part positions across frames.
 
 % NOTE: This has been taken out of the normal page flow so that it appears in the
 % right place. This should be corrected before submission.
