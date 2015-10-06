@@ -207,16 +207,16 @@ and the displacements of recombined limbs.
 
 \begin{figure}[t]
 \begin{center}
-\begin{overpic}[width=0.4\linewidth]{good-shots/frame-1.png}
+\begin{overpic}[width=0.24\linewidth]{good-shots/frame-1.png}
     \put (90, 80) {1}
 \end{overpic}%
-\begin{overpic}[width=0.4\linewidth]{good-shots/frame-2.png}
+\begin{overpic}[width=0.24\linewidth]{good-shots/frame-2.png}
     \put (90, 80) {2}
-\end{overpic}\\
-\begin{overpic}[width=0.4\linewidth]{good-shots/frame-3.png}
+\end{overpic}%
+\begin{overpic}[width=0.24\linewidth]{good-shots/frame-3.png}
     \put (90, 80) {3}
 \end{overpic}%
-\begin{overpic}[width=0.4\linewidth]{good-shots/frame-4.png}
+\begin{overpic}[width=0.24\linewidth]{good-shots/frame-4.png}
     \put (90, 80) {4}
 \end{overpic}
 \end{center}
@@ -712,41 +712,28 @@ the graph.}
 
 To evaluate the performance of our model, we tested it on the Poses in the
 Wild~\cite{cherian2014mixing} data set, which consists of a series of 16--30
-frame sequences extracted from movies. Sequences in this data set include
-challenging aspects like a large degree of camera motion, rapidly moving
-subjects, realistic backgrounds and occlusion of body parts.
+frame sequences extracted from movies. Many sequences in this data set include a
+large degree of camera motion, rapidly moving subjects, cluttered backgrounds or
+occlusion of body parts.
 
-Rather than training single-frame pose estimation model on a subset of Poses in
-the Wild, we train it on the training and validation portions of the similar
-Frames Labelled in Cinema (FLIC) data set~\cite{sapp2013modec}, with negatives
-drawn from the INRIA person dataset.{\footnotemark} The data set is augmented by
-rotating images through a \SI{70}{\degree} range in \SI{5}{\degree} increments,
-as done in \cyte{chen2014articulated}.
+The single-frame pose estimation model was trained on the Frames Labelled in
+Cinema (FLIC) data set~\cite{sapp2013modec}, with negatives drawn from the INRIA
+person dataset.{\footnotemark} The data set was augmented by rotating images
+through a \SI{70}{\degree} range in \SI{5}{\degree} increments, as done in
+\cyte{chen2014articulated}.
 
 \footnotetext{\url{http://pascal.inrialpes.fr/data/human/}}
 
-For recombination, we chose a set of parameters $\{\lambda_\tau, \lambda_\rho,
-\lambda_f, \lambda_m\}$ which differed slightly for each pair of parts,
-depending on extent of motion of the parts. The precise set of parameters are
-available online, along with the rest of the code for these
-experiments.\footnote{\url{https://github.com/qxcv/comp2560}} At test time, 100
-candidate poses are used in each frame and NMS is performed at a threshold of
-0.95 intersection-over-union on each wrist to ensure that those poses are
-reasonably diverse.
+For recombination, we chose a set of hand-tuned parameters which differed for
+each pair of parts, depending on the extent of motion of the parts. The precise
+set of parameters are available online, along with the rest of the code for
+these experiments.\footnote{\url{https://github.com/qxcv/comp2560}} At test
+time, 100 candidate poses are used in each frame and NMS is performed at a
+threshold of 95\% of the intersection-over-union on each wrist.
 
-Since training (Section~\ref{sec:intra-learning}) is performed on images which
-have an (approximately) equal scale, we have found it advantageous to perform
-candidate set generation at several scales. We perform multi-scale detection on
-each test frame by first passing the test frame through our CNN at a series of
-fixed scales to produce a feature pyramid of probabilities for part presence and
-limb types. Graphical model inference is then performed independently at each
-scale. The candidate sets at each scale are then concatenated, sorted descending
-by score, and truncated to ensure that the appropriate number of poses are used
-in recombination.
-
-Note that, since we have only evaluated our full pipeline on the approximately
-uniformly-scaled poses in Poses in the Wild, we have not adjusted the
-recombination stage to account for multiple scales.
+We have found it advantageous to perform candidate set generation independently
+at several scales. The highest-scoring poses over all scales were then passed to
+the recombination stage to produce a final pose sequence.
 
 \subsection{Results}
 
@@ -798,28 +785,23 @@ recombination yields an appreciable performance increase over independent pose
 estimation in each frame. This is particularly true for the wrists, which are
 generally the fastest-moving body parts in a video sequence.
 
-Counterintuitively, the method of \cyte{cherian2014mixing}, which primarily uses
-HoG-based features, outperforms our CNN-based algorithm for shoulder position
-prediction at low thresholds. In the graphical model used to generate pose
-candidate sets, the shoulder is attached to the upper arm, upper torso and base
-of the neck. Since 13 types were learnt for each limb, there are $13^3 = 2197$
-different combinations of adjacent limb types for each shoulder; it is possible
-that the CNN, which outputs the part--type joint distribution
-(\ref{eqn:cnn-output}), may not have sufficient data to produce reliable
-appearance terms for the shoulder, or IDPR terms for the neighbouring limbs.
+Counterintuitively, the approach of Cherian \etal outperforms ours on shoulders
+at low thresholds. This could be because of the size of part--type joint
+distribution (\ref{eqn:cnn-output}) learnt by the CNN; in the graphical model
+used to generate pose candidate sets, the shoulder is attached to the upper arm,
+upper torso and base of the neck, so if 13 types were learnt for each limb, then
+there would be $13^3 = 2197$ different combinations of adjacent limb types for
+each shoulder. Many of these combinations may not be well-represented in the
+training set, which would hurt performance at test time.
 
-Whilst this could be addressed by the decreasing the number of limb types, or by
-drawing additional training samples from other data sets, it may help to adopt a
-part-based type system~\cite{yang2011articulated} in place of a limb-based one.
-This would necessitate the replacement of the limb centroids $\{r_{uv t_{uv}}\}$
-with centroids $\{r_{u v t_u}\}$ depending only on the type of one joint. This
-would give greater control over the effective number of part types, which could
-allow for the size of the part--type joint distribution to be decreased
-significantly. This could also yield an increase in performance, since the CNN
-evaluation time for the final softmax layer in the network would decrease, as
-would the time taken to copy and marginalise over the hundreds of thousands
-joint distribution values produced by applying the fully convolutional network
-to large images.
+It may be possible to address this by adopting a part-based type
+system~\cite{yang2011articulated} in place of a limb-based one. This would give
+greater control over the effective number of part types, which could allow for
+the size of the part--type joint distribution to be decreased significantly.
+This could also yield an increase in performance, since the CNN evaluation time
+for the final softmax layer in the network would decrease, as would the time
+taken to copy and marginalise over the hundreds of thousands joint distribution
+values produced by applying the fully convolutional network to large images.
 
 % Accuracy could also be boosted by adopting the strategy of Park and
 % Ramanan~\cite{park2011n} for generating pose candidate sets. In
@@ -828,37 +810,29 @@ to large images.
 % for the root node of the model used for pose estimation. Instead, they present
 % an algorithm which is able to efficiently j_
 
-Figure~\ref{fig:qualitative} illustrates a number of common types of failure.
+Figure~\ref{fig:qualitative} illustrates a number of common failure modes.
 Whilst our algorithm is robust to minor occlusions---where a hand lies slightly
 outside a frame, for instance---of the kind shown in frames (a) and (d)--(f),
 self-occlusion of subjects and partial occlusion of several body parts have
-proven more challenging, as in frames (b) and (f), respectively. Frames (a) and
-(c) also show situations in which limb-like objects have confused the detector.
-Finally, rapid limb motion was responsible for a large number of failures,
-including examples (d)--(f).
+proven more challenging, as in frames (b) and (f). Frames (a) and (c) also show
+situations in which limb-like objects have confused the detector. Finally, rapid
+limb motion was responsible for a large number of failures, including examples
+(d)--(f).
 
 \section{Conclusion}
 
-This paper presented an approach to human pose estimation which divides the task
-of pose estimation in videos into two stages. In the first stage, we generate a
-score candidate poses in each frame independently using a tree-structured
-graphical model incorporating CNN-based features and type-based limb deformation
-costs in the style of \cyte{chen2014articulated}. To encourage diversity of the
-candidate pose set for each frame, we apply non-maximum suppression to the
-wrists of poses obtained by backtracking through the max marginals for the root
-node of the graphical model. In the second stage, we recombine the limbs
-associated with each pose in each candidate set to produce a single best
-sequence of poses. We use a recombination method which takes into account
-optical flow and the relative positions of parts across frames, but uses a
-top-down approach to avoid the computational intractability common to loopy
-graphical models.
-
-Our evaluation on the challenging Poses in the Wild data set shows that our
-method significantly improves on that of Cherian \etal~\cite{cherian2014mixing}
-for prediction of elbows and shoulders. We closed with a discussion of the
+This paper presented a two-stage approach to pose estimation in videos. In the
+first stage, we generated a candidate pose set in each frame independently using
+a graphical model incorporating CNN-derived features and type-based limb
+deformation costs. In the second stage, we recombined the limbs associated with
+each pose in each candidate set to produce a single best sequence of poses using
+an approximate top-down approach to avoid the computational intractability
+common to loopy graphical models. Evaluation on the challenging Poses in the
+Wild data set showed that, for elbows and shoulders, our method significantly
+improved on that of \cite{cherian2014mixing}. We closed with a discussion of the
 accuracy and failure modes of the algorithm, and suggested that both accuracy
 and performance could be improved by giving type labels to joints rather than
-limbs and by using an alternative method to generate candidate pose sets.
+limbs.
 
 \ifwacvfinal{%
 \noindent\textbf{Acknowledgements}\quad
