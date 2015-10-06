@@ -45,6 +45,9 @@
     % parfor to make fewer copies of `frames` and `imglist`.
     next_frames = frames(:,:,:,2:end);
     next_imglist = imglist(2:end);
+    p = gcp; % Start parpool first, to preserve timings
+    fprintf('Parallel pool up with %i workers\n', p.NumWorkers);
+    fullFlowStart = tic;
     parfor i=1:numfiles-1
         dest_mat = [data_flow_path strtok(imglist(i).name,'.') ...
                 '-' strtok(next_imglist(i).name,'.') '.mat'];
@@ -53,17 +56,23 @@
             fopticalflow{i} = loaded_flow.flow;
         catch        
             fprintf('flow: working on file=%d/%d\n',  i, numfiles);
+            indivFlowStart = tic;
             [u,v] = LDOF_Wrapper(frames(:,:,:,i), next_frames(:,:,:,i));
             fopticalflow{i}.u = u;
             fopticalflow{i}.v = v;
             save_flow(dest_mat, fopticalflow{i});
+            indivFlowTime = toc(indivFlowStart);
+            fprintf('[T] Flow for frame %i took %fs\n', i, indivFlowTime);
         end
     end
+    fullFlowTime = toc(fullFlowStart);
+    fprintf('[T] All flow took %fs\n', fullFlowTime);
     
     %% run the CNN over each image for part presence
     % Cache various statistics derived from model
     [components, apps] = modelcomponents(cy_model);
     fprintf('CNN forward propagation and head position estimation on the frames...\n');
+    cnnStart = tic;
     for i=1:numfiles
         box_dest_path = [data_store_path boxes_loc '/cnn_box_' strtok(imglist(i).name, '.') '.mat'];
         current_im = frames(:,:,:,i);
@@ -88,7 +97,7 @@
                 % to make a feature pyramid for unaries and IDPR terms
                 [pyra, unary_map, idpr_map] = imCNNdet(current_im, cy_model, config.gpuID, 1, @impyra);
                 cnnDetStop = toc(cnnDetStart);
-                fprintf('imCNNdet() took %fs\n', cnnDetStop);
+                fprintf('[T] imCNNdet() on %i took %fs\n', i, cnnDetStop);
                 pyra = rmfield(pyra, 'feat');
                 % This will take a long time and a heap of disk space, but I
                 % don't care
@@ -103,12 +112,14 @@
                 max_poses, pyra, unary_map, idpr_map, length(cy_model.components), ...
                 components, apps, config.nms_thresh, config.nms_parts);
             ifdStop = toc(ifdStart);
-            fprintf('IFD took %fs\n', ifdStop);
+            fprintf('[T] IFD on %i took %fs\n', i, ifdStop);
             save(box_dest_path, 'box');
         end
         
         boxes{i} = box;
     end
+    cnnTime = toc(cnnStart);
+    fprintf('[T] All detection stuff took %fs\n', cnnTime);
     
     % Make sure that we have a uniform number of pose estimates per frame
     [pose_counts, ~] = cellfun(@size, boxes);
@@ -128,6 +139,7 @@
     try
         load([data_store_path 'new_merged_joints_' boxes_loc '.mat'], 'new_merged_poses');
     catch
+        recombStart = tic;
         for pp=1:length(pose_joints)
             fprintf('working on pose_joints(%d)...\n', pp);
             keyjoints_left=pose_joints(pp).keyjoints_left; keyjoints_right=pose_joints(pp).keyjoints_right;                        
@@ -158,6 +170,8 @@
                 end
             end                
         end 
+        recombTime = toc(recombStart);
+        fprintf('[T] Recombination took %fs\n', recombTime);
         save([data_store_path 'new_merged_joints_' boxes_loc '.mat'], 'new_merged_poses');
     end    
  end
