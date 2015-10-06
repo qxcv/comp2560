@@ -11,7 +11,7 @@ from matplotlib.ticker import AutoMinorLocator
 from pandas import read_csv
 
 THRESH = 'Threshold'
-MARKERS = ['<', 'o', '^', 'x', '>', '+', 'v', 's']
+MARKERS = [None]
 # List of matplotlib.artist.Artist properties which we should copy between
 # subplots
 COMMON_PROPS = {
