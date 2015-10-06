@@ -1,190 +1,92 @@
-working on sequence seq15
-optical flow on the frames...
-Parallel pool up with 12 workers
-flow: working on file=12/30
 [T] Flow for frame 12 took 109.183807s
-flow: working on file=18/30
 [T] Flow for frame 18 took 109.406493s
-flow: working on file=16/30
 [T] Flow for frame 16 took 120.181774s
-flow: working on file=14/30
 [T] Flow for frame 14 took 120.784063s
-flow: working on file=19/30
 [T] Flow for frame 19 took 122.503107s
-flow: working on file=8/30
 [T] Flow for frame 8 took 122.533461s
-flow: working on file=2/30
 [T] Flow for frame 2 took 126.768425s
-flow: working on file=20/30
 [T] Flow for frame 20 took 126.544335s
-flow: working on file=6/30
 [T] Flow for frame 6 took 130.158305s
-flow: working on file=4/30
 [T] Flow for frame 4 took 133.364749s
-flow: working on file=10/30
 [T] Flow for frame 10 took 137.230994s
-flow: working on file=21/30
 [T] Flow for frame 21 took 137.365864s
-flow: working on file=17/30
 [T] Flow for frame 17 took 116.779416s
-flow: working on file=11/30
 [T] Flow for frame 11 took 118.950037s
-flow: working on file=22/30
 [T] Flow for frame 22 took 119.122771s
-flow: working on file=15/30
 [T] Flow for frame 15 took 124.940714s
-flow: working on file=1/30
 [T] Flow for frame 1 took 122.732441s
-flow: working on file=23/30
 [T] Flow for frame 23 took 123.725368s
-flow: working on file=7/30
 [T] Flow for frame 7 took 130.109278s
-flow: working on file=9/30
 [T] Flow for frame 9 took 116.708372s
-flow: working on file=13/30
 [T] Flow for frame 13 took 134.892763s
-flow: working on file=5/30
 [T] Flow for frame 5 took 126.871150s
-flow: working on file=3/30
 [T] Flow for frame 3 took 128.469132s
-flow: working on file=24/30
 [T] Flow for frame 24 took 128.511873s
-flow: working on file=25/30
 [T] Flow for frame 25 took 93.904368s
-flow: working on file=26/30
 [T] Flow for frame 26 took 93.932743s
-flow: working on file=27/30
 [T] Flow for frame 27 took 86.291657s
-flow: working on file=28/30
 [T] Flow for frame 28 took 87.109336s
-flow: working on file=29/30
 [T] Flow for frame 29 took 86.265382s
 [T] All flow took 336.412677s
-CNN forward propagation and head position estimation on the frames...
-CNN forward propagation on image=1/30
 [T] imCNNdet() on 1 took 56.494823s
-Intra-frame detection on image=1/30
 [T] IFD on 1 took 5.298153s
-CNN forward propagation on image=2/30
 [T] imCNNdet() on 2 took 58.804097s
-Intra-frame detection on image=2/30
 [T] IFD on 2 took 5.031235s
-CNN forward propagation on image=3/30
 [T] imCNNdet() on 3 took 67.826229s
-Intra-frame detection on image=3/30
 [T] IFD on 3 took 5.300905s
-CNN forward propagation on image=4/30
 [T] imCNNdet() on 4 took 58.789819s
-Intra-frame detection on image=4/30
 [T] IFD on 4 took 5.154777s
-CNN forward propagation on image=5/30
 [T] imCNNdet() on 5 took 71.859859s
-Intra-frame detection on image=5/30
 [T] IFD on 5 took 5.204435s
-CNN forward propagation on image=6/30
 [T] imCNNdet() on 6 took 51.885317s
-Intra-frame detection on image=6/30
 [T] IFD on 6 took 5.584964s
-CNN forward propagation on image=7/30
 [T] imCNNdet() on 7 took 60.280457s
-Intra-frame detection on image=7/30
 [T] IFD on 7 took 6.326863s
-CNN forward propagation on image=8/30
 [T] imCNNdet() on 8 took 67.511835s
-Intra-frame detection on image=8/30
 [T] IFD on 8 took 5.438526s
-CNN forward propagation on image=9/30
 [T] imCNNdet() on 9 took 52.735462s
-Intra-frame detection on image=9/30
 [T] IFD on 9 took 5.280233s
-CNN forward propagation on image=10/30
 [T] imCNNdet() on 10 took 65.928333s
-Intra-frame detection on image=10/30
 [T] IFD on 10 took 5.199379s
-CNN forward propagation on image=11/30
 [T] imCNNdet() on 11 took 59.950831s
-Intra-frame detection on image=11/30
 [T] IFD on 11 took 5.155484s
-CNN forward propagation on image=12/30
 [T] imCNNdet() on 12 took 47.303638s
-Intra-frame detection on image=12/30
 [T] IFD on 12 took 5.287537s
-CNN forward propagation on image=13/30
 [T] imCNNdet() on 13 took 66.808669s
-Intra-frame detection on image=13/30
 [T] IFD on 13 took 5.330939s
-CNN forward propagation on image=14/30
 [T] imCNNdet() on 14 took 58.849770s
-Intra-frame detection on image=14/30
 [T] IFD on 14 took 5.131903s
-CNN forward propagation on image=15/30
 [T] imCNNdet() on 15 took 57.140117s
-Intra-frame detection on image=15/30
 [T] IFD on 15 took 5.269329s
-CNN forward propagation on image=16/30
 [T] imCNNdet() on 16 took 53.631274s
-Intra-frame detection on image=16/30
 [T] IFD on 16 took 5.701486s
-CNN forward propagation on image=17/30
 [T] imCNNdet() on 17 took 56.968681s
-Intra-frame detection on image=17/30
 [T] IFD on 17 took 5.149125s
-CNN forward propagation on image=18/30
 [T] imCNNdet() on 18 took 57.513560s
-Intra-frame detection on image=18/30
 [T] IFD on 18 took 5.504725s
-CNN forward propagation on image=19/30
 [T] imCNNdet() on 19 took 54.836830s
-Intra-frame detection on image=19/30
 [T] IFD on 19 took 5.192469s
-CNN forward propagation on image=20/30
 [T] imCNNdet() on 20 took 51.430912s
-Intra-frame detection on image=20/30
 [T] IFD on 20 took 5.370327s
-CNN forward propagation on image=21/30
 [T] imCNNdet() on 21 took 58.177199s
-Intra-frame detection on image=21/30
 [T] IFD on 21 took 5.447084s
-CNN forward propagation on image=22/30
 [T] imCNNdet() on 22 took 57.864952s
-Intra-frame detection on image=22/30
 [T] IFD on 22 took 5.396257s
-CNN forward propagation on image=23/30
 [T] imCNNdet() on 23 took 63.094805s
-Intra-frame detection on image=23/30
 [T] IFD on 23 took 5.226223s
-CNN forward propagation on image=24/30
 [T] imCNNdet() on 24 took 51.868458s
-Intra-frame detection on image=24/30
 [T] IFD on 24 took 5.116884s
-CNN forward propagation on image=25/30
 [T] imCNNdet() on 25 took 52.148429s
-Intra-frame detection on image=25/30
 [T] IFD on 25 took 5.137373s
-CNN forward propagation on image=26/30
 [T] imCNNdet() on 26 took 48.009138s
-Intra-frame detection on image=26/30
 [T] IFD on 26 took 5.290297s
-CNN forward propagation on image=27/30
 [T] imCNNdet() on 27 took 49.387735s
-Intra-frame detection on image=27/30
 [T] IFD on 27 took 5.022563s
-CNN forward propagation on image=28/30
 [T] imCNNdet() on 28 took 47.894087s
-Intra-frame detection on image=28/30
 [T] IFD on 28 took 5.380550s
-CNN forward propagation on image=29/30
 [T] imCNNdet() on 29 took 50.715927s
-Intra-frame detection on image=29/30
 [T] IFD on 29 took 5.319264s
-CNN forward propagation on image=30/30
 [T] imCNNdet() on 30 took 57.156791s
-Intra-frame detection on image=30/30
 [T] IFD on 30 took 4.963028s
 [T] All detection stuff took 1937.889935s
-Minimum number of pose estimations: 100
-working on pose_joints(1)...
-working on pose_joints(2)...
-working on pose_joints(3)...
-working on pose_joints(4)...
 [T] Recombination took 10.861921s

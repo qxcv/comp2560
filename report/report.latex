@@ -125,7 +125,6 @@ resembles body parts, and so on. Taking advantage of the motion information
 present in video sequences introduces another layer of complexity to this
 already challenging problem.
 
-% CUT: "This recombination procedure takes..." onwards.
 We deal with this complexity by dividing our video pose estimation pipeline into
 two phases. Initially, a pose estimation procedure is applied independently to
 each frame in the video sequence. This procedure implicitly scores all possible
@@ -134,9 +133,7 @@ which is pruned through non-maximum suppression to ensure that the returned set
 contains a diverse selection of poses. After a candidate pose set has been
 generated for each frame, the parts of each pose candidate in each frame are
 recombined to reduce each frame's candidate set down to a single high-scoring
-pose. This recombination procedure takes into account the optical flow in each
-frame, the score of the poses associated with each limb used in recombination,
-and the displacements of recombined limbs.
+pose.
 
 \begin{figure}[t]
 \begin{center}
@@ -678,30 +675,29 @@ algorithm when only one candidate pose is generated for each frame
 % include PCK curves for Poses in the Wild---are also of interest for comparison
 % purposes, although they were not available for inclusion in this paper.}
 
-% TODO: Timings
-% Timings for the different stages of the pose estimation pipeline during the test
-% phase are given in Table~\ref{tab:runtime}. All experiments were performed on a
-% using two Intel Xeon E5-2620 processors and an NVIDIA K80 GPU, although the
-% parallelism offered by the CPUs is not factored into the runtimes listed in
-% Table~\ref{tab:runtime}.
+% Timings for the different stages of the pose estimation pipeline during testing
+% on a single sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
+% The experiment was performed using two Intel Xeon E5-2620 processors and an
+% NVIDIA K80 GPU. Due to the load on the machine at the time of testing and the
+% differing machine configurations used by other authors, the supplied timings
+% should be used as approximations of the relative costs of different stages of
+% the pipeline rather results for benchmarking.
 % 
 % \begin{table}
 % \begin{center}
 % \begin{tabular}{|l|c|}
 % \hline
-% Task & Mean time per frame\\
+% Stage & Time\\
 % \hline\hline
-% Optical flow & XXX s\\
-% CNN evaluation & XXX s\\
-% GM inference & XXX s\\
-% Recombination & XXX s\\
+% Optical flow & 336.41s\\
+% CNN evaluation & 1712.87s\\
+% Candidate set generation & 159.21s\\
+% Recombination & 10.86s\\
 % \hline
 % \end{tabular}
 % \end{center}
-% \caption{Runtime cost of different stages of the pipeline. In practise, optical
-% flow and candidate set generation can be performed in parallel, which can
-% significantly increase performance when parallel computing resources are
-% available.}
+% \caption{Run time of different stages of the pipeline when applied to all 30
+% frames of sequence 15 of Poses in the Wild.}
 % \label{tab:runtime}
 % \end{table}
 
