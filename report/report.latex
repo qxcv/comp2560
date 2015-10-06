@@ -397,8 +397,7 @@ remainder of the pose. However, since recombination
 benefits from a diverse set of poses, we apply
 non-maximum suppression to ensure that our returned candidate pool contains only
 poses for which the pairwise intersection-over-union for detected wrists is no
-greater than some threshold. This prevents the candidate generation algorithm
-from producing a set of poses which each differ by only a few pixels.
+greater than some threshold.
 
 \subsection{Learning}
 \label{sec:intra-learning}
@@ -441,19 +440,6 @@ described in \cyte{yang2011articulated}.
 
 \section{Pose estimation in videos}
 \label{sec:interframe}
-
-% \begin{figure*}[t]
-% \begin{center}
-% \fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
-% \end{center}
-% \caption{Diagram showing the recombination process. First, a fixed number of
-% candidate poses are generated in each frame, sorted descending by score. Next,
-% non-maximum suppression is performed on wrists and elbows to increase the
-% diversity of the top $N$ candidates. Finally, the top $N$ candidates in each
-% frame are fed to the recombination procedure, which greedily recombines limbs in
-% a top-down fashion whilst trying to minimise (\ref{eqn:recomb-cost}).}
-% \label{fig:recombination}
-% \end{figure*}
 
 \subsection{Motivation}
 
@@ -670,36 +656,27 @@ described evaluation configuration (``Default config.'') and the results of our
 algorithm when only one candidate pose is generated for each frame
 (``Static-only''). For comparison, we have also included the results of Cherian
 \etal~\cite{cherian2014mixing} on the same sequence.
+Timings for the different stages of the pose estimation pipeline during testing
+on a single sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
 
-% \footnote{The results of Pfister \etal~\cite{pfister2015flowing}---which
-% include PCK curves for Poses in the Wild---are also of interest for comparison
-% purposes, although they were not available for inclusion in this paper.}
-
-% Timings for the different stages of the pose estimation pipeline during testing
-% on a single sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
-% The experiment was performed using two Intel Xeon E5-2620 processors and an
-% NVIDIA K80 GPU. Due to the load on the machine at the time of testing and the
-% differing machine configurations used by other authors, the supplied timings
-% should be used as approximations of the relative costs of different stages of
-% the pipeline rather results for benchmarking.
-% 
-% \begin{table}
-% \begin{center}
-% \begin{tabular}{|l|c|}
-% \hline
-% Stage & Time\\
-% \hline\hline
-% Optical flow & 336.41s\\
-% CNN evaluation & 1712.87s\\
-% Candidate set generation & 159.21s\\
-% Recombination & 10.86s\\
-% \hline
-% \end{tabular}
-% \end{center}
-% \caption{Run time of different stages of the pipeline when applied to all 30
-% frames of sequence 15 of Poses in the Wild.}
-% \label{tab:runtime}
-% \end{table}
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+Stage & Time\\
+\hline\hline
+Optical flow & 336.41s\\
+CNN evaluation & 1712.87s\\
+Candidate set generation & 159.21s\\
+Recombination & 10.86s\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Run time of different stages of the pipeline when applied to all 30
+frames of sequence 15 of Poses in the Wild. The experiment was performed using
+two Intel Xeon E5-2620 processors and an NVIDIA K80 GPU.}
+\label{tab:runtime}
+\end{table}
 
 \subsection{Discussion and future work}
 
@@ -727,13 +704,6 @@ This could also yield an increase in performance, since the CNN evaluation time
 for the final softmax layer in the network would decrease, as would the time
 taken to copy and marginalise over the hundreds of thousands joint distribution
 values produced by applying the fully convolutional network to large images.
-
-% Accuracy could also be boosted by adopting the strategy of Park and
-% Ramanan~\cite{park2011n} for generating pose candidate sets. In
-% \cyte{park2011n}, Park and Ramaman argue that a large number of high-scoring
-% poses are typically not accessible by backtracking from the max marginal table
-% for the root node of the model used for pose estimation. Instead, they present
-% an algorithm which is able to efficiently j_
 
 Figure~\ref{fig:qualitative} illustrates a number of common failure modes.
 Whilst our algorithm is robust to minor occlusions---where a hand lies slightly
