@@ -43,8 +43,8 @@
 
 \begin{document}
 
-\title{Pose Estimation in Videos Using Convolutional Neural Networks and
-Inter-Frame Recombination}
+\title{Articulated Pose Estimation in Videos with Convolutional Neural Networks
+and Pose Recombination}
 
 \author{Sam Toyer\\
 The Australian National University\\
@@ -164,16 +164,15 @@ The Australian National University\\
 % want to throw it away :-)
 
 \begin{abstract}
-    This paper presents a method for estimation of articulated human poses in
-    video frames. Our approach is comprised of a Convolutional Neural Network
-    (CNN) and tree-structured graphical model for independent generation of
-    pose candidate sets in each frame, followed by a recombination step which
-    makes use of optical flow and pairwise deformation features to produce a
-    single, consistent series of poses across an entire sequence. Evaluation on
-    the Poses in the Wild dataset validates the usefulness of inter-frame pose
-    recombination over single-frame pose estimation alone, and suggests that our
-    method significantly improves upon the state-of-the-art in localising
-    difficult body parts like wrists and elbows.
+    This paper presents a method for 2D human pose estimation across a sequence
+    of video frames. Our approach is comprised of a Convolutional Neural Network
+    (CNN) and tree-structured graphical model for independent generation of pose
+    candidate sets in each frame, followed by a recombination step which makes
+    use of optical flow and pairwise deformation features to produce a single,
+    consistent sequence of poses. Evaluation on the Poses in the Wild dataset
+    validates the usefulness of inter-frame pose recombination over single-frame
+    pose estimation alone, and suggests that our method significantly improves
+    upon past work in localisation of difficult body parts like wrists and elbows.
 \end{abstract}
 
 \section{Introduction}
@@ -184,31 +183,27 @@ frames and output a series of two-dimensional ``skeletons'' representing the
 locations of the limbs of any humans in those images. Pose estimation is useful
 for higher-level computer vision tasks like identifying clothing
 items~\cite{liu2012street,liu2012hi,yamaguchi2012parsing}, recognising
-actions~\cite{yao2011does}, or even classifying objects which people interact
-with~\cite{delaitre2012scene}.
+actions~\cite{yao2011does}, and even classifying inanimate objects through a
+person's interactions with them~\cite{delaitre2012scene}.
 
-Human pose estimation is complicated by a number of factors, including the wide
-range of physically allowable human poses, the varied appearance of human bodies
-and clothing, occlusion of body parts by objects in the scene or by other body
-parts, background clutter which resembles body parts, and so on. Use of video
-frames---rather than static image data---for pose estimation introduces another
-layer of complexity to an already challenging problem by requiring algorithms to
-accommodate a wide range of camera and body motion whilst producing consistent
-labellings between frames.
+Pose estimation is complicated the wide range of anatomically possible human
+poses, the varied appearance of human bodies and clothing, occlusion of body
+parts by objects in the scene or by other body parts, background clutter which
+resembles body parts, and so on. Taking advantage of the motion information
+present in video sequences introduces another layer of complexity to this
+already challenging problem.
 
 We deal with this complexity by dividing our video pose estimation pipeline into
-two distinct phases. Initially, a pose estimation procedure is applied
-independently to each frame in the video sequence. This procedure implicitly
-scores all possible poses in each video frame and returns a selection of the
-highest-scoring poses, which is pruned through non-maximum suppression to ensure
-that the returned set contains a diverse selection of poses. After a candidate
-pose set has been generated for each frame, the parts of each pose candidate in
-each frame are recombined to reduce each frame's candidate set down to a single
-high-scoring pose. This recombination procedure takes into account the optical
-flow in each frame, the score of the poses associated with each limb used in
-recombination, and the displacements of recombined limbs to increase the
-accuracy of the produced pose sequence relative to simply using the
-highest-scoring pose in each frame's candidate set without recombination.
+two phases. Initially, a pose estimation procedure is applied independently to
+each frame in the video sequence. This procedure implicitly scores all possible
+poses in each video frame and returns a selection of the highest-scoring poses,
+which is pruned through non-maximum suppression to ensure that the returned set
+contains a diverse selection of poses. After a candidate pose set has been
+generated for each frame, the parts of each pose candidate in each frame are
+recombined to reduce each frame's candidate set down to a single high-scoring
+pose. This recombination procedure takes into account the optical flow in each
+frame, the score of the poses associated with each limb used in recombination,
+and the displacements of recombined limbs.
 
 \begin{figure}[t]
 \begin{center}
@@ -236,54 +231,45 @@ Yuille~\cite{chen2014articulated}, which combines features from a deep CNN with
 a graphical model to estimate poses in a static image. The CNN yields features
 which are much more informative than the Histogram-of-Gradients (HoG) features
 used in previous work, whilst the graphical model encourages parts to take on
-anatomically reasonable positions relative to one another.
+anatomically reasonable relative positions.
 
 As explained in Section~\ref{sec:interframe}, incorporating temporal edges into
 graphical model-based pose estimation methods can result in an intractable
 inference problem because of the loopiness of the resulting graph. Independently
 generating a small set of candidate poses in each frame and using temporal edges
-to find an optimal selection of candidates from each frame partially alleviates
-this problem by reducing the number of poses which must be considered. The
-recombination method which we employ, as described by Cherian
-\etal~\cite{cherian2014mixing}, improves efficiency even further by allowing
-parts to be mixed-and-matched from different poses in the candidate sets,
-thereby increasing the effective size of the candidate sets without yielding an
+to select a candidate from each frame partially alleviates this problem by
+reducing the number of poses which must be considered. The recombination method
+which we employ, as described by Cherian \etal~\cite{cherian2014mixing},
+improves efficiency even further by allowing parts to be mixed-and-matched from
+different poses in the candidate sets in a top-down fashion, thereby increasing
+the effective size of the candidate sets under consideration without yielding an
 intractable problem.
-
-In Section~\ref{sec:experiments}, we show that this combination of techniques
-significantly increases performance over the use of single-frame pose detection
-alone or of recombination of poses produced by a graphical model making use of
-less expressive HoG features.
 
 \section{Related work}
 
-Early approaches to pose estimation used pictorial structure
-models~\cite{fischler1973representation,felzenszwalb2005pictorial}. Pictorial
-structure models are a type of graphical mode, and can can be intuitively
-understood as employing an appearance model to determine the likelihood that a
-given part of an object lies at a given location, then attaching a series of
-``springs'' to adjacent parts which encourage the attached parts to stay within
-a certain range of distances of one another. One notable extension to this
-approach is that of Yang and Ramanan~\cite{yang2011articulated}, who introduced
-the notion of part types to capture the different appearances which a part can
-have depending on whether it's open or closed (in the case of hands), extended
-or folded (arms), rotated, and so on. By treating the types of each part as
-latent variables in their graphical model, and augmenting their deformation
-terms to take into account the parts on either end of a limb, Yang and Ramanan
-were able to obtain a significant increase in accuracy. In this paper, we use a
-similar setup for generating pose candidate sets within frames, except that we
-assign types to limbs instead of joints.
-% A similar mode-based approach was taken by Sapp and
-% Taskar~\cite{sapp2013modec} to improve the performance of a graphical model
-% composed of a chain conditional random field for each side of the body.
+Early attempts at human pose estimation often made use of pictorial structure
+models~\cite{fischler1973representation,felzenszwalb2005pictorial}, which
+exploit the fact that poses can be decomposed into joints which are likely to
+stay within a certain range of distances of one another. Yang and
+Ramanan~\cite{yang2011articulated} extended this approach by introducing the
+notion of part types to capture the different appearances which a part can have
+depending on whether it's open or closed (in the case of hands), whether it's
+extended or folded (arms), how much it is rotated, and so on. By treating the
+types of each part as latent variables in their graphical model, and augmenting
+their deformation terms to take into account the parts on either end of a limb,
+Yang and Ramanan were able to obtain a significant increase in accuracy over
+traditional pictorial structure models. In this paper, we use a similar approach
+for generating pose candidate sets within frames, except that we assign types to
+limbs instead of joints.
 
 Another common approach is to attempt to regress the $(x, y)$ coordinates of
 parts directly from an image~\cite{toshev2014deeppose,sun2012conditional},
 although this can lead to implausible poses being generated unless some
-constraints on the relative positions of limbs or overall pose are used. Use of
-graphical models can increase accuracy by eliminating pose candidates in which
-predicted joint positions are individually likely, but collectively implausible
-due to anatomical constraints imposed by a human limbs.
+constraints on the relative positions of limbs or on the overall pose are
+introduced. Use of graphical models can increase accuracy by eliminating pose
+candidates in which predicted joint positions are individually likely, but
+collectively implausible due to the anatomical constraints imposed by a human
+limbs.
 
 More recently, deep neural networks have been successfully applied to pose
 estimation in a variety of ways. One common approach is to attempt to regress
@@ -294,9 +280,9 @@ approximations. Alternative
 approaches~\cite{jain2013learning,jain2014modeep,pfister2015flowing} instead map
 images to heatmaps for each joint, which has the advantage of being a less
 nonlinear mapping than that from images to joint coordinates. The heatmap
-approach makes it straightforward to incorporate graphical models later in the
-pose estimation pipeline, since the heatmap values at different locations can be
-used as potentials for graphical model
+approach also makes it straightforward to incorporate graphical models later in
+the pose estimation pipeline, since the heatmap values at different locations
+can be used as potentials for graphical model
 inference~\cite{chen2014articulated,tompson2014joint}, as explained further in
 Section~\ref{sec:img-dep}.
 
@@ -312,45 +298,45 @@ alluded to in Section~\ref{sec:introduction}, incorporating temporal links into
 graphical models tends to result in intractable inference problems, and so past
 approaches in this area have generally used approximate methods for inference.
 We avoid this problem by generating pose candidate sets independently and taking
-the recombination approach mentioned in the previous
-section~\cite{cherian2014mixing}.
+the recombination approach described in
+Section~\ref{sec:introduction}~\cite{cherian2014mixing}.
 
 \section{Single-frame candidate set generation}
 \label{sec:intraframe}
 
-Our method for generating a pose candidate set in each frame mostly follows that
-of \cyte{chen2014articulated}, although we will describe the relevant parts of
-their method in full.
-
 \subsection{Model}
 \label{sec:model}
 
-Skeletons are represented by a graph consisting of a $\mathcal G = (\mathcal V,
-\mathcal E)$ consisting of a set of vertices (also known as ``parts'' or
-``joints'') $\mathcal V$ and a set of edges (commonly referred to as ``limbs'')
-$\mathcal E \subseteq \mathcal V \times \mathcal V$. A complete pose $\vec{p} =
-(\vec l, \vec t)$ is represented by a location $\vec{l_u}$ within an image $\mat
-I$ for each joint $u \in \mathcal V$, and discrete ``types'' $t_{uv} \in \{1,
-\ldots, T_{uv}\}$ and $t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v)
-\in \mathcal E$.
+Our method for generating pose candidate sets largely follows that of
+\cyte{chen2014articulated}, although we will use this section to describe the
+relevant parts of their method in full.
 
-Limb types, as popularised by \cyte{yang2011articulated}, are used to express
-the orientation and length of limbs. For example, long forearms running from
-left to right might be assigned their own discrete type, as might short,
-vertical forearms, medium-length diagonal forearms, and so on. During inference,
-these types can be introduced as latent variables, in which case they can be
-used to encourage the relative positions of body parts to take anatomically
-reasonable values through the use of type-dependent limb deformation costs.
-Further evidence for the type of a limb can be gleaned by inspecting small
-patches of an image around the endpoints of that limb: for instance, an image of
-a shoulder might give clues as to the direction in which the attached upper arm
-is pointing. Both type-dependent deformation costs and IDPR terms are discussed at
-greater length in Section~\ref{sec:img-dep}.
+Pose skeletons are represented by a graph $\mathcal G = (\mathcal V, \mathcal
+E)$ consisting of a set of vertices (also known as ``parts'' or ``joints'')
+$\mathcal V$ and a set of edges (commonly referred to as ``limbs'') $\mathcal E
+\subseteq \mathcal V \times \mathcal V$. A complete pose $\vec{p} = (\vec l,
+\vec t)$ is represented by a location $\vec{l_u}$ within an image $\mat I$ for
+each joint $u \in \mathcal V$, and discrete ``types'' $t_{uv} \in \{1, \ldots,
+T_{uv}\}$ and $t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v) \in
+\mathcal E$.
 
-Given a complete pose $(\vec l, \vec t)$ consisting of a vector part locations
-$l$ and a vector of limb types $t$, and an image $\mat I$, the full score
+Limb types are used to express the orientation and length of limbs. For example,
+long forearms running from left to right might be assigned their own discrete
+type, as might short, vertical forearms, medium-length diagonal forearms, and so
+on. During inference, these types can be introduced as latent variables, in
+which case they can be used to encourage the relative positions of body parts to
+take anatomically reasonable values through the use of type-dependent limb
+deformation costs. Further evidence for the type of a limb can be gleaned by
+inspecting small patches of an image around the endpoints of that limb. For
+instance, an image of a shoulder might give clues as to the direction in which
+the attached upper arm is pointing; this notion is the motivating force behind
+Image-Dependent Pairwise Relations (IDPRs), which are are discussed at greater
+length in Section~\ref{sec:img-dep}.
+
+Given an image $\mat I$ and a complete pose $(\vec l, \vec t)$ consisting of a
+set of part locations $\vec l$ and a set of limb types $\vec t$, the full score
 $C(\mat l, \mat t \mid \mat I)$ of the pose can be decomposed into a sum of
-unary costs and pairwise costs, as in
+unary costs and pairwise costs, written as
 \begin{equation}
 \label{eqn:full-cost}
 \begin{split}
@@ -360,14 +346,15 @@ C(\vec l, \vec t \mid \mat I)
     \psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I),
 \end{split}
 \end{equation}
-where $\phi_u$ and $\psi_{uv}$ are described below, and $w_0$ is a bias term.
+where $\phi_u$ and $\psi_{uv}$ are described in the next section, and $w_0$ is a
+bias term.
 
 \subsection{Image-dependent terms}
 \label{sec:img-dep}
 
-The pairwise cost $\phi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)$
-can itself be decomposed into the sum of type-dependent deformation costs and
-IDPR terms, as expressed by
+The pairwise cost $\psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)$
+can be decomposed into the sum of type-dependent deformation costs and IDPR
+terms, as expressed by
 \begin{equation}
 \begin{split}
 \psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu})
@@ -381,14 +368,14 @@ where $d(\vec v) = \begin{bmatrix}v_x^2 & v_y^2 & v_x & v_y\end{bmatrix}^T$ is a
 deformation feature, and $\mathcal I$ represents an IDPR term, explained below.
 
 Given a $K$-joint skeleton, we can define $p(j = u \mid \mat I(\vec l))$ to be
-the probability that the joint contained in the image $\mat I(\vec l)$ of $\mat
+the probability that the joint contained in the patch $\mat I(\vec l)$ of $\mat
 I$ around $\vec l$ is the joint represented by $u \in \{1, \ldots, K\} \cup
-\{0\}$, with the special value of 0 appended to indicate that no joint is
-present. If we know that the patch $\mat I(\vec l)$ contains a joint $u$, and
-$(u, v) \in \mathcal E$ is a limb, then we can define $p(t_{uv} = t \mid j = u,
-\mat I(\vec l))$ to be the probability that the limb between $(u, v)$ has type
-$t_{uv} \in \{1, \ldots, T_{uv}\}$. Using this notation, we can define the IDPR
-term $\mathcal I$ as
+\{0\} = \mathcal V \cup \{0\}$, with the special value of $u = 0$ indicating
+that no joint is present. If we know that the patch $\mat I(\vec l)$ contains a
+joint $u$, and $(u, v) \in \mathcal E$ is a limb, then we can define $p(t_{uv} =
+t \mid j = u, \mat I(\vec l))$ to be the probability that the limb between $(u,
+v)$ has type $t_{uv} \in \{1, \ldots, T_{uv}\}$. Using this notation, we can
+define the IDPR term $\mathcal I$ as
 \begin{equation}
 \label{eqn:idpr}
 \mathcal I_{uv}(\vec l, t, \mat I)
@@ -399,13 +386,13 @@ The inclusion of both $\mathcal I_{uv}$ and $\mathcal I_{vu}$ ensures that the
 visual cues given by the parts at either end of a limb can be used to infer the
 type of that limb.
 
-Similarly, the appearance term $\phi_u$ gives the log likelihood that a small,
-fixed-size patch of the image centered at $\vec{l_u}$ contains the joint $u$:
-
+The appearance term $\phi_u$ is defined similarly, and gives the log probability
+that a small, fixed-size patch of the image centered at $\vec{l}_u$ contains the
+joint $u$:
 \begin{equation}
 \label{eqn:unary}
-\phi_u(\vec l \mid \mat I)
-= w_u \log p(j = u \mid \mat I(\vec l)).
+\phi_u(\vec l_u \mid \mat I)
+= w_u \log p(j = u \mid \mat I(\vec l_u)).
 \end{equation}
 
 \subsection{Computing unaries and IDPR terms}
@@ -413,11 +400,11 @@ fixed-size patch of the image centered at $\vec{l_u}$ contains the joint $u$:
 
 To compute the unaries defined by (\ref{eqn:unary}) and the IDPR terms defined
 by (\ref{eqn:idpr}), we train a CNN to output the joint distribution over part
-locations and neighbouring limb types for a given image $\mat I$, from which we
-may obtain the appearance and IDPR terms by marginalisation. If we let $t_u \in
-\prod_{(u, v) \in \mathcal E} \{1, \ldots, T_{uv}\}$ denote a part type---as
-opposed to a limb type---which defines a type for all parts neighbouring part
-$u$, then we can write this distribution as
+locations and neighbouring limb types for each patch of a given image $\mat I$,
+from which we may obtain the appearance and IDPR terms by marginalisation. If we
+let $t_u \in \prod_{(u, v) \in \mathcal E} \{1, \ldots, T_{uv}\}$ denote a
+combination of types for all limbs adjacent to a part $u$, then we can write
+this distribution as
 \begin{equation}
 \label{eqn:cnn-output}
 p(j = u, t_u = t \mid \mat I(\vec l))
@@ -430,22 +417,15 @@ always zero, then this becomes a discrete distribution over
 \sum_{u \in \mathcal V} T^{|\{(u, v) : (u, v) \in \mathcal E\}|} + 1
 \end{equation}
 values, where $\nb(u)$ denotes the neighbours of part $u$ and we assume that
-$T_{uv} = T \in \mathbb N$ for all $(u, v) \in \mathcal E$. The extra value is
-for when no part is present ($j = 0$).
+$T_{uv} = T \in \mathbb N$ for all $(u, v) \in \mathcal E$.
 
 Our CNN architecture closely follows that of
 AlexNet~\cite{krizhevsky2012imagenet}, and is identical to that of
-\cyte{chen2014articulated}. At a high level, the network begins with a
-convolution over the input, followed by two convolutional layers coupled with
-max pooling and local response normalisation, after which three convolutional
-layers are applied before two 4096-neuron fully-connected layers which feed into
-the softmax output layer.
-
-To minimise wasted computation, we convert the final fully connected layers of
-the network to $1 \times 4096$ convolutions after the network has been trained.
-This allows us to evaluate (\ref{eqn:cnn-output}) over a full-resolution image
-in a single pass, rather than having to pass appropriately-sized crops of the
-image through the network one at a time.
+\cyte{chen2014articulated}. To minimise wasted computation, we convert the final
+fully connected layers of the network to $1 \times 4096$ convolutions after the
+network has been trained. This allows us to evaluate (\ref{eqn:cnn-output}) over
+a set of uniformly space patches of a full-resolution image in a single pass,
+rather than having to pass patches through the network one at a time.
 
 \subsection{Producing the candidate set}
 
@@ -488,40 +468,38 @@ benefits from a diverse set of poses, we apply
 non-maximum suppression to ensure that our returned candidate pool contains only
 poses for which the pairwise intersection-over-union for detected wrists is no
 greater than some threshold. This prevents the candidate generation algorithm
-from producing a set of poses which differ only by several pixels.
+from producing a set of poses which each differ by only a few pixels.
 
 \subsection{Learning}
 \label{sec:intra-learning}
 
 Training for the single-frame candidate generation model begins with derivation
-of the mean limb deformation $\vec r_{uv t_{uv}}$ for each limb $(u, v) \in
+of the mean limb displacement $\vec r_{uv t_{uv}}$ for each limb $(u, v) \in
 \mathcal E$ and each type $t_{uv} \in \{1, \ldots, T\}$ for that limb, where we
-have assumed for simplicity that each limb has the same number of types $T$.
-For a limb $(u, v)$, this is achieved by calculating the displacement $\vec l_v
-- \vec l_u$ associated with each pose in the training set, then running
-$K$-means to find $T$ centroids for the calculated displacements.
+have assumed for simplicity that each limb has the same number of types $T$. For
+a limb $(u, v)$, this is achieved by calculating the displacement $\vec l_v -
+\vec l_u$ associated with each pose in the training set, then running $K$-means
+to find $T$ centroids for the calculated displacements.
 
 Having assigned a type to each limb in the training set, an image crop is made
 around each joint and labelled with the joint type and the types of all
-neighbouring limbs. This set of examples is augmented rotating all patches
-containing a limb through a range of angles, and we also include a set of
-patches not containing any people which are labelled with a special negative
-label. The produced set of patches and labels is used to find parameters for the
-neural network described in Section~\ref{sec:cnn} using a near-identical
-training regime to that of \cyte{krizhevsky2012imagenet}.
+neighbouring limbs. We also include a set of patches not containing any people,
+which are labelled with a special negative label. The produced set of patches
+and labels is used to find parameters for the neural network described in
+Section~\ref{sec:cnn} using stochastic gradient descent.
 
-Finally, we can learn the weights $\{\vec w_{uv t_{uv}}, w_{uv} : (u, v) \in
-\mathcal E\} \cup \{w_u : u \in \mathcal V\} \cup \{w_0\}$ of the pose cost
-(\ref{eqn:full-cost}). The cost $C(\vec l_n, \vec t_n \mid \mat I_n)$ associated
-with the limb locations $\vec l_n$, image $\mat I_n$ and limb types $\vec t_n$
-detected from the $n$th training sample can be represented as an inner product
-between a weight vector $\vec w$ and a feature vector $\mat \Phi_n$ composed of
-all appearance, IDPR and deformation terms, with a constant bias concatenated to
-the end. We label the $n$th training sample with $y_n = 1$ if the training
-sample corresponds to a labelled pose with correctly detected type labels, and
-$y_n = -1$ if the training sample corresponds to a negative image with no pose
-or if the type labels are not correctly inferred. We can now cast learning of
-the graphical model weights as an optimisation problem in which we must find the
+Finally, we can learn the bias $w_0$ and the weight sets $\{\vec w_{uv
+t_{uv}}\}$, $\{w_{uv}\}$, and $\{w_u\}$ for the pose cost (\ref{eqn:full-cost}).
+The cost $C(\vec l_n, \vec t_n \mid \mat I_n)$ associated with the limb
+locations $\vec l_n$, image $\mat I_n$ and limb types $\vec t_n$ detected from
+the $n$th training sample can be represented as an inner product between a
+weight vector $\vec w$ and a feature vector $\mat \Phi_n$ composed of all
+appearance, IDPR and deformation terms, with a constant bias concatenated to the
+end. We label the $n$th training sample with $y_n = 1$ if the training sample
+corresponds to a labelled pose with correctly detected type labels, and $y_n =
+-1$ if the training sample corresponds to a negative image with no pose or if
+the type labels are not correctly inferred. We can now cast learning of the
+graphical model weights as an optimisation problem in which we must find the
 weight vector $\vec w^*$ satisfying
 \begin{align}
 \vec w^* &= \min_{\vec w}\left[ \frac 12 \|\vec w\|^2 + C \sum_n E_n(\vec w)\right],\\
@@ -547,8 +525,6 @@ descent approach described in \cyte{yang2011articulated}.
 % \label{fig:recombination}
 % \end{figure*}
 
-\subsection{Motivation}
-
 % XXX: This equation has been taken out of the normal page flow so that it
 % appears at the bottom of the page where it's referenced. It will almost
 % certainly need to be moved before submission. Why LaTeX doesn't have an option
@@ -557,24 +533,26 @@ descent approach described in \cyte{yang2011articulated}.
 \rule{\textwidth}{0.1pt}
 \begin{equation}\label{eqn:recomb-cost}
 \sum_{t=1}^{F-1} \left[
-    C(p_t, I_t)
+    C(p_t, \mat I_t)
     + \sum_{u \in \mathcal V}
         \tau_u(\vec l_{u,t}, \vec l_{u,t+1}, \mat I_t, \mat I_{t+1})
     + \sum_{v \in \mathcal V_S} \rho_v(\vec l_{v,t}, \vec l_{v,t}')
 \right]
-+ C(p_F, I_F) + \sum_{v \in \mathcal V_S} \rho_v(\vec l_{v,F}, \vec l_{v,F}')
++ C(p_F, \mat I_F) + \sum_{v \in \mathcal V_S} \rho_v(\vec l_{v,F}, \vec l_{v,F}')
 \end{equation}
 \end{figure*}
+
+\subsection{Motivation}
 
 We have already seen in Section~\ref{sec:intraframe} how we can use a graphical
 model to do pose estimation within a single frame. Pose estimation in videos is
 similar to pose estimation in static images, except that we wish to enforce some
-sort of temporal consistency between the poses corresponding to successive
-frames. The obvious approach to this problem is to apply our existing graphical
-model to each frame, but to additionally add some temporal consistency term
-$\theta(p_t, p_{t+1}) = \sum_{u \in \mathcal V} \theta_u(l_{u,t}, l_{u,t+1})$, where
-$l_{u,t}$ denotes the location of part $u$ at time $t$. If we had $F$ frames in
-total, then the full cost would be
+sort of temporal consistency between poses. The obvious approach to this problem
+is to apply our existing graphical model to each frame, but to additionally add
+some temporal consistency term $\tau(p_t, p_{t+1}) = \sum_{u \in \mathcal V}
+\tau_u(\vec l_{u,t}, \vec l_{u,t+1})$, where $\vec l_{u,t}$ denotes the location
+of part $u$ at time $t$. If we had $F$ frames in total, then the full cost would
+be
 \begin{equation}\label{eqn:hypo-interframe}
 C(p_F, \mat I_F) + \sum_{t=1}^{F-1}
 \left[C(p_t, \mat I_t) + \tau(p_t, p_{t+1})\right].
@@ -591,19 +569,14 @@ time. $|\mathcal P|^2$ can still be colossal when a large number of poses are
 considered in each frame, which restricts the applicability of this technique to
 situations in which $|\mathcal P|$ is small.
 
-Unfortunately, whilst a small set of poses might, for each part, contain at
-least one pose in which the location of that part is close its best possible
-location, it's possible that the set will not contain a single pose in which
-\emph{all} parts are close to their best locations.
-
 \subsection{Recombination}
 
-The method in \cyte{cherian2014mixing} avoids the penalty incurred by large
-pose candidate sets by taking a small, diverse set of $|\mathcal P|$ candidate
-poses and then considering all possible combinations of limbs from each of those
-poses. Given $|\mathcal P|$ poses and $K$ limbs, this results in an effective
-candidate set of $K^{|\mathcal P|}$ poses in each frame, and ensures that the
-best joints in the pose candidate set, rather than just the best poses, are
+The method in \cyte{cherian2014mixing} avoids the penalty incurred by large pose
+candidate sets by taking a small, diverse set of $|\mathcal P|$ candidate poses
+and then considering all possible combinations of joints from each of those
+poses. Given $|\mathcal P|$ poses and $K$ joints, this results in an effective
+candidate set of ${|\mathcal P|}^K$ poses in each frame, and ensures that the
+best joints in the pose candidate set, rather than just the best candidates, are
 considered.
 
 Now that we know we can efficiently perform inference on a large effective pose
@@ -660,11 +633,11 @@ heads in adjacent frames:
 
 If we have $|\mathcal P|$ candidate poses in each frame, each of which
 corresponds to a single head position candidate, then we can use dynamic
-programming to perform this minimisation in $O(|\mathcal P|^T F)$ time.
+programming to perform this minimisation in $O(|\mathcal P|^2 F)$ time.
 
 Position sequences for any subsequent part $u$ can be found in much the same
 way, except that we must also include pairwise costs from the single-frame cost
-$C$, as well as recombination costs relative to the (previously localise) parent
+$C$, as well as recombination costs relative to the (previously localised) parent
 part, yielding a full cost of
 \begin{equation}\label{eqn:subsequent-part-cost}
 \begin{split}
@@ -746,7 +719,8 @@ search.
 (a) & (b) & (c) & (d) & (e) & (f)
 \end{tabular}
 \end{center}
-\caption{Common types of errors encountered on the Poses in the Wild data set.}
+\caption{Common types of errors encountered during testing on the Poses in the
+Wild data set.}
 \label{fig:qualitative}
 \end{figure*}
 
@@ -813,10 +787,11 @@ comparison, we have included the results of our algorithm in its previously
 described evaluation configuration (``Default config'') and the results of our
 algorithm when only one candidate pose is generated for each frame (``Static
 only''). For comparison, we have also included the results of Cherian
-\etal~\cite{cherian2014mixing} on the same sequence.\footnote{The results of
-Pfister \etal~\cite{pfister2015flowing}---who also report PCK curves for Poses in
-the Wild---will be of interest to some readers, although we have not been able
-to include them in this paper.}
+\etal~\cite{cherian2014mixing} on the same sequence.
+
+% \footnote{The results of Pfister \etal~\cite{pfister2015flowing}---which
+% include PCK curves for Poses in the Wild---are also of interest for comparison
+% purposes, although they were not available for inclusion in this paper.}
 
 % TODO: Timings
 % Timings for the different stages of the pose estimation pipeline during the test
