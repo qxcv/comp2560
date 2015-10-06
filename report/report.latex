@@ -230,7 +230,9 @@ Section~\ref{sec:intraframe}, follows the approach of Chen and
 Yuille~\cite{chen2014articulated}, which combines features from a deep CNN with
 a graphical model to estimate poses in a static image. The CNN yields features
 which are much more informative than the Histogram-of-Gradients (HoG) features
-used in previous work, whilst the graphical model encourages parts to take on
+used in previous
+work~\cite{yang2011articulated,cherian2014mixing,ferrari2008progressive,sapp2013modec},
+whilst the graphical model encourages parts to take on
 anatomically reasonable relative positions.
 
 As explained in Section~\ref{sec:interframe}, incorporating temporal edges into
@@ -522,23 +524,6 @@ described in \cyte{yang2011articulated}.
 % \label{fig:recombination}
 % \end{figure*}
 
-% XXX: This equation has been taken out of the normal page flow so that it
-% appears at the bottom of the page where it's referenced. It will almost
-% certainly need to be moved before submission. Why LaTeX doesn't have an option
-\begin{figure*}[!b]
-\centering
-\rule{\textwidth}{0.1pt}
-\begin{equation}\label{eqn:recomb-cost}
-\sum_{t=1}^{F-1} \left[
-    C(p_t, \mat I_t)
-    + \sum_{u \in \mathcal V}
-        \tau_u(\vec l_{u,t}, \vec l_{u,t+1}, \mat I_t, \mat I_{t+1})
-    + \sum_{v \in \mathcal V_S} \rho_v(\vec l_{v,t}, \vec l_{v,t}')
-\right]
-+ C(p_F, \mat I_F) + \sum_{v \in \mathcal V_S} \rho_v(\vec l_{v,F}, \vec l_{v,F}')
-\end{equation}
-\end{figure*}
-
 \subsection{Motivation}
 
 We have already seen in Section~\ref{sec:intraframe} how we can use a graphical
@@ -606,6 +591,19 @@ of parts which are shared between two or more limbs, whilst $\vec l_v$ denotes
 the location of part $v$ in a recombined pose and $\vec l_v'$ denotes a location
 of part a $v$ which was discarded during recombination, but for which the
 location of some part $w$ \emph{connected} to $v$ was used.
+
+\begin{equation}\label{eqn:recomb-cost}
+\begin{split}
+C(p_F, \mat I_F) &+ \sum_{v \in \mathcal V_S} \rho_v(\vec l_{v,F}, \vec
+l_{v,F}')\\
++ \sum_{t=1}^{F-1} \biggl[
+    &C(p_t, \mat I_t)
+    + \sum_{v \in \mathcal V_S} \rho_v(\vec l_{v,t}, \vec l_{v,t}')\\
+    &+ \sum_{u \in \mathcal V}
+        \tau_u(\vec l_{u,t}, \vec l_{u,t+1}, \mat I_t, \mat I_{t+1})
+\biggr]
+\end{split}
+\end{equation}
 
 In order to make the minimisation of the full temporal cost
 (\ref{eqn:recomb-cost}) tractable, limbs are recombined starting at the
