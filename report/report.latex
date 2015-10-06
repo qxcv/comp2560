@@ -782,11 +782,14 @@ as done in \cyte{chen2014articulated}.
 
 \footnotetext{\url{http://pascal.inrialpes.fr/data/human/}}
 
-For recombination, we choose the parameters % XXX TODO get these later
-, which are almost identical to those used in \cyte{cherian2014mixing}. At test
-time, 100 candidate poses are used in each frame and NMS is performed at a
-threshold of 0.95 intersection-over-union on each wrist to ensure that those
-poses are reasonably diverse.
+For recombination, we chose a set of parameters $\{\lambda_\tau, \lambda_\rho,
+\lambda_f, \lambda_m\}$ which differed slightly for each pair of parts,
+depending on extent of motion of the parts. The precise set of parameters are
+available online, along with the rest of the code for these
+experiments.\footnote{\url{https://github.com/qxcv/comp2560}} At test time, 100
+candidate poses are used in each frame and NMS is performed at a threshold of
+0.95 intersection-over-union on each wrist to ensure that those poses are
+reasonably diverse.
 
 Since training (Section~\ref{sec:intra-learning}) is performed on images which
 have an (approximately) equal scale, we have found it advantageous to perform
@@ -801,9 +804,6 @@ in recombination.
 Note that, since we have only evaluated our full pipeline on the approximately
 uniformly-scaled poses in Poses in the Wild, we have not adjusted the
 recombination stage to account for multiple scales.
-
-Code for all experiments is available
-online.\footnote{\url{https://github.com/qxcv/comp2560}}
 
 \subsection{Results}
 
