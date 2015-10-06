@@ -166,13 +166,13 @@ The Australian National University\\
 \begin{abstract}
     This paper presents a method for 2D human pose estimation across a sequence
     of video frames. Our approach is comprised of a Convolutional Neural Network
-    (CNN) and tree-structured graphical model for independent generation of pose
-    candidate sets in each frame, followed by a recombination step which makes
-    use of optical flow and pairwise deformation features to produce a single,
-    consistent sequence of poses. Evaluation on the Poses in the Wild dataset
-    validates the usefulness of inter-frame pose recombination over single-frame
-    pose estimation alone, and suggests that our method significantly improves
-    upon past work in localisation of difficult body parts like wrists and elbows.
+    (CNN) and graphical model for independent generation of pose candidate sets
+    in each frame, followed by a recombination step which makes use of optical
+    flow and pairwise deformation features to produce a single, consistent
+    sequence of poses. Evaluation on the Poses in the Wild data set validates the
+    usefulness of inter-frame pose recombination over single-frame pose
+    estimation alone, and shows that our method significantly improves upon past
+    work in localisation of wrists and elbows.
 \end{abstract}
 
 \section{Introduction}
@@ -186,7 +186,7 @@ items~\cite{liu2012street,liu2012hi,yamaguchi2012parsing}, recognising
 actions~\cite{yao2011does}, and even classifying inanimate objects through a
 person's interactions with them~\cite{delaitre2012scene}.
 
-Pose estimation is complicated the wide range of anatomically possible human
+Pose estimation is complicated by the wide range of anatomically possible human
 poses, the varied appearance of human bodies and clothing, occlusion of body
 parts by objects in the scene or by other body parts, background clutter which
 resembles body parts, and so on. Taking advantage of the motion information
@@ -207,18 +207,18 @@ and the displacements of recombined limbs.
 
 \begin{figure}[t]
 \begin{center}
-\begin{overpic}[width=0.24\linewidth]{good-shots/frame-1.png}
+\begin{overpic}[width=0.33\linewidth]{good-shots/frame-1.png}
     \put (90, 80) {1}
 \end{overpic}%
-\begin{overpic}[width=0.24\linewidth]{good-shots/frame-2.png}
+\begin{overpic}[width=0.33\linewidth]{good-shots/frame-2.png}
     \put (90, 80) {2}
 \end{overpic}%
-\begin{overpic}[width=0.24\linewidth]{good-shots/frame-3.png}
+\begin{overpic}[width=0.33\linewidth]{good-shots/frame-3.png}
     \put (90, 80) {3}
-\end{overpic}%
-\begin{overpic}[width=0.24\linewidth]{good-shots/frame-4.png}
-    \put (90, 80) {4}
 \end{overpic}
+% \begin{overpic}[width=0.24\linewidth]{good-shots/frame-4.png}
+%     \put (90, 80) {4}
+% \end{overpic}
 \end{center}
 \caption{Excerpt from a video sequence annotated with the detections produced by
 our algorithm. Only shoulders, wrists and elbows are shown in this example.}
@@ -234,16 +234,16 @@ used in previous work, whilst the graphical model encourages parts to take on
 anatomically reasonable relative positions.
 
 As explained in Section~\ref{sec:interframe}, incorporating temporal edges into
-graphical model-based pose estimation methods can result in an intractable
-inference problem because of the loopiness of the resulting graph. Independently
-generating a small set of candidate poses in each frame and using temporal edges
-to select a candidate from each frame partially alleviates this problem by
-reducing the number of poses which must be considered. The recombination method
-which we employ, as described by Cherian \etal~\cite{cherian2014mixing},
-improves efficiency even further by allowing parts to be mixed-and-matched from
-different poses in the candidate sets in a top-down fashion, thereby increasing
-the effective size of the candidate sets under consideration without yielding an
-intractable problem.
+graphical model-based pose estimation methods can result in intractable
+inference problems because of the loopiness of the resulting graph.
+Independently generating a small set of candidate poses in each frame and using
+temporal edges to select a candidate from each frame partially alleviates this
+problem by reducing the number of poses which must be considered. The
+recombination method which we employ, as described by Cherian
+\etal~\cite{cherian2014mixing}, improves efficiency even further by allowing
+parts to be mixed-and-matched from different poses in the candidate sets in a
+top-down fashion, thereby increasing the effective size of the candidate sets
+under consideration whilst maintaining low algorithmic complexity.
 
 \section{Related work}
 
@@ -259,17 +259,15 @@ types of each part as latent variables in their graphical model, and augmenting
 their deformation terms to take into account the parts on either end of a limb,
 Yang and Ramanan were able to obtain a significant increase in accuracy over
 traditional pictorial structure models. In this paper, we use a similar approach
-for generating pose candidate sets within frames, except that we assign types to
-limbs instead of joints.
+for generating pose candidate sets within frames.
 
-Another common approach is to attempt to regress the $(x, y)$ coordinates of
-parts directly from an image~\cite{toshev2014deeppose,sun2012conditional},
-although this can lead to implausible poses being generated unless some
-constraints on the relative positions of limbs or on the overall pose are
-introduced. Use of graphical models can increase accuracy by eliminating pose
-candidates in which predicted joint positions are individually likely, but
-collectively implausible due to the anatomical constraints imposed by a human
-limbs.
+Another common approach is to regress the $(x, y)$ coordinates of parts directly
+from an image~\cite{toshev2014deeppose,sun2012conditional}, although this can
+lead to implausible poses being generated unless some constraints on the
+relative positions of limbs or on the overall pose are introduced. Use of
+graphical models can increase accuracy by eliminating pose candidates in which
+predicted joint positions are individually likely, but collectively implausible
+due to the anatomical constraints imposed by a human limbs.
 
 More recently, deep neural networks have been successfully applied to pose
 estimation in a variety of ways. One common approach is to attempt to regress
@@ -323,15 +321,14 @@ T_{uv}\}$ and $t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v) \in
 Limb types are used to express the orientation and length of limbs. For example,
 long forearms running from left to right might be assigned their own discrete
 type, as might short, vertical forearms, medium-length diagonal forearms, and so
-on. During inference, these types can be introduced as latent variables, in
-which case they can be used to encourage the relative positions of body parts to
-take anatomically reasonable values through the use of type-dependent limb
-deformation costs. Further evidence for the type of a limb can be gleaned by
-inspecting small patches of an image around the endpoints of that limb. For
-instance, an image of a shoulder might give clues as to the direction in which
-the attached upper arm is pointing; this notion is the motivating force behind
-Image-Dependent Pairwise Relations (IDPRs), which are are discussed at greater
-length in Section~\ref{sec:img-dep}.
+on. During inference, these types are introduced as latent variables, and
+type-dependent limb deformation costs are added to encourage joints to take
+anatomically reasonable relative positions. Further evidence for the type of a
+limb can be gleaned by inspecting small patches of an image around the endpoints
+of that limb. For instance, an image of a shoulder might give clues as to the
+direction in which the attached upper arm is pointing; this notion is the
+motivating force behind Image-Dependent Pairwise Relations (IDPRs), which are
+are discussed at greater length in Section~\ref{sec:img-dep}.
 
 Given an image $\mat I$ and a complete pose $(\vec l, \vec t)$ consisting of a
 set of part locations $\vec l$ and a set of limb types $\vec t$, the full score
@@ -378,8 +375,8 @@ v)$ has type $t_{uv} \in \{1, \ldots, T_{uv}\}$. Using this notation, we can
 define the IDPR term $\mathcal I$ as
 \begin{equation}
 \label{eqn:idpr}
-\mathcal I_{uv}(\vec l, t, \mat I)
-= \log p(t_{uv} = t \mid j = u, \mat I(\vec l)).
+\mathcal I_{uv}(\vec l_u, t, \mat I)
+= \log p(t_{uv} = t \mid j = u, \mat I(\vec l_u)).
 \end{equation}
 
 The inclusion of both $\mathcal I_{uv}$ and $\mathcal I_{vu}$ ensures that the
@@ -424,7 +421,7 @@ AlexNet~\cite{krizhevsky2012imagenet}, and is identical to that of
 \cyte{chen2014articulated}. To minimise wasted computation, we convert the final
 fully connected layers of the network to $1 \times 4096$ convolutions after the
 network has been trained. This allows us to evaluate (\ref{eqn:cnn-output}) over
-a set of uniformly space patches of a full-resolution image in a single pass,
+a set of uniformly spaced patches of a full-resolution image in a single pass,
 rather than having to pass patches through the network one at a time.
 
 \subsection{Producing the candidate set}
@@ -506,8 +503,8 @@ weight vector $\vec w^*$ satisfying
 E_n(\vec w) &= \max(0, 1 - y_n \vec w^T \mat \Phi_n).
 \end{align}
 
-In our case, we calculate $\vec w^*$ efficiently using the dual coordinate
-descent approach described in \cyte{yang2011articulated}.
+We calculate $\vec w^*$ efficiently using the dual coordinate descent approach
+described in \cyte{yang2011articulated}.
 
 \section{Pose estimation in videos}
 \label{sec:interframe}
@@ -548,8 +545,8 @@ We have already seen in Section~\ref{sec:intraframe} how we can use a graphical
 model to do pose estimation within a single frame. Pose estimation in videos is
 similar to pose estimation in static images, except that we wish to enforce some
 sort of temporal consistency between poses. The obvious approach to this problem
-is to apply our existing graphical model to each frame, but to additionally add
-some temporal consistency term $\tau(p_t, p_{t+1}) = \sum_{u \in \mathcal V}
+is to apply our existing graphical model to each frame, but to also add some
+temporal consistency term $\tau(p_t, p_{t+1}) = \sum_{u \in \mathcal V}
 \tau_u(\vec l_{u,t}, \vec l_{u,t+1})$, where $\vec l_{u,t}$ denotes the location
 of part $u$ at time $t$. If we had $F$ frames in total, then the full cost would
 be
@@ -616,13 +613,12 @@ head---which is typically the easiest part to detect---then moving on to the
 neck, the shoulders, and so on until the full pose has been estimated in all
 frames.
 
-Specifically, the algorithm starts by choosing a head position $\vec{l_{h,t}}$
-at each time $t = 1, \ldots, F$ by choosing a head position from the set
-$\mathcal P_t$ in each frame such that the temporal sequence of heads minimises
-the following cost, which corresponds to the parts of the full cost
+Specifically, the algorithm starts by choosing a head position $\vec l_{h,t}$ at
+each time $t = 1, \ldots, F$ by choosing a head position from the set $\mathcal
+P_t$ in each frame such that the chosen sequence of heads minimises the
+following cost, which corresponds to the parts of the full cost
 (\ref{eqn:hypo-interframe}) that involve the head or any temporal links between
 heads in adjacent frames:
-
 \begin{equation}\label{eqn:head-cost}
 \phi_h(\vec l_{h,F}, \mid \mat I_F)
 + \sum_{t=1}^{F-1} \left[
@@ -697,11 +693,12 @@ Wild data set.}
 \begin{center}
 \input{plots/accuracy.pgf}
 \end{center}
-\caption{Percentage of correct detections over the entire Poses in the Wild
-dataset for different body parts. A part is considered to be correctly detected
-in a single frame if the distance between its predicted position and its true
-position is less than the pixel distance threshold indicated on the $x$ axis of
-the graph.}
+\caption{PCK over the entire Poses in the Wild data set for different body parts.
+A part is considered to be correctly detected in a single frame if the distance
+between its predicted position and its true position is less than the pixel
+distance threshold indicated on the $x$ axis of the graph. Note that the curve
+for the default configuration in the shoulder plot is hidden by that of the
+static-only configuration.}
 \label{fig:quantitative}
 \end{figure*}
 
@@ -718,7 +715,7 @@ occlusion of body parts.
 
 The single-frame pose estimation model was trained on the Frames Labelled in
 Cinema (FLIC) data set~\cite{sapp2013modec}, with negatives drawn from the INRIA
-person dataset.{\footnotemark} The data set was augmented by rotating images
+person data set.{\footnotemark} The data set was augmented by rotating images
 through a \SI{70}{\degree} range in \SI{5}{\degree} increments, as done in
 \cyte{chen2014articulated}.
 
