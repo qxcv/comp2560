@@ -9,11 +9,11 @@
 \usepackage{cite}
 % This makes floats actually float in the right god-damn place
 \usepackage{dblfloatfix}
-% microtype is so pretty, but pads out the paper a bit. Take it out if you need
-% to.
 \usepackage{microtype}
 \usepackage{siunitx}
 \usepackage{pgf}
+\usepackage[percent]{overpic}
+\usepackage{color}
 
 % Include other packages here, before hyperref.
 
@@ -167,7 +167,7 @@ The Australian National University\\
     This paper presents a method for estimation of articulated human poses in
     video frames. Our approach is comprised of a Convolutional Neural Network
     (CNN) and tree-structured graphical model for independent generation of
-    candidate pose sets in each frame, followed by a recombination step which
+    pose candidate sets in each frame, followed by a recombination step which
     makes use of optical flow and pairwise deformation features to produce a
     single, consistent series of poses across an entire sequence. Evaluation on
     the Poses in the Wild dataset validates the usefulness of inter-frame pose
@@ -202,7 +202,7 @@ independently to each frame in the video sequence. This procedure implicitly
 scores all possible poses in each video frame and returns a selection of the
 highest-scoring poses, which is pruned through non-maximum suppression to ensure
 that the returned set contains a diverse selection of poses. After a candidate
-pose set has been generated for each frame, the parts of each candidate pose in
+pose set has been generated for each frame, the parts of each pose candidate in
 each frame are recombined to reduce each frame's candidate set down to a single
 high-scoring pose. This recombination procedure takes into account the optical
 flow in each frame, the score of the poses associated with each limb used in
@@ -210,16 +210,23 @@ recombination, and the displacements of recombined limbs to increase the
 accuracy of the produced pose sequence relative to simply using the
 highest-scoring pose in each frame's candidate set without recombination.
 
-% TODO: Complete figure
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=0.4\linewidth]{good-shots/frame-1.png}%
-\includegraphics[width=0.4\linewidth]{good-shots/frame-2.png}\\%
-\includegraphics[width=0.4\linewidth]{good-shots/frame-3.png}%
-\includegraphics[width=0.4\linewidth]{good-shots/frame-4.png}
+\begin{overpic}[width=0.4\linewidth]{good-shots/frame-1.png}
+    \put (90, 80) {1}
+\end{overpic}%
+\begin{overpic}[width=0.4\linewidth]{good-shots/frame-2.png}
+    \put (90, 80) {2}
+\end{overpic}\\
+\begin{overpic}[width=0.4\linewidth]{good-shots/frame-3.png}
+    \put (90, 80) {3}
+\end{overpic}%
+\begin{overpic}[width=0.4\linewidth]{good-shots/frame-4.png}
+    \put (90, 80) {4}
+\end{overpic}
 \end{center}
-\caption{Exemplar showing the detections produced by our algorithm on a sequence
-from Poses in the Wild~\cite{cherian2014mixing}.}
+\caption{Excerpt from a video sequence annotated with the detections produced by
+our algorithm. Only shoulders, wrists and elbows are shown in this example.}
 \label{fig:skeleton}
 \end{figure}
 
@@ -264,7 +271,7 @@ or folded (arms), rotated, and so on. By treating the types of each part as
 latent variables in their graphical model, and augmenting their deformation
 terms to take into account the parts on either end of a limb, Yang and Ramanan
 were able to obtain a significant increase in accuracy. In this paper, we use a
-similar setup for generating candidate pose sets within frames, except that we
+similar setup for generating pose candidate sets within frames, except that we
 assign types to limbs instead of joints.
 % A similar mode-based approach was taken by Sapp and
 % Taskar~\cite{sapp2013modec} to improve the performance of a graphical model
@@ -304,14 +311,14 @@ increase accuracy over single-frame pose estimation~\cite{jain2014modeep}. As
 alluded to in Section~\ref{sec:introduction}, incorporating temporal links into
 graphical models tends to result in intractable inference problems, and so past
 approaches in this area have generally used approximate methods for inference.
-We avoid this problem by generating candidate pose sets independently and taking
+We avoid this problem by generating pose candidate sets independently and taking
 the recombination approach mentioned in the previous
 section~\cite{cherian2014mixing}.
 
 \section{Single-frame candidate set generation}
 \label{sec:intraframe}
 
-Our method for generating a candidate pose set in each frame mostly follows that
+Our method for generating a pose candidate set in each frame mostly follows that
 of \cyte{chen2014articulated}, although we will describe the relevant parts of
 their method in full.
 
@@ -527,7 +534,6 @@ descent approach described in \cyte{yang2011articulated}.
 \section{Pose estimation in videos}
 \label{sec:interframe}
 
-% % TODO: Complete figure
 % \begin{figure*}[t]
 % \begin{center}
 % \fbox{\rule{0pt}{1in} \rule{0.9\linewidth}{0pt}}
@@ -593,11 +599,11 @@ location, it's possible that the set will not contain a single pose in which
 \subsection{Recombination}
 
 The method in \cyte{cherian2014mixing} avoids the penalty incurred by large
-candidate pose sets by taking a small, diverse set of $|\mathcal P|$ candidate
+pose candidate sets by taking a small, diverse set of $|\mathcal P|$ candidate
 poses and then considering all possible combinations of limbs from each of those
 poses. Given $|\mathcal P|$ poses and $K$ limbs, this results in an effective
 candidate set of $K^{|\mathcal P|}$ poses in each frame, and ensures that the
-best joints in the candidate pose set, rather than just the best poses, are
+best joints in the pose candidate set, rather than just the best poses, are
 considered.
 
 Now that we know we can efficiently perform inference on a large effective pose
@@ -726,8 +732,7 @@ recombination parameters in \cyte{cherian2014mixing} by hand, although in
 principle it should also be possible to obtain reasonable results with grid
 search.
 
-% TODO: Complete figure. Also explain why the poor performance was witnessed.
-% XXX: This has been taken out of the normal page flow so that it appears in the
+% NOTE: This has been taken out of the normal page flow so that it appears in the
 % right place. This should be corrected before submission.
 \begin{figure*}[ht!]
 \begin{center}
@@ -753,7 +758,7 @@ search.
 dataset for different body parts. A part is considered to be correctly detected
 in a single frame if the distance between its predicted position and its true
 position is less than the pixel distance threshold indicated on the $x$ axis of
-the graph. Cherian \etal is \cyte{cherian2014mixing}.}
+the graph.}
 \label{fig:quantitative}
 \end{figure*}
 
@@ -802,53 +807,114 @@ online.\footnote{\url{https://github.com/qxcv/comp2560}}
 
 \subsection{Results}
 
-% Results I plan to include:
-% - My code, final config (100 poses)
-% - My code, no NMS (100 poses)
-% - My code, final config (1 pose)
-% - Anoop's code in its published configuration
-% I also want to figure out the average time for candidate set generation, in
-% each image, the average time for optical flow for each frame (well, except the
-% last one in each sequence), and the average time for recombination (normalised
-% to the number of frames in each set).
-% Finally, I want some qualitative results in the form of a set of wildly
-% incorrect pose estimates which I can yap about. If I have a correct sequence,
-% I'll probably put part of it in the introduction so that people can see what
-% I'm on about.
+The mean Percentage Correct Keypoints (PCK) for our algorithm, averaged over all
+sequences in Poses in the Wild, is given in Figure~\ref{fig:qualitative}. For
+comparison, we have included the results of our algorithm in its previously
+described evaluation configuration (``Default config'') and the results of our
+algorithm when only one candidate pose is generated for each frame (``Static
+only''). For comparison, we have also included the results of Cherian
+\etal~\cite{cherian2014mixing} on the same sequence.\footnote{The results of
+Pfister \etal~\cite{pfister2015flowing}---who also report PCK curves for Poses in
+the Wild---will be of interest to some readers, although we have not been able
+to include them in this paper.}
 
-Timings for the different stages of the pose estimation pipeline during the test
-phase are given in Table~\ref{tab:runtime}. All experiments were performed on a
-using two Intel Xeon E5-2620 processors and an NVIDIA K80 GPU, although the
-parallelism offered by the CPUs is not factored into the runtimes listed in
-Table~\ref{tab:runtime}.
+% TODO: Timings
+% Timings for the different stages of the pose estimation pipeline during the test
+% phase are given in Table~\ref{tab:runtime}. All experiments were performed on a
+% using two Intel Xeon E5-2620 processors and an NVIDIA K80 GPU, although the
+% parallelism offered by the CPUs is not factored into the runtimes listed in
+% Table~\ref{tab:runtime}.
+% 
+% \begin{table}
+% \begin{center}
+% \begin{tabular}{|l|c|}
+% \hline
+% Task & Mean time per frame\\
+% \hline\hline
+% Optical flow & XXX s\\
+% CNN evaluation & XXX s\\
+% GM inference & XXX s\\
+% Recombination & XXX s\\
+% \hline
+% \end{tabular}
+% \end{center}
+% \caption{Runtime cost of different stages of the pipeline. In practise, optical
+% flow and candidate set generation can be performed in parallel, which can
+% significantly increase performance when parallel computing resources are
+% available.}
+% \label{tab:runtime}
+% \end{table}
 
-\begin{table}
-\begin{center}
-\begin{tabular}{|l|c|}
-\hline
-Task & Mean time per frame\\
-\hline\hline
-Optical flow & XXX s\\
-CNN evaluation & XXX s\\
-GM inference & XXX s\\
-Recombination & XXX s\\
-\hline
-\end{tabular}
-\end{center}
-\caption{Runtime cost of different stages of the pipeline. In practise, optical
-flow and candidate set generation can be performed in parallel, which can
-significantly increase performance when parallel computing resources are
-available.}
-\label{tab:runtime}
-\end{table}
+\subsection{Discussion and future work}
 
-\subsection{Discussion}
+Figure~\ref{fig:qualitative} shows that our algorithm significantly improves on
+the results of \cyte{cherian2014mixing} for elbows and wrists, which are
+typically the most difficult body parts to detect. Further, it demonstrates that
+recombination yields an appreciable performance increase over independent pose
+estimation in each frame. This is particularly true for the wrists, which are
+generally the fastest-moving body parts in a video sequence.
 
-\subsection{Future work}
+Counterintuitively, the method of \cyte{cherian2014mixing}, which primarily uses
+HoG-based features, outperforms our CNN-based algorithm for shoulder position
+prediction at low thresholds. In the graphical model used to generate pose
+candidate sets, the shoulder is attached to the upper arm, upper torso and base
+of the neck. Since 13 types were learnt for each limb, there are $13^3 = 2197$
+different combinations of adjacent limb types for each shoulder; it is possible
+that the CNN, which outputs the part--type joint distribution
+(\ref{eqn:cnn-output}), may not have sufficient data to produce reliable
+appearance terms for the shoulder, or IDPR terms for the neighbouring limbs.
 
-\cyte{park2011n}
+Whilst this could be addressed by the decreasing the number of limb types, or by
+drawing additional training samples from other data sets, it may help to adopt a
+part-based type system~\cite{yang2011articulated} in place of a limb-based one.
+This would necessitate the replacement of the limb centroids $\{r_{uv t_{uv}}\}$
+with centroids $\{r_{u v t_u}\}$ depending only on the type of one joint. This
+would give greater control over the effective number of part types, which could
+allow for the size of the part--type joint distribution to be decreased
+significantly. This could also yield an increase in performance, since the CNN
+evaluation time for the final softmax layer in the network would decrease, as
+would the time taken to copy and marginalise over the hundreds of thousands
+joint distribution values produced by applying the fully convolutional network
+to large images.
+
+% Accuracy could also be boosted by adopting the strategy of Park and
+% Ramanan~\cite{park2011n} for generating pose candidate sets. In
+% \cyte{park2011n}, Park and Ramaman argue that a large number of high-scoring
+% poses are typically not accessible by backtracking from the max marginal table
+% for the root node of the model used for pose estimation. Instead, they present
+% an algorithm which is able to efficiently j_
+
+Figure~\ref{fig:qualitative} illustrates a number of common types of failure.
+Whilst our algorithm is robust to minor occlusions---where a hand lies slightly
+outside a frame, for instance---of the kind shown in frames (a) and (d)--(f),
+self-occlusion of subjects and partial occlusion of several body parts have
+proven more challenging, as in frames (b) and (f), respectively. Frames (a) and
+(c) also show situations in which limb-like objects have confused the detector.
+Finally, rapid limb motion was responsible for a large number of failures,
+including examples (d)--(f).
 
 \section{Conclusion}
+
+This paper presented an approach to human pose estimation which divides the task
+of pose estimation in videos into two stages. In the first stage, we generate a
+score candidate poses in each frame independently using a tree-structured
+graphical model incorporating CNN-based features and type-based limb deformation
+costs in the style of \cyte{chen2014articulated}. To encourage diversity of the
+candidate pose set for each frame, we apply non-maximum suppression to the
+wrists of poses obtained by backtracking through the max marginals for the root
+node of the graphical model. In the second stage, we recombine the limbs
+associated with each pose in each candidate set to produce a single best
+sequence of poses. We use a recombination method which takes into account
+optical flow and the relative positions of parts across frames, but uses a
+top-down approach to avoid the computational intractability common to loopy
+graphical models.
+
+Our evaluation on the challenging Poses in the Wild data set shows that our
+method significantly improves on that of Cherian \etal~\cite{cherian2014mixing}
+for prediction of elbows and shoulders. We closed with a discussion of the
+accuracy and failure modes of the algorithm, and suggested that both accuracy
+and performance could be improved by giving type labels to joints rather than
+limbs and by using an alternative method to generate candidate pose sets.
 
 \ifwacvfinal{%
 \noindent\textbf{Acknowledgements}\quad
