@@ -61,7 +61,6 @@ for i = 1:ibatch:max_scale
     end
     
     % Convolution is by far the most costly step
-    convStart = tic;
     % TODO: Do we have the dimension ordering here? matcaffe code said
     % something about h * w * c * n (which is super weird)
     % Reshaping the data blob to match our input size will ensure that
@@ -73,8 +72,6 @@ for i = 1:ibatch:max_scale
     % input is a cell array because some nets have multiple input layers,
     % as opposed to input blobs (ours doesn't)
     resp = net.forward({impyra});      % softmax apply in caffe model.
-    convStop = toc(convStart);
-    fprintf('Forward convolution took %f seconds\n', convStop);
     
     % Believe it or not, resp{1} is HUGE, so the time taken to copy things
     % back out is on the same order as the time taken to copy them in!

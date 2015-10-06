@@ -34,7 +34,7 @@
 % statsPath is an optional argument indicating where to put calculated PCK
 % statistics (in CSV format). If unspecified, statistics will be written to
 % stdout.
-function demo(stats_path)
+function demo(stats_path, seq_num)
 
 startup(); % set some paths
 
@@ -58,7 +58,19 @@ piw_data = get_piw_data('piw', config.data_path);
 % dataset folder.
 detected_pose_type = struct('seq', {}, 'filename', {}, 'frame', {}, 'bestpose',{});
 detected_pose_seqs = repmat(detected_pose_type, [1,1,1]);
-seqs = dir(config.data_path); seqs = seqs(3:end);
+if nargin < 2
+    seqs = dir(config.data_path); seqs = seqs(3:end);
+else
+    % Use * so that we only get the listing for the specific directory that
+    % we want. Frig, this is hacky. Oh, and you can't put the wildcard
+    % *before* the last component of the filename, because Matlab.
+    seqs = dir(fullfile(config.data_path, sprintf('se*q%i', seq_num))); 
+    if isempty(seqs)
+        error('Couldn''t find seq ''%s*''', spec_seq);
+    elseif length(seqs) > 1
+        error('Too many matches for seq ''%s*'' (%i)', spec_seq, length(seqs));
+    end
+end
 all_detections = []; gt_all = []; mov = 1;
 
 % for every sequence in the selected_seqs folder (with the dataset)
@@ -78,7 +90,10 @@ for s=1:length(seqs)
     try
         load([config.data_store_path 'detected_poses_' seqs(s).name], 'detected_poses');
     catch
+        estimationStart = tic;
         detected_poses = EstimatePosesInVideo(seq_dir, cy_model, config);
+        estimationTime = toc(estimationStart);
+        fprintf('[T] Complete pose estimation process took %fs\n', estimationTime);
         save([config.data_store_path '/detected_poses_' seqs(s).name], 'detected_poses');
     end
 
