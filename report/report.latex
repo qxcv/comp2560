@@ -119,9 +119,9 @@ actions~\cite{yao2011does}, and even classifying inanimate objects through a
 person's interactions with them~\cite{delaitre2012scene}.
 
 Pose estimation is complicated by the wide range of anatomically possible human
-poses, the varied appearance of human bodies and clothing, occlusion of body
-parts by objects in the scene or by other body parts, background clutter which
-resembles body parts, and so on. Taking advantage of the motion information
+poses, the varied appearance of human bodies and clothing, occlusion of
+joints by objects in the scene or by other limbs, background clutter which
+resembles joints, and so on. Taking advantage of the motion information
 present in video sequences introduces another layer of complexity to this
 already challenging problem.
 
@@ -131,9 +131,9 @@ each frame in the video sequence. This procedure implicitly scores all possible
 poses in each video frame and returns a selection of the highest-scoring poses,
 which is pruned through non-maximum suppression to ensure that the returned set
 contains a diverse selection of poses. After a candidate pose set has been
-generated for each frame, the parts of each pose candidate in each frame are
-recombined to reduce each frame's candidate set down to a single high-scoring
-pose.
+generated for each frame, the joints associated with each pose candidate in each
+frame are recombined to reduce each frame's candidate set down to a single
+high-scoring pose.
 
 \begin{figure}[t]
 \begin{center}
@@ -162,7 +162,7 @@ a graphical model to estimate poses in a static image. The CNN yields features
 which are much more informative than the Histogram-of-Gradients (HoG) features
 used in previous
 work~\cite{yang2011articulated,cherian2014mixing,ferrari2008progressive,sapp2013modec},
-whilst the graphical model encourages parts to take on
+whilst the graphical model encourages joints to take on
 anatomically reasonable relative positions.
 
 As explained in Section~\ref{sec:interframe}, incorporating temporal edges into
@@ -173,7 +173,7 @@ temporal edges to select a candidate from each frame partially alleviates this
 problem by reducing the number of poses which must be considered. The
 recombination method which we employ, as described by Cherian
 \etal~\cite{cherian2014mixing}, improves efficiency even further by allowing
-parts to be mixed-and-matched from different poses in each candidate set in a
+joints to be mixed-and-matched from different poses in each candidate set in a
 top-down fashion, thereby increasing the effective size of the candidate sets
 under consideration whilst maintaining low algorithmic complexity.
 
@@ -188,12 +188,12 @@ notion of part types to capture the different appearances which a part can have
 depending on whether it's open or closed (in the case of hands), whether it's
 extended or folded (arms), how much it is rotated, and so on. By treating the
 types of each part as latent variables in their graphical model, and augmenting
-their deformation terms to take into account the parts on either end of a limb,
+their deformation terms to take into account the joints on either end of a limb,
 Yang and Ramanan were able to obtain a significant increase in accuracy over
 traditional pictorial structure models. In this paper, we use a similar approach
 for generating pose candidate sets within frames.
 
-Another common approach is to regress the $(x, y)$ coordinates of parts directly
+Another common approach is to regress the $(x, y)$ coordinates of joints directly
 from an image~\cite{toshev2014deeppose,sun2012conditional}, although this can
 lead to implausible poses being generated unless some constraints on the
 relative positions of limbs or on the overall pose are introduced. Use of
@@ -219,7 +219,7 @@ Section~\ref{sec:img-dep}.
 The motion information available in videos has previously been exploited by
 tracking detected poses throughout a video
 sequence~\cite{ji20023d,andriluka2010monocular} or by extending graphical models
-for single-frame prediction with temporal links between parts in different
+for single-frame prediction with temporal links between joints in different
 frames~\cite{ferrari2008progressive,cherian2014mixing,sigal2004tracking}. Motion
 information has also been incorporated into CNN-based detectors by introducing
 motion features like optical flow at the input layers, which can sometimes
@@ -242,13 +242,17 @@ Our method for generating pose candidate sets largely follows that of
 relevant parts of their method in full.
 
 Pose skeletons are represented by a graph $\mathcal G = (\mathcal V, \mathcal
-E)$ consisting of a set of vertices (which we refer to as ``parts'' or
-``joints'') $\mathcal V$ and a set of edges (which we call ``limbs'') $\mathcal
-E \subseteq \mathcal V \times \mathcal V$. A complete pose $\vec{p} = (\vec l,
-\vec t)$ is represented by a location $\vec{l_u}$ within an image $\mat I$ for
-each joint $u \in \mathcal V$, and discrete ``types'' $t_{uv} \in \{1, \ldots,
-T_{uv}\}$ and $t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v) \in
-\mathcal E$.
+E)$ consisting of a set of vertices (or ``joints'') $\mathcal V$ and a set of
+edges (or ``limbs'') $\mathcal E
+\subseteq \mathcal V \times \mathcal V$.\footnotemark A complete pose $\vec{p} =
+(\vec l, \vec t)$ is represented by a location $\vec{l_u}$ within an image $\mat
+I$ for each joint $u \in \mathcal V$, and discrete ``types'' $t_{uv} \in \{1,
+\ldots, T_{uv}\}$ and $t_{vu} \in \{1, \ldots, T_{vu}\}$ for each limb $(u, v)
+\in \mathcal E$.
+
+\footnotetext{Not all vertices in the pose graph correspond to physical joints,
+and not all edges correspond to physical limbs, but we will stick with this
+anatomically incorrect nomenclature for the sake of consistency.}
 
 Limb types are used to express the orientation and length of limbs. For example,
 long forearms running from left to right might be assigned their own discrete
@@ -260,7 +264,7 @@ limb can be gleaned by inspecting small patches of an image around the endpoints
 of that limb. For instance, an image of a shoulder might give clues as to the
 direction in which the attached upper arm is pointing; this notion is the
 motivating force behind Image-Dependent Pairwise Relations (IDPRs), which are
-are discussed at greater length in Section~\ref{sec:img-dep}.
+discussed at greater length in Section~\ref{sec:img-dep}.
 
 Given an image $\mat I$ and a complete pose $(\vec l, \vec t)$ consisting of a
 set of part locations $\vec l$ and a set of limb types $\vec t$, the full score
@@ -312,7 +316,7 @@ define the IDPR term $\mathcal I$ as
 \end{equation}
 
 The inclusion of both $\mathcal I_{uv}$ and $\mathcal I_{vu}$ ensures that the
-visual cues given by the parts at either end of a limb can be used to infer the
+visual cues given by the joints at either end of a limb can be used to infer the
 type of that limb.
 
 The appearance term $\phi_u$ is defined similarly, and gives the log probability
@@ -504,7 +508,7 @@ cost $\rho_v$ for each pair of limbs $(u, v), (v, w) \in \mathcal E$ (where $u
 The complete cost which the recombination process must minimise is therefore
 given in (\ref{eqn:recomb-cost}); we have used $\mathcal V_S = \{v : \exists u
 \neq w : (u, v) \in \mathcal E \land (v, w) \in \mathcal E\}$ to denote the set
-of parts which are shared between two or more limbs, whilst $\vec l_v$ denotes
+of joints which are shared between two or more limbs, whilst $\vec l_v$ denotes
 the location of part $v$ in a recombined pose and $\vec l_v'$ denotes a location
 of part a $v$ which was discarded during recombination, but for which the
 location of some part $w$ \emph{connected} to $v$ was used.
@@ -524,7 +528,7 @@ l_{v,F}')\\
 
 In order to make the minimisation of the full temporal cost
 (\ref{eqn:recomb-cost}) tractable, limbs are recombined starting at the
-head---which is typically the easiest part to detect---then moving on to the
+head---which is typically the easiest joint to detect---then moving on to the
 neck, the shoulders, and so on until the full pose has been estimated in all
 frames.
 
@@ -546,10 +550,10 @@ If we have $|\mathcal P|$ candidate poses in each frame, each of which
 corresponds to a single head position candidate, then we can use dynamic
 programming to perform this minimisation in $O(|\mathcal P|^2 F)$ time.
 
-Position sequences for any subsequent part $u$ can be found in much the same
+Position sequences for any subsequent joint $u$ can be found in much the same
 way, except that we must also include pairwise costs from the single-frame cost
 $C$, as well as recombination costs relative to the (previously localised) parent
-part, yielding a full cost of
+joint, yielding a full cost of
 \begin{equation}\label{eqn:subsequent-part-cost}
 \begin{split}
 C_{uv}(l_{u,F}, &\vec l_{v, F}, \vec t \mid \mat I_F)
@@ -562,17 +566,17 @@ C_{uv}(l_{u,F}, &\vec l_{v, F}, \vec t \mid \mat I_F)
 \end{equation}
 where $v = \pa(u)$ is the parent of $u$ and $C_{uv}(\vec l_u, \vec l_v, \vec t
 \mid \mat I)$ are the terms of the single-frame cost (\ref{eqn:full-cost}) which
-either involve only part $u$ or involve both $u$ and $v$.
+either involve only joint $u$ or involve both $u$ and $v$.
 
-As with the head, finding the appropriate sequence of part locations for each
-remaining part can be done in $O(|\mathcal P|^2 F)$ time with dynamic
+As with the head, finding the appropriate sequence of joint locations for each
+remaining joint can be done in $O(|\mathcal P|^2 F)$ time with dynamic
 programming, meaning that the total runtime of the minimisation procedure is
-$O(K |\mathcal P|^2 F)$ for a $K$-part skeleton.
+$O(K |\mathcal P|^2 F)$ for a $K$-joint skeleton.
 
 \subsection{Approximations and heuristics}
 
 In practice, the unary terms in the head sequence cost (\ref{eqn:head-cost}) and
-the cost (\ref{eqn:subsequent-part-cost}) for subsequent parts can be
+the cost (\ref{eqn:subsequent-part-cost}) for subsequent joints can be
 approximated by the full, single-frame inference score $C(\vec l, \vec t \mid
 \mat I)$ for the specific candidate pose being considered. This not only makes
 implementation easier, but improves performance due to the fact that the
@@ -583,7 +587,7 @@ In addition to the costs listed above, we have used the ``practical extensions''
 of \cyte{cherian2014mixing}, which include additional keypoints along limbs to
 constrain motion further, an additional term for wrists which encourages them to
 occupy regions of high motion, and a regularisation term which acts to constrain
-the absolute difference between part positions across frames.
+the absolute difference between joint positions across frames.
 
 % NOTE: This has been taken out of the normal page flow so that it appears in the
 % right place. This should be corrected before submission.
@@ -608,8 +612,8 @@ Wild data set.}
 \begin{center}
 \input{plots/accuracy.pgf}
 \end{center}
-\caption{PCK over the entire Poses in the Wild data set for different body parts.
-A part is considered to be correctly detected in a single frame if the distance
+\caption{PCK over the entire Poses in the Wild data set for different joints.
+A joint is considered to be correctly detected in a single frame if the distance
 between its predicted position and its true position is less than the pixel
 distance threshold indicated on the $x$ axis of the graph. Note that the curve
 for the default configuration in the shoulder plot is hidden by that of the
@@ -626,7 +630,7 @@ To evaluate the performance of our model, we tested it on the Poses in the
 Wild~\cite{cherian2014mixing} data set, which consists of a series of 16--30
 frame sequences extracted from movies. Many sequences in this data set include a
 large degree of camera motion, rapidly moving subjects, cluttered backgrounds or
-occlusion of body parts.
+occlusion of joints.
 
 The single-frame pose estimation model was trained on the Frames Labelled in
 Cinema (FLIC) data set~\cite{sapp2013modec}, with negatives drawn from the INRIA
@@ -637,7 +641,7 @@ through a \SI{70}{\degree} range in \SI{5}{\degree} increments, as done in
 \footnotetext{\url{http://pascal.inrialpes.fr/data/human/}}
 
 For recombination, we chose a set of hand-tuned parameters which differed for
-each pair of parts, depending on the extent of motion of the parts. The precise
+each pair of joints, depending on the extent of motion of the joints. The precise
 set of parameters are available online, along with the rest of the code for
 these experiments.\footnote{\url{https://github.com/qxcv/comp2560}} At test
 time, 100 candidate poses are used in each frame and NMS is performed at a
@@ -678,17 +682,17 @@ two Intel Xeon E5-2620 processors and an NVIDIA K80 GPU.}
 \label{tab:runtime}
 \end{table}
 
-\subsection{Discussion and future work}
+\section{Discussion and future work}
 
 Figure~\ref{fig:qualitative} shows that our algorithm significantly improves on
 the results of \cyte{cherian2014mixing} for elbows and wrists, which are
-typically the most difficult body parts to detect. Further, it demonstrates that
+typically the most difficult joints to detect. Further, it demonstrates that
 recombination yields an appreciable performance increase over independent pose
 estimation in each frame. This is particularly true for the wrists, which are
-generally the fastest-moving body parts in a video sequence.
+generally the fastest-moving joints in a video sequence.
 
 Counterintuitively, the approach of Cherian \etal outperforms ours on shoulders
-at low thresholds. This could be because of the size of part--type joint
+at low thresholds. This could be because of the size of joint--type
 distribution (\ref{eqn:cnn-output}) learnt by the CNN; in the graphical model
 used to generate pose candidate sets, the shoulder is attached to the upper arm,
 upper torso and base of the neck, so if 13 types were learnt for each limb, then
@@ -696,10 +700,10 @@ there would be $13^3 = 2197$ different combinations of adjacent limb types for
 each shoulder. Many of these combinations may not be well-represented in the
 training set, which would hurt performance at test time.
 
-It may be possible to address this by adopting a part-based type
+It may be possible to address this by adopting a joint-based type
 system~\cite{yang2011articulated} in place of a limb-based one. This would give
-greater control over the effective number of part types, which could allow for
-the size of the part--type joint distribution to be decreased significantly.
+greater control over the effective number of joint types, which could allow for
+the size of the joint--type distribution to be decreased significantly.
 This could also yield an increase in performance, since the CNN evaluation time
 for the final softmax layer in the network would decrease, as would the time
 taken to copy and marginalise over the hundreds of thousands joint distribution
@@ -708,7 +712,7 @@ values produced by applying the fully convolutional network to large images.
 Figure~\ref{fig:qualitative} illustrates a number of common failure modes.
 Whilst our algorithm is robust to minor occlusions---where a hand lies slightly
 outside a frame, for instance---of the kind shown in frames (a) and (d)--(f),
-self-occlusion of subjects and partial occlusion of several body parts have
+self-occlusion of subjects and partial occlusion of several joints have
 proven more challenging, as in frames (b) and (f). Frames (a) and (c) also show
 situations in which limb-like objects have confused the detector. Finally, rapid
 limb motion was responsible for a large number of failures, including examples
