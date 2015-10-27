@@ -3,7 +3,7 @@ function visualise_map(unaries)
 colormap jet;
 scale = 7;
 joints = [1 3 5 8];
-figure('Visible','off')
+figure('Visible','off');
 for j=joints
     map = unaries{scale}{j};
     big = imresize(map, 4);
