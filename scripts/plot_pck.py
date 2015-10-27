@@ -28,7 +28,7 @@ PRIORITIES = {
 }
 
 parser = ArgumentParser(
-    description="Take PCK at different thresholds and plot it nicely"
+    description="Take accuracy at different thresholds and plot it nicely"
 )
 parser.add_argument(
     '--save', metavar='PATH', type=str, default=None,
@@ -37,6 +37,10 @@ parser.add_argument(
 parser.add_argument(
     '--input', nargs=2, metavar=('NAME', 'PATH'), action='append', default=[],
     help='Name (title) and path of CSV to plot; can be specified repeatedly'
+)
+parser.add_argument(
+    '--poster', action='store_true', dest='is_poster', default=False,
+    help='Produce a plot for the poster rather than the report.'
 )
 parser.add_argument(
     '--dims', nargs=2, type=float, metavar=('WIDTH', 'HEIGHT'),
@@ -76,16 +80,27 @@ if __name__ == '__main__':
         print('error: must specify at least one --input', file=stderr)
         exit(1)
 
-    matplotlib.rcParams.update({
-        'font.family': 'serif',
-        'pgf.rcfonts': False,
-        'pgf.texsystem': 'pdflatex',
-        'xtick.labelsize': 'x-small',
-        'ytick.labelsize': 'x-small',
-        'legend.fontsize': 'x-small',
-        'axes.labelsize': 'small',
-        'axes.titlesize': 'small',
-    })
+    if args.is_poster:
+        matplotlib.rcParams.update({
+            'font.family': 'sans',
+            'pgf.rcfonts': False,
+            'xtick.labelsize': '12',
+            'ytick.labelsize': '12',
+            'legend.fontsize': '14',
+            'axes.labelsize': '16',
+            'axes.titlesize': '18',
+        })
+    else:
+        matplotlib.rcParams.update({
+            'font.family': 'serif',
+            'pgf.rcfonts': False,
+            'pgf.texsystem': 'pdflatex',
+            'xtick.labelsize': 'x-small',
+            'ytick.labelsize': 'x-small',
+            'legend.fontsize': 'x-small',
+            'axes.labelsize': 'small',
+            'axes.titlesize': 'small',
+        })
 
     labels, thresholds, parts = load_data(args.input)
 
@@ -113,7 +128,7 @@ if __name__ == '__main__':
         subplot.set_xlabel('Threshold (px)')
         subplot.grid(which='both')
 
-    subplots[0].set_ylabel('PCK (%)')
+    subplots[0].set_ylabel('Accuracy (%)')
     subplots[0].set_ylim(ymin=0, ymax=100)
     minor_locator = AutoMinorLocator(2)
     subplots[0].yaxis.set_minor_locator(minor_locator)
