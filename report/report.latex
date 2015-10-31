@@ -22,7 +22,10 @@
 % run, let it finish, and you should be clear).
 \usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
 
-%{\wacvfinalcopy} % *** Uncomment this line for the final submission
+% IMPORTANT! Omitting \wacvfinalcopy will leave rulers on the side, include a
+% paper ID, disable acknowledgements, hide the authors list, etc. (as
+% appropriate for reviewing)
+{\wacvfinalcopy}
 
 \def\wacvPaperID{0000} % Fake paper ID for the quasi-conference
 \def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
