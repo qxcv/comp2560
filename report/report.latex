@@ -206,8 +206,8 @@ due to the anatomical constraints imposed by human limbs.
 
 More recently, deep neural networks have been successfully applied to pose
 estimation in a variety of ways. One common approach is to attempt to regress
-joint coordinates directly; Toshev \etal~\cite{toshev2014deeppose} do this with
-a cascade of regressors, where the first regressor outputs an approximate
+joint coordinates directly; Toshev and Szegedy~\cite{toshev2014deeppose} do this
+with a cascade of regressors, where the first regressor outputs an approximate
 location for each joint, and subsequent regressors are used to refine those
 approximations. Alternative
 approaches~\cite{jain2013learning,jain2014modeep,pfister2015flowing} instead map
