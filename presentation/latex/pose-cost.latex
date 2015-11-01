@@ -1,0 +1,12 @@
+\documentclass{standalone}
+\renewcommand{\vec}{\mathbf}
+\newcommand{\mat}{\mathbf}
+\begin{document}
+% See http://tex.stackexchange.com/a/50171 for \displaystyle tip
+$\displaystyle
+C(\vec l, \vec t \mid \mat I)
+= \sum_{u \in \mathcal V} \phi_u(\vec l_u \mid \mat I)
++ \sum_{(u, v) \in \mathcal E}
+\psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu} \mid \mat I)
+$
+\end{document}
