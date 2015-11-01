@@ -187,10 +187,10 @@ models~\cite{fischler1973representation,felzenszwalb2005pictorial}, which
 exploit the fact that poses can be decomposed into joints which are likely to
 stay within a certain range of distances of one another. Yang and
 Ramanan~\cite{yang2011articulated} extended this approach by introducing the
-notion of part types to capture the different appearances which a part can have
+notion of joint types to capture the different appearances which a joint can have
 depending on whether it's open or closed (in the case of hands), whether it's
 extended or folded (arms), how much it is rotated, and so on. By treating the
-types of each part as latent variables in their graphical model, and augmenting
+types of each joint as latent variables in their graphical model, and augmenting
 their deformation terms to take into account the joints on either end of a limb,
 Yang and Ramanan were able to obtain a significant increase in accuracy over
 traditional pictorial structure models. In this paper, we use a similar approach
@@ -270,7 +270,7 @@ motivating force behind Image-Dependent Pairwise Relations (IDPRs), which are
 discussed at greater length in Section~\ref{sec:img-dep}.
 
 Given an image $\mat I$ and a complete pose $(\vec l, \vec t)$ consisting of a
-set of part locations $\vec l$ and a set of limb types $\vec t$, the full score
+set of joint locations $\vec l$ and a set of limb types $\vec t$, the full score
 $C(\mat l, \mat t \mid \mat I)$ of the pose can be decomposed into a sum of
 unary costs and pairwise costs, written as
 \begin{equation}
@@ -335,17 +335,17 @@ joint $u$:
 \label{sec:cnn}
 
 To compute the unaries defined by (\ref{eqn:unary}) and the IDPR terms defined
-by (\ref{eqn:idpr}), we train a CNN to output the joint distribution over part
+by (\ref{eqn:idpr}), we train a CNN to output the joint distribution over joint
 locations and neighbouring limb types for each patch of a given image $\mat I$,
 from which we may obtain the appearance and IDPR terms by marginalisation. If we
 let $t_u \in \prod_{(u, v) \in \mathcal E} \{1, \ldots, T_{uv}\}$ denote a
-combination of types for all limbs adjacent to a part $u$, then we can write
+combination of types for all limbs adjacent to a joint $u$, then we can write
 this distribution as
 \begin{equation}
 \label{eqn:cnn-output}
 p(j = u, t_u = t \mid \mat I(\vec l))
 \end{equation}
-for any location $\vec l$ in $\mat I$ and any part $u \in \{1, \ldots, K\}$.
+for any location $\vec l$ in $\mat I$ and any joint $u \in \{1, \ldots, K\}$.
 
 If we disregard combinations of $u$ and $t$ for which the joint probability is
 always zero, then this becomes a discrete distribution over
@@ -370,7 +370,7 @@ Having evaluated appearance and IDPR terms for all joints and all locations in
 the image, we can now produce a set of high-scoring pose candidates for use in
 the recombination procedure (Section~\ref{sec:interframe}). Recall from
 Section~\ref{sec:model} that poses are modelled as trees rooted at the head. In
-this case, the score of any subtree of the full pose tree rooted at part $u$ in
+this case, the score of any subtree of the full pose tree rooted at joint $u$ in
 location $\vec l_u$ is
 \begin{equation}\label{eqn:gm-local-score}
 \begin{split}
@@ -388,7 +388,7 @@ At the leaves, this formula becomes $S_v(\vec l_v, \mat I) = \phi_v(\vec l_v
 \mid \mat I)$, which is trivial to compute for all locations in the image.
 Otherwise, given child scores $S_{v_1}(\vec l_{v_1}, \mat I), \ldots,
 S_{v_C}(\vec l_{v_C}, \mat I)$ for the children $\{v : \pa(v) = u\}$ of some
-non-leaf part $u$, it is possible to evaluate $S_u(\vec l_u, \mat I)$ for all
+non-leaf joint $u$, it is possible to evaluate $S_u(\vec l_u, \mat I)$ for all
 locations $\vec l_u$ in linear time using distance
 transforms~\cite{felzenszwalb2012distance}. If we have $T_{uv} = T$ for each
 $(u, v) \in \mathcal E$, then we must also perform maximisation over $T^2$ limb
@@ -457,7 +457,7 @@ sort of temporal consistency between poses. The obvious approach to this problem
 is to apply our existing graphical model to each frame, but to also add some
 temporal consistency term $\tau(p_t, p_{t+1}) = \sum_{u \in \mathcal V}
 \tau_u(\vec l_{u,t}, \vec l_{u,t+1})$, where $\vec l_{u,t}$ denotes the location
-of part $u$ at time $t$. If we had $F$ frames in total, then the full cost would
+of joint $u$ at time $t$. If we had $F$ frames in total, then the full cost would
 be
 \begin{equation}\label{eqn:hypo-interframe}
 C(p_F, \mat I_F) + \sum_{t=1}^{F-1}
@@ -486,7 +486,7 @@ best joints in the pose candidate set, rather than just the best candidates, are
 considered.
 
 Now that we know we can efficiently perform inference on a large effective pose
-set, we can introduce temporal smoothing links between each part $u \in \mathcal
+set, we can introduce temporal smoothing links between each joint $u \in \mathcal
 V$ in the pose at time $t$ and its counterpart at time $t+1$ using a cost
 \begin{equation}\label{eqn:temporal-cost}
 \begin{split}
@@ -502,7 +502,7 @@ $\vec l_{u,t}$ between frame $\vec I_t$ and frame $\vec I_{t+1}$.
 Additionally, to encourage the connected limbs chosen to make up each frame's
 final, recombined pose to be close to one another, we introduce a recombination
 cost $\rho_v$ for each pair of limbs $(u, v), (v, w) \in \mathcal E$ (where $u
-\neq w$) which share a common part $v$:
+\neq w$) which share a common joint $v$:
 
 \begin{equation}\label{eqn:recomb-strength}
 \rho_v(\vec l_v, \vec l_v') = \lambda_\rho \|\vec l_v - \vec l_v'\|^2.
@@ -512,9 +512,9 @@ The complete cost which the recombination process must minimise is therefore
 given in (\ref{eqn:recomb-cost}); we have used $\mathcal V_S = \{v : \exists u
 \neq w : (u, v) \in \mathcal E \land (v, w) \in \mathcal E\}$ to denote the set
 of joints which are shared between two or more limbs, whilst $\vec l_v$ denotes
-the location of part $v$ in a recombined pose and $\vec l_v'$ denotes a location
-of part a $v$ which was discarded during recombination, but for which the
-location of some part $w$ \emph{connected} to $v$ was used.
+the location of joint $v$ in a recombined pose and $\vec l_v'$ denotes a location
+of joint a $v$ which was discarded during recombination, but for which the
+location of some joint $w$ \emph{connected} to $v$ was used.
 
 \begin{equation}\label{eqn:recomb-cost}
 \begin{split}
@@ -557,7 +557,7 @@ Position sequences for any subsequent joint $u$ can be found in much the same
 way, except that we must also include pairwise costs from the single-frame cost
 $C$, as well as recombination costs relative to the (previously localised) parent
 joint, yielding a full cost of
-\begin{equation}\label{eqn:subsequent-part-cost}
+\begin{equation}\label{eqn:subsequent-joint-cost}
 \begin{split}
 C_{uv}(l_{u,F}, &\vec l_{v, F}, \vec t \mid \mat I_F)
 + \rho_u(\vec l_{u,F}, \vec l_{u,F}')\\
@@ -579,7 +579,7 @@ $O(K |\mathcal P|^2 F)$ for a $K$-joint skeleton.
 \subsection{Approximations and heuristics}
 
 In practice, the unary terms in the head sequence cost (\ref{eqn:head-cost}) and
-the cost (\ref{eqn:subsequent-part-cost}) for subsequent joints can be
+the cost (\ref{eqn:subsequent-joint-cost}) for subsequent joints can be
 approximated by the full, single-frame inference score $C(\vec l, \vec t \mid
 \mat I)$ for the specific candidate pose being considered. This not only makes
 implementation easier, but improves performance due to the fact that the
