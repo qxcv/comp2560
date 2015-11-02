@@ -8,7 +8,7 @@ end
 compile;
 
 % load and display model
-load('PARSE_model');
+load('BUFFY_model');
 visualizemodel(model);
 disp('model template visualization');
 disp('press any key to continue'); 
