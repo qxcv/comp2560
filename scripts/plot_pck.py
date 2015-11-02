@@ -133,8 +133,12 @@ if __name__ == '__main__':
     minor_locator = AutoMinorLocator(2)
     subplots[0].yaxis.set_minor_locator(minor_locator)
     subplots[0].set_yticks(range(0, 101, 20))
-    plt.figlegend(
-        common_handles, labels, 'lower right', bbox_to_anchor=(0.98, 0.2)
+    ax = plt.gca()
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    legend = plt.figlegend(
+        common_handles, labels, 'center left', bbox_to_anchor=(0.965, 0.5),
+        borderaxespad=0.
     )
 
     if args.save is None:
@@ -143,4 +147,6 @@ if __name__ == '__main__':
         print('Saving figure to', args.save)
         plt.gcf().set_size_inches(args.dims)
         plt.tight_layout()
-        plt.savefig(args.save, bbox_inches='tight')
+        plt.savefig(
+            args.save, bbox_inches='tight', bbox_extra_artists=[legend]
+        )

@@ -653,25 +653,28 @@ the recombination stage to produce a final pose sequence.
 \subsection{Results}
 \label{sec:results}
 
-The mean Percentage Correct Keypoints (PCK) for our algorithm, averaged over all
-sequences in Poses in the Wild, is given in Figure~\ref{fig:quantitative}. For
-comparison, we have included the results of our algorithm in its previously
-described evaluation configuration and the results of our algorithm when only
-one candidate pose is generated for each frame, in which case it is equivalent
-to Chen and Yuille's method \cyte{chen2014articulated}. We have also included
-the results of Cherian \etal \cyte{cherian2014mixing} on the same sequence.
+The accuracy of our algorithm, averaged over all joints in all sequences of
+Poses in the Wild, is given in Figure~\ref{fig:quantitative}. For comparison, we
+have included the results of our algorithm in its previously described
+evaluation configuration and the results of our algorithm when only one
+candidate pose is generated for each frame, in which case it is equivalent to
+Chen and Yuille's method \cyte{chen2014articulated}. We have also included the
+results of Cherian \etal \cyte{cherian2014mixing} on the same sequence. Timings
+for the different stages of the pose estimation pipeline during testing on a
+single sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
+
 Results for Yang and Ramanan's \cyte{yang2011articulated} widely used pose
-estimator have been provided solely to enable future comparison of our work with
-other work which has been evaluated against Yang and Ramanan's system, even
-though their results can no longer be considered state-of-the-art. Timings for
-the different stages of the pose estimation pipeline during testing on a single
-sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
+estimator have been provided in Figure~\ref{fig:quantiative} solely to enable
+future comparison of our work with other work which has been evaluated against
+Yang and Ramanan's system, even though their results can no longer be considered
+state-of-the-art.
 
 \begin{table}
 \begin{center}
+\small
 \begin{tabular}{|l||c|c|c|c|}
 \hline
-Stage & Flow & CNN & Candidate gen. & Recomb.\\
+Stage & Flow & CNN & Candidate set gen. & Recomb.\\
 \hline
 Time & 337s & 1713s & 159s & 11s\\
 \hline
