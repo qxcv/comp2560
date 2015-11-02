@@ -114,12 +114,27 @@ The Australian National University\\
 
 The aim of human pose estimation is to take a sequence of static images or video
 frames and output a series of two-dimensional ``skeletons'' representing the
-locations of the limbs of any humans in those images, as depicted in
-Figure~\ref{fig:skeleton}. Skeletons produced through pose estimation are useful
-for higher-level computer vision tasks like identifying clothing
-items~\cite{liu2012street,liu2012hi,yamaguchi2012parsing}, recognising
-actions~\cite{yao2011does}, and even classifying inanimate objects through a
-person's interactions with them~\cite{delaitre2012scene}.
+locations of certain joints\footnotemark of any humans in those images, as
+depicted in Figure~\ref{fig:skeleton}. Skeletons produced through pose
+estimation are useful for many higher-level computer vision tasks. For instance,
+knowing the locations of limbs can be helpful in identifying what kind of
+clothing a person is
+wearing~\cite{liu2012street,liu2012hi,yamaguchi2012parsing}, and the relative
+positions of a person's limbs can be useful for action
+recognition~\cite{yao2011does}. Pose estimation can even be used to classify
+inanimate objects by observing how a person interacts with
+them~\cite{delaitre2012scene}---for instance, a chair could be identified by a
+person in a sitting position above it. Improving on the accuracy or performance
+of existing pose estimation techniques could yield improvements in all of these
+applications, which makes pose estimation a promising research area in its own
+right.
+
+\footnotetext{In the jargon of pose estimation, the term ``joint'' can be used
+to refer to any clearly identifiable point on a person's body, including the
+elbows, wrists, head, midpoints of the upper and lower arms, and so on.
+Similarly, ``limb'' can be used to describe any connection made between joints
+for the purpose of constraining or visualising poses, and need not refer to an
+anatomical limb like an arm or leg.}
 
 Pose estimation is complicated by the wide range of anatomically possible human
 poses, the varied appearance of human bodies and clothing, occlusion of
