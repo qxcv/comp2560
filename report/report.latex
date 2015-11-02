@@ -83,14 +83,13 @@ frames and output ``skeletons'' representing the locations of the
 joints\footnotemark~of any humans in those images, as depicted in
 Figure~\ref{fig:skeleton}. Skeletons produced through pose estimation are useful
 for many higher-level computer vision tasks: for instance, knowing the locations
-of limbs can be helpful in identifying what kind of clothing a person is wearing
-\cyte{liu2012street,liu2012hi,yamaguchi2012parsing}, and the relative positions
-of a person's limbs can be useful for action recognition \cyte{yao2011does}.
-Pose estimation can even be used to classify inanimate objects by observing how
-a person interacts with them \cyte{delaitre2012scene}---for instance, a chair
-could be identified by a person in a sitting position above it. Improvement of
-existing pose estimation techniques can yield flow-on improvement in all of
-these applications.
+of limbs can be helpful for identifying what kind of clothing a person is
+wearing \cyte{liu2012street,liu2012hi,yamaguchi2012parsing}, or for recognising
+actions \cyte{yao2011does}. Pose estimation can even be used to classify
+inanimate objects by observing how a person interacts with them
+\cyte{delaitre2012scene}---for instance, a chair could be identified by a person
+in a sitting position above it. Improvement of existing pose estimation
+techniques can yield flow-on improvement in all of these applications.
 
 \footnotetext{In the jargon of pose estimation, the term ``joint'' can be used
 to refer to any identifiable point on a person's body, including the elbows,
@@ -182,7 +181,7 @@ this can lead to implausible poses being generated unless some constraints on
 the relative positions of limbs or on the overall pose are introduced. Using
 graphical models, as we have, can increase accuracy by eliminating pose
 candidates in which predicted joint positions are individually likely, but
-collectively implausible due to the anatomical constraints.
+collectively implausible due to anatomical constraints.
 
 The benefits of CNNs over traditional hand-engineered image features---as
 elucidated by LeCun and Bengio \cyte{lecun1995convolutional}---have recently led
@@ -194,15 +193,14 @@ increased investigation of CNNs for pose estimation.
 Toshev and Szegedy \cyte{toshev2014deeppose} produced an early result in this
 area by proposing a cascade of CNN-based regressors, where the first regressor
 outputs an approximate location for each joint, and subsequent regressors are
-used to refine those approximations. Alternative
-approaches \cyte{jain2013learning,jain2014modeep,pfister2015flowing} instead map
-images to heatmaps for each joint, which has the advantage of being a less
-nonlinear mapping than that from images to joint coordinates. The heatmap
-approach also makes it straightforward to incorporate graphical models later in
-the pose estimation pipeline, since the heatmap values at different locations
-can be used as potentials for graphical model
-inference \cyte{chen2014articulated,tompson2014joint}, as explained further in
-Section~\ref{sec:img-dep}.
+used to refine those approximations. Alternative approaches
+\cyte{jain2013learning,jain2014modeep,pfister2015flowing} instead map images to
+heatmaps for each joint, which has the advantage of being a less nonlinear
+mapping than that from images to joint coordinates. The heatmap approach also
+makes it straightforward to incorporate graphical models later in the pose
+estimation pipeline, since the heatmap values at different locations can be used
+as graphical model potentials \cyte{chen2014articulated,tompson2014joint}, as
+explained further in Section~\ref{sec:img-dep}.
 
 The motion information available in videos has previously been exploited using
 tracking \cyte{ji20023d,andriluka2010monocular} or by extending graphical models
@@ -219,9 +217,9 @@ described in Section~\ref{sec:recombination}.
 \section{Single-frame candidate set generation}
 \label{sec:intraframe}
 
-Our method for generating pose candidate sets largely follows that of
-\cyte{chen2014articulated}, although we will use this section to describe the
-relevant parts in full.
+Our method for generating pose candidate sets largely follows that of Chen and
+Yuille \cyte{chen2014articulated}, although we will use this section to describe
+the relevant parts in full.
 
 Pose skeletons are represented by a graph $\mathcal G = (\mathcal V, \mathcal
 E)$ consisting of a set of joints $\mathcal V$ and a set of limbs $\mathcal E
@@ -406,13 +404,14 @@ similar to pose estimation in static images, except that we wish to enforce some
 sort of temporal consistency between poses. The obvious approach to this problem
 is to apply our existing graphical model to each frame, but to also add some
 temporal consistency term $\tau(p_t, p_{t+1}) = \sum_{u \in \mathcal V}
-\tau_u(\vec l_{u,t}, \vec l_{u,t+1})$, where $\vec l_{u,t}$ denotes the location
-of joint $u$ at time $t$. If we had $F$ frames in total, then the full cost would
-be
+\tau_u(\vec l_{u,t}, \vec l_{u,t+1})$, where $p_t$ is the pose predicted at time
+$t$, and $\vec l_{u,t}$ denotes the predicted location of joint $u$ at time $t$.
+If we had $F$ frames in total, then the full cost would be
 \begin{equation}\label{eqn:hypo-interframe}
 C(p_F) + \sum_{t=1}^{F-1}
-\left[C(p_t) + \tau(p_t, p_{t+1})\right].
+\left[C(p_t) + \tau(p_t, p_{t+1})\right],
 \end{equation}
+where we have abbreviated $C(\vec l_t, \vec t_t)$ as $C(p_t)$.
 
 (\ref{eqn:hypo-interframe}) corresponds to a complex, highly loopy graph, which
 makes it infeasible to find the $p_1, \ldots, p_F$ which minimises
@@ -433,8 +432,8 @@ candidate sets by taking a small, diverse set of $|\mathcal P|$ candidate poses
 and then considering all possible combinations of joints from each of those
 poses. Given $|\mathcal P|$ poses and $K$ joints, this results in an effective
 candidate set of ${|\mathcal P|}^K$ poses in each frame, and ensures that the
-best joints in the pose candidate set, rather than just the best candidates, are
-considered.
+best joints in the pose candidate set, rather than just the best pose candidates
+themselves, are considered.
 
 Now that we know we can efficiently perform inference on a large effective pose
 set, we can introduce temporal smoothing links between each joint $u \in \mathcal
@@ -565,8 +564,8 @@ Wild data set.}
 \caption{Accuracy on the Poses in the Wild data set for different joints. A
 joint is considered to be correctly detected in a single frame if the distance
 between its predicted position and its true position is less than some
-threshold. We have averaged accuracy for each joint over all frame, and tested
-at a wide range of thresholds to indicate precisely how ``close'' predictions
+threshold. We have averaged accuracy for each joint over all frames, and tested
+at a wide range of thresholds to indicate precisely how close predictions
 are to the ground truth. Note that the curve for our algorithm in the shoulder
 plot is obscured by that for Chen and Yuille's algorithm.}
 \label{fig:quantitative}
@@ -605,15 +604,15 @@ recombination stage to produce a final pose sequence.
 \subsection{Results}
 \label{sec:results}
 
-The accuracy of our algorithm, averaged over all joints in all sequences of
-Poses in the Wild, is given in Figure~\ref{fig:quantitative}. For comparison, we
-have included the results of our algorithm in its previously described
-evaluation configuration and the results of our algorithm when only one
-candidate pose is generated for each frame, in which case it is equivalent to
-Chen and Yuille's method \cyte{chen2014articulated}. We have also included the
-results of Cherian \etal \cyte{cherian2014mixing} on the same sequence. Timings
-for the different stages of the pose estimation pipeline during testing on a
-single sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
+The accuracy of our algorithm on Poses in the Wild is depicted in
+Figure~\ref{fig:quantitative}. For comparison, we have included the results of
+our algorithm in its previously described evaluation configuration and the
+results of our algorithm when only one candidate pose is generated for each
+frame, in which case it is equivalent to Chen and Yuille's method
+\cyte{chen2014articulated}. We have also included the results of Cherian \etal
+\cyte{cherian2014mixing} on the same sequence. Timings for the different stages
+of the pose estimation pipeline during testing on a single sequence of Poses in
+the Wild are given in Table~\ref{tab:runtime}.
 
 Note that results for Yang and Ramanan's \cyte{yang2011articulated} widely used
 pose estimator have been provided in Figure~\ref{fig:quantitative} solely to
@@ -708,11 +707,9 @@ temporal smoothing as well as CNN-based features, our complete pipeline
 increases accuracy even further for fast-moving joints like wrists and elbows,
 which are typically the hardest joints to localise.
 
-\ifwacvfinal{%
-\noindent\textbf{Acknowledgements}\quad
+\ifwacvfinal{\paragraph{Acknowledgements}
 We would like to thank the authors of \cyte{chen2014articulated} and
-\cyte{cherian2014mixing} for making their code publicly available.
-}\fi
+\cyte{cherian2014mixing} for making their code publicly available.}\fi
 
 \ifwacvfinal\else\clearpage\fi
 {\small
