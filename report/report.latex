@@ -119,11 +119,11 @@ depicted in Figure~\ref{fig:skeleton}. Skeletons produced through pose
 estimation are useful for many higher-level computer vision tasks. For instance,
 knowing the locations of limbs can be helpful in identifying what kind of
 clothing a person is
-wearing~\cite{liu2012street,liu2012hi,yamaguchi2012parsing}, and the relative
+wearing \cyte{liu2012street,liu2012hi,yamaguchi2012parsing}, and the relative
 positions of a person's limbs can be useful for action
-recognition~\cite{yao2011does}. Pose estimation can even be used to classify
+recognition \cyte{yao2011does}. Pose estimation can even be used to classify
 inanimate objects by observing how a person interacts with
-them~\cite{delaitre2012scene}---for instance, a chair could be identified by a
+them \cyte{delaitre2012scene}---for instance, a chair could be identified by a
 person in a sitting position above it. Improving on the accuracy or performance
 of existing pose estimation techniques could yield improvements in all of these
 applications, which makes pose estimation a promising research area in its own
@@ -175,11 +175,11 @@ our algorithm. Only shoulders, wrists and elbows are shown in this example.}
 
 Our candidate set generation procedure, described in
 Section~\ref{sec:intraframe}, follows the approach of Chen and
-Yuille~\cite{chen2014articulated}, which combines features from a deep CNN with
+Yuille \cyte{chen2014articulated}, which combines features from a deep CNN with
 a graphical model to estimate poses in a static image. The CNN yields features
 which are much more informative than the Histogram-of-Gradients (HoG) features
 used in previous
-work~\cite{yang2011articulated,cherian2014mixing,ferrari2008progressive,sapp2013modec},
+work \cyte{yang2011articulated,cherian2014mixing,ferrari2008progressive,sapp2013modec},
 whilst the graphical model encourages joints to take on
 anatomically reasonable relative positions.
 
@@ -190,7 +190,7 @@ Independently generating a small set of candidate poses in each frame and using
 temporal edges to select a candidate from each frame partially alleviates this
 problem by reducing the number of poses which must be considered. We employ a
 recombination method---as described by Cherian
-\etal~\cite{cherian2014mixing}---to improves efficiency even further by allowing
+\etal \cyte{cherian2014mixing}---to improves efficiency even further by allowing
 joints to be mixed-and-matched from different poses in each candidate set in a
 top-down fashion, thereby increasing the effective size of the candidate sets
 under consideration whilst maintaining low algorithmic complexity.
@@ -207,10 +207,10 @@ estimation, respectively.
 \section{Related work}
 
 Early attempts at human pose estimation often made use of pictorial structure
-models~\cite{fischler1973representation,felzenszwalb2005pictorial}, which
+models \cyte{fischler1973representation,felzenszwalb2005pictorial}, which
 exploit the fact that poses can be decomposed into joints which are likely to
 stay within a certain range of distances of one another. Yang and
-Ramanan~\cite{yang2011articulated} extended this approach by introducing the
+Ramanan \cyte{yang2011articulated} extended this approach by introducing the
 notion of joint types to capture the different appearances which a joint can have
 depending on whether it's open or closed (in the case of hands), whether it's
 extended or folded (arms), how much it is rotated, and so on. By treating the
@@ -221,7 +221,7 @@ traditional pictorial structure models. In this paper, we use a similar approach
 for generating pose candidate sets within frames.
 
 Another common approach is to regress the $(x, y)$ coordinates of joints directly
-from an image~\cite{toshev2014deeppose,sun2012conditional}, although this can
+from an image \cyte{toshev2014deeppose,sun2012conditional}, although this can
 lead to implausible poses being generated unless some constraints on the
 relative positions of limbs or on the overall pose are introduced. Use of
 graphical models can increase accuracy by eliminating pose candidates in which
@@ -229,39 +229,39 @@ predicted joint positions are individually likely, but collectively implausible
 due to the anatomical constraints imposed by human limbs.
 
 The benefits of CNNs over traditional hand-engineered image features---as
-elucidated by LeCun and Bengio~\cite{lecun1995convolutional}---have recently led
+elucidated by LeCun and Bengio \cyte{lecun1995convolutional}---have recently led
 to major advances in image classification, object detection, and other
 fundamental tasks in computer
-vision~\cite{krizhevsky2012imagenet,sermanet2013overfeat}. This has prompted
+vision \cyte{krizhevsky2012imagenet,sermanet2013overfeat}. This has prompted
 increased investigation of CNNs for pose estimation.
 
-Toshev and Szegedy~\cite{toshev2014deeppose} produced an early result in this
+Toshev and Szegedy \cyte{toshev2014deeppose} produced an early result in this
 area by proposing a cascade of CNN-based regressors, where the first regressor
 outputs an approximate location for each joint, and subsequent regressors are
 used to refine those approximations. Alternative
-approaches~\cite{jain2013learning,jain2014modeep,pfister2015flowing} instead map
+approaches \cyte{jain2013learning,jain2014modeep,pfister2015flowing} instead map
 images to heatmaps for each joint, which has the advantage of being a less
 nonlinear mapping than that from images to joint coordinates. The heatmap
 approach also makes it straightforward to incorporate graphical models later in
 the pose estimation pipeline, since the heatmap values at different locations
 can be used as potentials for graphical model
-inference~\cite{chen2014articulated,tompson2014joint}, as explained further in
+inference \cyte{chen2014articulated,tompson2014joint}, as explained further in
 Section~\ref{sec:img-dep}.
 
 The motion information available in videos has previously been exploited by
 tracking detected poses throughout a video
-sequence~\cite{ji20023d,andriluka2010monocular} or by extending graphical models
+sequence \cyte{ji20023d,andriluka2010monocular} or by extending graphical models
 for single-frame prediction with temporal links between joints in different
-frames~\cite{ferrari2008progressive,cherian2014mixing,sigal2004tracking}. Motion
+frames \cyte{ferrari2008progressive,cherian2014mixing,sigal2004tracking}. Motion
 information has also been incorporated into CNN-based detectors by introducing
 motion features like optical flow at the input layers, which can sometimes
-increase accuracy over single-frame pose estimation~\cite{jain2014modeep}. As
+increase accuracy over single-frame pose estimation \cyte{jain2014modeep}. As
 alluded to in Section~\ref{sec:introduction}, incorporating temporal links into
 graphical models tends to result in intractable inference problems, and so past
 approaches in this area have generally used approximate methods for inference.
 We avoid this problem by generating pose candidate sets independently and taking
 the recombination approach described in
-Section~\ref{sec:introduction}~\cite{cherian2014mixing}.
+Section~\ref{sec:introduction} \cyte{cherian2014mixing}.
 
 \section{Single-frame candidate set generation}
 \label{sec:intraframe}
@@ -385,13 +385,13 @@ values, where we assume that $T_{uv} = T \in \mathbb N$ for all $(u, v) \in
 \mathcal E$.
 
 Our CNN architecture closely follows that of
-AlexNet~\cite{krizhevsky2012imagenet}, and is identical to that of
+AlexNet \cyte{krizhevsky2012imagenet}, and is identical to that of
 \cyte{chen2014articulated}. To minimise wasted computation, we convert the final
 fully connected layers of the network to $1 \times 4096$ convolutions after the
 network has been trained. This allows us to evaluate (\ref{eqn:cnn-output}) over
 a set of uniformly spaced patches of a full-resolution image in a single pass,
 rather than having to pass patches through the network one at a
-time~\cite{sermanet2013overfeat}.
+time \cyte{sermanet2013overfeat}.
 
 \subsection{Producing the candidate set}
 
@@ -419,7 +419,7 @@ Otherwise, given child scores $S_{v_1}(\vec l_{v_1}, \mat I), \ldots,
 S_{v_C}(\vec l_{v_C}, \mat I)$ for the children $\{v : \pa(v) = u\}$ of some
 non-leaf joint $u$, it is possible to evaluate $S_u(\vec l_u, \mat I)$ for all
 locations $\vec l_u$ in linear time using distance
-transforms~\cite{felzenszwalb2012distance}. If we have $T_{uv} = T$ for each
+transforms \cyte{felzenszwalb2012distance}. If we have $T_{uv} = T$ for each
 $(u, v) \in \mathcal E$, then we must also perform maximisation over $T^2$ limb
 label combinations at each joint. Since this maximisation must be performed at a
 total of $K$ joints, the overall time complexity of calculating the score
@@ -660,13 +660,13 @@ obscured by that for Chen and Yuille's algorithm.}
 \subsection{Setup}
 
 To evaluate the performance of our model, we tested it on the Poses in the
-Wild~\cite{cherian2014mixing} data set, which consists of a series of 16--30
+Wild \cyte{cherian2014mixing} data set, which consists of a series of 16--30
 frame sequences extracted from movies. Many sequences in this data set include a
 large degree of camera motion, rapidly moving subjects, cluttered backgrounds or
 occlusion of joints.
 
 The single-frame pose estimation model was trained on the Frames Labelled in
-Cinema (FLIC) data set~\cite{sapp2013modec}, with negatives drawn from the INRIA
+Cinema (FLIC) data set \cyte{sapp2013modec}, with negatives drawn from the INRIA
 person data set.{\footnotemark} The data set was augmented by rotating images
 through a \SI{70}{\degree} range in \SI{5}{\degree} increments, as done in
 \cyte{chen2014articulated}.
@@ -690,15 +690,18 @@ the recombination stage to produce a final pose sequence.
 \label{sec:results}
 
 The mean Percentage Correct Keypoints (PCK) for our algorithm, averaged over all
-sequences in Poses in the Wild, is given in Figure~\ref{fig:qualitative}. For
+sequences in Poses in the Wild, is given in Figure~\ref{fig:quantitative}. For
 comparison, we have included the results of our algorithm in its previously
 described evaluation configuration and the results of our algorithm when only
-one candidate pose is generated for each frame, which is equivalent to Chen and
-Yuille's method~\cite{chen2014articulated}. For comparison, we have also
-included the results of Cherian \etal~\cite{cherian2014mixing} on the same
-sequence. Timings for the different stages of the pose estimation pipeline
-during testing on a single sequence of Poses in the Wild are given in
-Table~\ref{tab:runtime}.
+one candidate pose is generated for each frame, in which case it is equivalent
+to Chen and Yuille's method \cyte{chen2014articulated}. We have also included
+the results of Cherian \etal \cyte{cherian2014mixing} on the same sequence.
+Further, we have provided results for Yang and Ramanan's
+\cyte{yang2011articulated} widely used pose estimator for the sake of comparison
+with other work which has been evaluated against theirs, even though Yang and
+Ramanan's results can no longer be considered state-of-the-art. Timings for the
+different stages of the pose estimation pipeline during testing on a single
+sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
 
 \begin{table}
 \begin{center}
@@ -716,32 +719,54 @@ two Intel Xeon E5-2620 processors and an NVIDIA K80 GPU.}
 \label{tab:runtime}
 \end{table}
 
+Owing to the lack of released evaluation code, the recent results of Pfister
+\etal \cyte{pfister2015flowing} are not listed in Figure~\ref{fig:quantitative}.
+However, Pfister \etal also reported improvements on the state of the art in
+video pose estimation, so comparison with the results given in their
+paper---especially their evaluation on Poses in the Wild---may be of benefit for
+some readers.
+
 \section{Discussion and future work}
 
-Figure~\ref{fig:qualitative} shows that our algorithm significantly improves on
+Figure~\ref{fig:quantitative} shows that our algorithm significantly improves on
 the results of \cyte{cherian2014mixing} for elbows and wrists, which are
 typically the most difficult joints to detect. Further, it demonstrates that
 recombination yields an appreciable performance increase over independent pose
-estimation in each frame. This is particularly true for the wrists, which are
-generally the fastest-moving joints in a video sequence.
+estimation in each frame, especially for wrists. The results also show a slight
+improvement over Chen and Yuille's method \cyte{chen2014articulated} in some
+cases, and compare favourably with the reported results of Pfister \etal
+\cyte{pfister2015flowing}.
+
+Chen and Yuille's pose estimation method performs impressively well on its own
+given that it does not make use of temporal information. This can be ascribed to
+its use of powerful CNN-based image features rather than the HoG features of
+previous pose estimation systems. This also serves to explain our performance
+gains relative to Cherian \etal's method alone, since the candidate set
+generation stage of our pipeline is an extension of Chen and Yuille's model.
 
 Counterintuitively, the approach of Cherian \etal outperforms ours on shoulders
-at low thresholds. This could be because of the size of joint--type
-distribution (\ref{eqn:cnn-output}) learnt by the CNN; in the graphical model
-used to generate pose candidate sets, the shoulder is attached to the upper arm,
-upper torso and base of the neck, so if 13 types were learnt for each limb, then
+at low thresholds. This could be because of the size of joint--type distribution
+(\ref{eqn:cnn-output}) learnt by the CNN; in the graphical model used to
+generate pose candidate sets, the shoulder is attached to the upper arm, upper
+torso and base of the neck, so if 13 types were learnt for each limb, then
 there would be $13^3 = 2197$ different combinations of adjacent limb types for
 each shoulder. Many of these combinations may not be well-represented in the
 training set, which would hurt performance at test time.
 
-It may be possible to address this by adopting a joint-based type
-system~\cite{yang2011articulated} in place of a limb-based one. This would give
-greater control over the effective number of joint types, which could allow for
-the size of the joint--type distribution to be decreased significantly.
-This could also yield an increase in performance, since the CNN evaluation time
-for the final softmax layer in the network would decrease, as would the time
-taken to copy and marginalise over the hundreds of thousands joint distribution
-values produced by applying the fully convolutional network to large images.
+It may be possible to address this by adopting a joint-based type system
+\cyte{yang2011articulated} in place of a limb-based one. This would give greater
+control over the effective number of joint types, which could allow for the size
+of the joint--type distribution to be decreased significantly. This could also
+yield an increase in performance, since the CNN evaluation time for the final
+softmax layer in the network would decrease, as would the time taken to copy and
+marginalise over the hundreds of thousands joint distribution values produced by
+applying the fully convolutional network to large images.
+
+Another way of addressing this problem would be to train the network with more
+data, or perform more aggressive augmentations on an existing data set. This
+would be perfectly computationally feasible given that training time is linear
+in the number of training samples used. However, introducing more data would be
+a less elegant fix than modifying the existing system to be more efficient.
 
 Figure~\ref{fig:qualitative} illustrates a number of common failure modes.
 Whilst our algorithm is robust to minor occlusions---where a hand lies slightly
@@ -762,7 +787,7 @@ each pose in each candidate set to produce a single best sequence of poses using
 an approximate top-down approach to avoid the computational intractability
 common to loopy graphical models. Evaluation on the challenging Poses in the
 Wild data set showed that, for elbows and shoulders, our method significantly
-improved on that of \cite{cherian2014mixing}. We closed with a discussion of the
+improved on that of \cyte{cherian2014mixing}. We closed with a discussion of the
 accuracy and failure modes of the algorithm, and suggested that both accuracy
 and performance could be improved by giving type labels to joints rather than
 limbs.
