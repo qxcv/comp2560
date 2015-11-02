@@ -46,8 +46,8 @@
 
 \begin{document}
 
-\title{Articulated Pose Estimation in Videos with Convolutional Neural Networks
-and Pose Recombination}
+\title{Video Pose Estimation with Convolutional Neural Networks and
+Recombination}
 
 \author{Sam Toyer\\
 The Australian National University\\
@@ -132,8 +132,8 @@ joint in each frame of the sequence.
 %     \put (90, 80) {4}
 % \end{overpic}
 \end{center}
-\caption{Excerpt from a video sequence annotated with the detections produced by
-our algorithm. Only shoulders, wrists and elbows are shown in this example.}
+\caption{A video sequence annotated by our algorithm. Only shoulders, wrists and
+elbows are shown in this example.}
 \label{fig:skeleton}
 \end{figure}
 
@@ -230,9 +230,6 @@ Section~\ref{sec:introduction} \cyte{cherian2014mixing}.
 \section{Single-frame candidate set generation}
 \label{sec:intraframe}
 
-\subsection{Model}
-\label{sec:model}
-
 Our method for generating pose candidate sets largely follows that of
 \cyte{chen2014articulated}, although we will use this section to describe the
 relevant parts of their method in full.
@@ -268,7 +265,6 @@ $C(\mat l, \mat t)$ of the pose can be decomposed into a sum of unary costs and
 pairwise costs, written as
 \begin{equation}
 \label{eqn:full-cost}
-\small
 \begin{split}
 C(\vec l, \vec t)
 = w_0 + \sum_{u \in \mathcal V} \phi_u(\vec l_u)
@@ -286,7 +282,6 @@ The pairwise cost $\psi_{uv}(\vec l_u, \vec l_v, t_{uv}, t_{vu})$
 can be decomposed into the sum of type-dependent deformation costs and IDPR
 terms, as expressed by
 \begin{equation}
-\small
 \begin{split}
 \psi_{uv}&(\vec l_u, \vec l_v, t_{uv}, t_{vu})
 = \vec w_{uvt_{uv}}^T d(\vec l_v - \vec l_u - \vec r_{uv t_{uv}})\\
@@ -307,7 +302,6 @@ $p(t_{uv} = t \mid j = u, \mat I(\vec l))$ to be the probability that the limb
 between $(u, v)$ has type $t_{uv} \in \{1, \ldots, T_{uv}\}$. Using this
 notation, we can define the IDPR term $\mathcal I$ as
 \begin{equation}
-\small
 \label{eqn:idpr}
 \mathcal I_{uv}(\vec l_u, t)
 = \log p(t_{uv} = t \mid j = u, \mat I(\vec l_u)).
@@ -321,7 +315,6 @@ The appearance term $\phi_u$ is defined similarly, and gives the log probability
 that a small, fixed-size patch of the image centered at $\vec{l}_u$ contains the
 joint $u$:
 \begin{equation}
-\small
 \label{eqn:unary}
 \phi_u(\vec l_u)
 = w_u \log p(j = u \mid \mat I(\vec l_u)).
@@ -338,7 +331,6 @@ let $t_u \in \prod_{(u, v) \in \mathcal E} \{1, \ldots, T_{uv}\}$ denote a
 combination of types for all limbs adjacent to a joint $u$, then we can write
 this distribution as
 \begin{equation}
-\small
 \label{eqn:cnn-output}
 p(j = u, t_u = t \mid \mat I(\vec l))
 \end{equation}
@@ -347,7 +339,6 @@ for any location $\vec l$ in $\mat I$ and any joint $u \in \{1, \ldots, K\}$.
 If we disregard combinations of $u$ and $t$ for which the joint probability is
 always zero, then this becomes a discrete distribution over
 \begin{equation}
-\small
 \sum_{u \in \mathcal V} T^{|\{(u, v) : (u, v) \in \mathcal E\}|} + 1
 \end{equation}
 values, where we assume that $T_{uv} = T \in \mathbb N$ for all $(u, v) \in
@@ -366,12 +357,10 @@ time \cyte{sermanet2013overfeat}.
 
 Having evaluated appearance and IDPR terms for all joints and all locations in
 the image, we can now produce a set of high-scoring pose candidates for use in
-the recombination procedure (Section~\ref{sec:interframe}). Recall from
-Section~\ref{sec:model} that poses are modelled as trees rooted at the head. In
-this case, the score of any subtree of the full pose tree rooted at joint $u$ in
-location $\vec l_u$ is
+the recombination procedure (Section~\ref{sec:interframe}). Recall that poses
+are modelled as trees rooted at the head. In this case, the score of any subtree
+of the full pose tree rooted at joint $u$ in location $\vec l_u$ is
 \begin{equation}\label{eqn:gm-local-score}
-\small
 \begin{split}
 S_u&(\vec l_u) =
 \phi_u(\vec l_u)\\
@@ -435,8 +424,6 @@ using the dual coordinate descent approach described in
 \section{Pose estimation in videos}
 \label{sec:interframe}
 
-\subsection{Motivation}
-
 We have already seen in Section~\ref{sec:intraframe} how we can use a graphical
 model to do pose estimation within a single frame. Pose estimation in videos is
 similar to pose estimation in static images, except that we wish to enforce some
@@ -447,7 +434,6 @@ temporal consistency term $\tau(p_t, p_{t+1}) = \sum_{u \in \mathcal V}
 of joint $u$ at time $t$. If we had $F$ frames in total, then the full cost would
 be
 \begin{equation}\label{eqn:hypo-interframe}
-\small
 C(p_F) + \sum_{t=1}^{F-1}
 \left[C_t(p_t) + \tau(p_t, p_{t+1})\right].
 \end{equation}
@@ -477,7 +463,6 @@ Now that we know we can efficiently perform inference on a large effective pose
 set, we can introduce temporal smoothing links between each joint $u \in \mathcal
 V$ in the pose at time $t$ and its counterpart at time $t+1$ using a cost
 \begin{equation}\label{eqn:temporal-cost}
-\small
 \begin{split}
 \tau_{ut}(\vec l_{u,t}, \vec l_{u,t+1})
 = \lambda_\tau \|\vec l_{u,t+1}
@@ -493,7 +478,6 @@ final, recombined pose to be close to one another, we introduce a recombination
 cost $\rho_v$ for each pair of limbs $(u, v), (v, w) \in \mathcal E$ (where $u
 \neq w$) which share a common joint $v$:
 \begin{equation}\label{eqn:recomb-strength}
-\small
 \rho_v(\vec l_v, \vec l_v') = \lambda_\rho \|\vec l_v - \vec l_v'\|^2.
 \end{equation}
 
@@ -505,7 +489,6 @@ the location of joint $v$ in a recombined pose and $\vec l_v'$ denotes a locatio
 of joint a $v$ which was discarded during recombination, but for which the
 location of some joint $w$ \emph{connected} to $v$ was used.
 \begin{equation}\label{eqn:recomb-cost}
-\small
 \begin{split}
 \sum_{t=1}^{F-1} &\biggl[
     C_t(p_t)
@@ -531,7 +514,6 @@ following cost, which corresponds to the parts of the full cost
 (\ref{eqn:hypo-interframe}) that involve the head or any temporal links between
 heads in adjacent frames:
 \begin{equation}\label{eqn:head-cost}
-\small
 \phi_h(\vec l_{h,F})
 + \sum_{t=1}^{F-1} \left[
     \phi_h(\vec l_{h,t})
@@ -548,7 +530,6 @@ way, except that we must also include pairwise costs from the single-frame cost
 $C$, as well as recombination costs relative to the (previously localised) parent
 joint, yielding a full cost of
 \begin{equation}\label{eqn:subsequent-joint-cost}
-\small
 \begin{split}
 \sum_{t=1}^{F-1} &\bigl[
 C_{uv}(l_{u,t}, \vec l_{v,t}, \vec t)
@@ -619,8 +600,6 @@ obscured by that for Chen and Yuille's algorithm.}
 \section{Experiments}
 \label{sec:experiments}
 
-\subsection{Setup}
-
 To evaluate the performance of our model, we tested it on the Poses in the
 Wild \cyte{cherian2014mixing} data set, which consists of a series of 16--30
 frame sequences extracted from movies. Many sequences in this data set include a
@@ -668,8 +647,7 @@ Ramanan's system, even though their results can no longer be considered
 state-of-the-art.
 
 \begin{table}
-\begin{center}
-\small
+\begin{center}\small
 \begin{tabular}{|l||c|c|c|c|}
 \hline
 Stage & Flow & CNN & Candidate set gen. & Recomb.\\
