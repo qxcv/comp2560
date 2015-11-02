@@ -334,8 +334,8 @@ time \cyte{sermanet2013overfeat}.
 Having evaluated appearance and IDPR terms for all joints and all locations in
 the image, we can now produce a set of high-scoring pose candidates for use in
 the recombination procedure (Section~\ref{sec:interframe}). Recall that poses
-are modelled as trees rooted at the head. In this case, the score of any subtree
-of the full pose tree rooted at joint $u$ in location $\vec l_u$ is
+are modelled as trees rooted at the head; the score of any subtree of the full
+pose tree rooted at joint $u$ in location $\vec l_u$ is
 \begin{equation}\label{eqn:gm-local-score}
 \begin{split}
 S_u&(\vec l_u) =
@@ -352,13 +352,13 @@ At the leaves, this formula becomes $S_v(\vec l_v) = \phi_v(\vec l_v)$, which is
 trivial to compute for all locations in the image. Otherwise, given child scores
 $S_{v_1}(\vec l_{v_1}), \ldots, S_{v_C}(\vec l_{v_C})$ for the children $\{v :
 \pa(v) = u\}$ of some non-leaf joint $u$, it is possible to evaluate $S_u(\vec
-l_u, \mat I)$ for all locations $\vec l_u$ in linear time using distance
-transforms \cyte{felzenszwalb2012distance}. If we have $T_{uv} = T$ for each
-$(u, v) \in \mathcal E$, then we must also perform maximisation over $T^2$ limb
-label combinations at each joint. Since this maximisation must be performed at a
-total of $K$ joints, the overall time complexity of calculating the score
-$S_h(\vec{l}_h, \mat I)$ of the root component for all locations $\vec l_h$ is
-$O(T^2 N K)$, where $N$ is the number of grid locations.
+l_u)$ for all locations $\vec l_u$ in linear time using distance transforms
+\cyte{felzenszwalb2012distance}. If we have $T_{uv} = T$ for each $(u, v) \in
+\mathcal E$, then we must also perform maximisation over $T^2$ limb label
+combinations at each joint. Since this maximisation must be performed at a total
+of $K$ joints, the overall time complexity of calculating the score
+$S_h(\vec{l}_h, \mat I)$ of the root component for all $N$ values of $\vec l_h$ is
+$O(T^2 N K)$.
 
 Given the maximum scores $S_h(\vec l_h)$ for a pose rooted at each possible head
 location $\vec l_h$, we can produce a set of $M$ pose candidates by choosing the
@@ -392,10 +392,10 @@ The cost associated with the limb locations, image, and limb types detected from
 a training sample can be represented as an inner product between a weight vector
 and a feature vector composed of all appearance, IDPR and deformation terms. If
 we classify all accurate predicted pose configurations as ``positive'' examples,
-and all other configurations as ``negative'' examples, then this can be viewed
-as the problem of finding weights for a structural SVM, which we do efficiently
-using the dual coordinate descent approach described in
-\cyte{yang2011articulated}.
+and all other configurations---including poses predicted for images in which no
+humans are present---as ``negative'' examples, then this can be viewed as the
+problem of finding weights for a structural SVM, which we do using the dual
+coordinate descent approach described in \cyte{yang2011articulated}.
 
 \section{Pose estimation in videos}
 \label{sec:interframe}
@@ -411,7 +411,7 @@ of joint $u$ at time $t$. If we had $F$ frames in total, then the full cost woul
 be
 \begin{equation}\label{eqn:hypo-interframe}
 C(p_F) + \sum_{t=1}^{F-1}
-\left[C_t(p_t) + \tau(p_t, p_{t+1})\right].
+\left[C(p_t) + \tau(p_t, p_{t+1})\right].
 \end{equation}
 
 (\ref{eqn:hypo-interframe}) corresponds to a complex, highly loopy graph, which
@@ -428,7 +428,7 @@ situations in which $|\mathcal P|$ is small.
 \subsection{Recombination}
 \label{sec:recombination}
 
-The method in \cyte{cherian2014mixing} avoids the penalty incurred by large pose
+Cherian \etal \cyte{cherian2014mixing} avoid the penalty incurred by large pose
 candidate sets by taking a small, diverse set of $|\mathcal P|$ candidate poses
 and then considering all possible combinations of joints from each of those
 poses. Given $|\mathcal P|$ poses and $K$ joints, this results in an effective
@@ -441,7 +441,7 @@ set, we can introduce temporal smoothing links between each joint $u \in \mathca
 V$ in the pose at time $t$ and its counterpart at time $t+1$ using a cost
 \begin{equation}\label{eqn:temporal-cost}
 \begin{split}
-\tau_{ut}(\vec l_{u,t}, \vec l_{u,t+1})
+\tau_{u}(\vec l_{u,t}, \vec l_{u,t+1})
 = \lambda_\tau \|\vec l_{u,t+1}
 - \vec l_{u,t}
 - f_t(\vec l_{u,t})\|^2,
@@ -468,10 +468,10 @@ location of some joint $w$ \emph{connected} to $v$ was used.
 \begin{equation}\label{eqn:recomb-cost}
 \begin{split}
 \sum_{t=1}^{F-1} &\biggl[
-    C_t(p_t)
+    C(p_t)
     + \sum_{v \in \mathcal V_S} \rho_v(\vec l_{v,t}, \vec l_{v,t}')
     + \sum_{u \in \mathcal V}
-        \tau_{ut}(\vec l_{u,t}, \vec l_{u,t+1})
+        \tau_{u}(\vec l_{u,t}, \vec l_{u,t+1})
 \biggr]\\
 &+ C(p_F) + \sum_{v \in \mathcal V_S} \rho_v(\vec l_{v,F}, \vec
 l_{v,F}')
@@ -485,9 +485,8 @@ neck, the shoulders, and so on until the full pose has been estimated in all
 frames.
 
 Specifically, the algorithm starts by choosing a head position $\vec l_{h,t}$ at
-each time $t = 1, \ldots, F$ by choosing a head position from the set $\mathcal
-P_t$ in each frame such that the chosen sequence of heads minimises the
-following cost, which corresponds to the parts of the full cost
+each time $t = 1, \ldots, F$ such that the chosen sequence of heads minimises
+the following cost, which corresponds to the parts of the full cost
 (\ref{eqn:hypo-interframe}) that involve the head or any temporal links between
 heads in adjacent frames:
 \begin{equation}\label{eqn:head-cost}
@@ -518,7 +517,7 @@ C_{uv}(l_{u,t}, \vec l_{v,t}, \vec t)
 \end{equation}
 where $v = \pa(u)$ is the parent of $u$ and $C_{uv}(\vec l_u, \vec l_v, \vec t)$
 are the terms of the single-frame cost (\ref{eqn:full-cost}) which either
-involve only joint $u$ or involve both $u$ and $v$.
+involve only $u$ or involve both $u$ and $v$.
 
 As with the head, finding the appropriate sequence of joint locations for each
 remaining joint can be done in $O(|\mathcal P|^2 F)$ time with dynamic
@@ -529,11 +528,10 @@ $O(K |\mathcal P|^2 F)$ for a $K$-joint skeleton.
 
 In practice, the unary terms in the head sequence cost (\ref{eqn:head-cost}) and
 the cost (\ref{eqn:subsequent-joint-cost}) for subsequent joints can be
-approximated by the full, single-frame inference score $C(\vec l, \vec t \mid
-\mat I)$ for the specific candidate pose being considered. This not only makes
-implementation easier, but improves performance due to the fact that the
-single-frame inference scores are already computed during candidate set
-generation.
+approximated by the full, single-frame inference score $C(\vec l, \vec t)$ for
+the specific candidate pose being considered. This not only makes implementation
+easier, but improves performance due to the fact that the single-frame inference
+scores are already computed during candidate set generation.
 
 In addition to the costs listed above, we have used the ``practical extensions''
 of \cyte{cherian2014mixing}, which include additional keypoints along limbs to
