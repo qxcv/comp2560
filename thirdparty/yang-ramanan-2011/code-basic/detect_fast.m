@@ -1,4 +1,4 @@
-function boxes = detect_fast(im, model, thresh)
+function boxes = detect_fast(im, model)
 % boxes = detect(im, model, thresh)
 % Detect objects in input using a model and a score threshold.
 % Higher threshold leads to fewer detections.
@@ -49,8 +49,14 @@ for rlevel = levels,
     [rscore Ik]    = max(parts(1).score,[],3);
 
     % Walk back down tree following pointers
-    [Y,X] = find(rscore >= thresh);
-    if length(X) > 1,
+    % Just grab the top-scoring X/Y/whatever
+    % (condition in find() was rscore >= thresh before)
+    [Y,X] = find(rscore >= max(rscore(:)));
+    X = X(1:1);
+    Y = Y(1:1);
+    % XXX: This check used to be `if length(X) > 1`, but I changed it so
+    % that I'd actually get some detections
+    if length(X) > 0,
       I   = (X-1)*size(rscore,1) + Y;
       box = backtrack(X,Y,Ik(I),parts,pyra);
       i   = cnt+1:cnt+length(I);

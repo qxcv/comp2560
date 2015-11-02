@@ -17,6 +17,15 @@ for n = 1:length(boxes)
     for i = 1:size(b,1)
         points = Transback * [bx(i,:)' by(i,:)'];
         points = cat(1, points, [0 0]);
+        % Here's what the Buffy-trained detector gives us (XXX: This could be wrong!):
+        % [Head, Neck, L-{shoulder, upper arm, elbow, lower arm, wrist,
+        % upper torso, mid torso, hip}, R-{shoulder, upper arm, elbow,
+        % lower arm, wrist, upper torso, mid torso, hip}]
+        % Here's what PIW contains (observer perspective):
+        % [Head, R-{shoulder, upper arm, elbow, lower arm, wrist},
+        % L-{shoulder, upper arm, elbow, lower arm, wrist}, {upper, lower}
+        % torso midpoint]
+        % In the below, I use 19 as a synonym for "missing"
         piw_map = [19, 11, 12, 13, 14, 15, 3, 4, 5, 6, 7, 19, 19];
         det(n).point(:,:,i) = points(piw_map, :);
         det(n).score(i) = box(i, end);
