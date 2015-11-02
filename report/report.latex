@@ -188,12 +188,21 @@ graphical model-based pose estimation methods can result in intractable
 inference problems because of the loopiness of the resulting graph.
 Independently generating a small set of candidate poses in each frame and using
 temporal edges to select a candidate from each frame partially alleviates this
-problem by reducing the number of poses which must be considered. The
-recombination method which we employ, as described by Cherian
-\etal~\cite{cherian2014mixing}, improves efficiency even further by allowing
+problem by reducing the number of poses which must be considered. We employ a
+recombination method---as described by Cherian
+\etal~\cite{cherian2014mixing}---to improves efficiency even further by allowing
 joints to be mixed-and-matched from different poses in each candidate set in a
 top-down fashion, thereby increasing the effective size of the candidate sets
 under consideration whilst maintaining low algorithmic complexity.
+
+In Section~\ref{sec:results}, we find that, by combining these two approaches,
+we obtain a significant in accuracy over Cherian \etal's method alone, and a
+slight increase in accuracy over Chen and Yuille's method alone when estimating
+the positions of wrists and elbows. Wrists and elbows are the most difficult
+joints to detect due to their size and rapid motion, which makes our result
+significant, especially given that Cherian \etal's method and Chen and Yuille's
+method recently represented the state-of-the-art in video and static image pose
+estimation, respectively.
 
 \section{Related work}
 
@@ -219,12 +228,17 @@ graphical models can increase accuracy by eliminating pose candidates in which
 predicted joint positions are individually likely, but collectively implausible
 due to the anatomical constraints imposed by human limbs.
 
-More recently, deep neural networks have been successfully applied to pose
-estimation in a variety of ways. One common approach is to attempt to regress
-joint coordinates directly; Toshev and Szegedy~\cite{toshev2014deeppose} do this
-with a cascade of regressors, where the first regressor outputs an approximate
-location for each joint, and subsequent regressors are used to refine those
-approximations. Alternative
+The benefits of CNNs over traditional hand-engineered image features---as
+elucidated by LeCun and Bengio~\cite{lecun1995convolutional}---have recently led
+to major advances in image classification, object detection, and other
+fundamental tasks in computer
+vision~\cite{krizhevsky2012imagenet,sermanet2013overfeat}. This has prompted
+increased investigation of CNNs for pose estimation.
+
+Toshev and Szegedy~\cite{toshev2014deeppose} produced an early result in this
+area by proposing a cascade of CNN-based regressors, where the first regressor
+outputs an approximate location for each joint, and subsequent regressors are
+used to refine those approximations. Alternative
 approaches~\cite{jain2013learning,jain2014modeep,pfister2015flowing} instead map
 images to heatmaps for each joint, which has the advantage of being a less
 nonlinear mapping than that from images to joint coordinates. The heatmap
@@ -660,17 +674,20 @@ through a \SI{70}{\degree} range in \SI{5}{\degree} increments, as done in
 \footnotetext{\url{http://pascal.inrialpes.fr/data/human/}}
 
 For recombination, we chose a set of hand-tuned parameters which differed for
-each pair of joints, depending on the extent of motion of the joints. The precise
-set of parameters are available online, along with the rest of the code for
-these experiments.\footnote{\url{https://github.com/qxcv/comp2560}} At test
-time, 100 candidate poses are used in each frame and NMS is performed at a
-threshold of 95\% of the intersection-over-union on each wrist.
+each pair of joints, depending on the extent of motion of the
+joints.\footnotemark At test time, 100 candidate poses are used in each frame
+and NMS is performed at a threshold of 95\% of the intersection-over-union on
+each wrist.
+
+\footnotetext{All parameters are available online, along with the rest of the
+code for these experiments: \url{https://github.com/qxcv/comp2560}}
 
 We have found it advantageous to perform candidate set generation independently
 at several scales. The highest-scoring poses over all scales were then passed to
 the recombination stage to produce a final pose sequence.
 
 \subsection{Results}
+\label{sec:results}
 
 The mean Percentage Correct Keypoints (PCK) for our algorithm, averaged over all
 sequences in Poses in the Wild, is given in Figure~\ref{fig:qualitative}. For
