@@ -591,16 +591,16 @@ through a \SI{70}{\degree} range in \SI{5}{\degree} increments, as done in
 
 For recombination, we chose a set of hand-tuned parameters which differed for
 each pair of joints, depending on the extent of motion of the
-joints.\footnotemark At test time, 100 candidate poses are used in each frame
-and NMS is performed at a threshold of 95\% of the intersection-over-union on
+joints.\footnotemark At test time, 100 candidate poses were used in each frame
+and NMS was performed at a threshold of 95\% of the intersection-over-union on
 each wrist.
 
 \footnotetext{All parameters are available online, along with the rest of the
 code for these experiments: \url{https://github.com/qxcv/comp2560}}
 
-We have found it advantageous to perform candidate set generation independently
-at several scales. The highest-scoring poses over all scales were then passed to
-the recombination stage to produce a final pose sequence.
+We found it advantageous to perform candidate set generation independently at
+several scales. The highest-scoring poses over all scales were passed to the
+recombination stage to produce a final pose sequence.
 
 \subsection{Results}
 \label{sec:results}
@@ -615,11 +615,11 @@ results of Cherian \etal \cyte{cherian2014mixing} on the same sequence. Timings
 for the different stages of the pose estimation pipeline during testing on a
 single sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
 
-Results for Yang and Ramanan's \cyte{yang2011articulated} widely used pose
-estimator have been provided in Figure~\ref{fig:quantitative} solely to enable
-comparison of our work with other work which has been evaluated against Yang and
-Ramanan's system, even though their results can no longer be considered
-state-of-the-art.
+Note that results for Yang and Ramanan's \cyte{yang2011articulated} widely used
+pose estimator have been provided in Figure~\ref{fig:quantitative} solely to
+enable comparison with other work which has been evaluated against their system;
+whilst their system once represented the state of the art, and was widely
+benchmarked against as a result, it has since been surpassed in accuracy.
 
 \begin{table}
 \begin{center}\small
@@ -641,26 +641,26 @@ Owing to the lack of released evaluation code, the recent results of Pfister
 \etal \cyte{pfister2015flowing} are not listed in Figure~\ref{fig:quantitative}.
 However, Pfister \etal also reported improvements on the state of the art in
 video pose estimation, so comparison with the results given in their
-paper---especially their evaluation on Poses in the Wild---may be of benefit for
+paper---especially their evaluation on Poses in the Wild---may be of benefit to
 some readers.
 
 \section{Discussion and future work}
 
 Figure~\ref{fig:quantitative} shows that our algorithm significantly improves on
-the results of \cyte{cherian2014mixing} for elbows and wrists, which are
-typically the most difficult joints to detect. Further, it demonstrates that
-recombination yields an appreciable performance increase over independent pose
-estimation in each frame, especially for wrists. The results also show a slight
-improvement over Chen and Yuille's method \cyte{chen2014articulated} in some
-cases, and compare favourably with the reported results of Pfister \etal
-\cyte{pfister2015flowing}.
+the results of Cherian \etal \cyte{cherian2014mixing} for elbows and wrists,
+which are typically the most difficult joints to detect. Further, it
+demonstrates that recombination yields an appreciable performance increase over
+independent pose estimation in each frame, especially for wrists. The results
+also show a slight improvement over Chen and Yuille's method
+\cyte{chen2014articulated} in some cases, and compare favourably with the
+reported results of Pfister \etal \cyte{pfister2015flowing}.
 
 Chen and Yuille's pose estimation method performs impressively well on its own
 given that it does not make use of temporal information. This can be ascribed to
 its use of powerful CNN-based image features rather than the HoG features of
-previous pose estimation systems. This also serves to explain our performance
-gains relative to Cherian \etal's method alone, since the candidate set
-generation stage of our pipeline is an extension of Chen and Yuille's model.
+previous pose estimation systems. This serves to explain our performance gains
+relative to Cherian \etal's method, since the candidate set generation stage of
+our pipeline is an extension of Chen and Yuille's model.
 
 Counterintuitively, the approach of Cherian \etal outperforms ours on shoulders
 at low thresholds. This could be because of the size of joint--type distribution
@@ -676,7 +676,7 @@ It may be possible to address this by adopting a joint-based type system
 control over the effective number of joint types, which could allow for the size
 of the joint--type distribution to be decreased significantly. This could also
 yield an increase in performance, since the CNN evaluation time for the final
-softmax layer in the network would decrease, as would the time taken to copy and
+layer in the network would decrease, as would the time taken to copy and
 marginalise over the hundreds of thousands joint distribution values produced by
 applying the fully convolutional network to large images.
 
@@ -697,16 +697,16 @@ limb motion was responsible for a large number of failures, including examples
 
 \section{Conclusion}
 
-We have presented a two-stage pose estimation algorithm: in the first, a
-candidate pose set is generated for each frame using a graphical model
-incorporating CNN-derived features, and in the second, a temporally consistent
-sequence of poses is produced by recombining the poses in each frame's candidate
-set. We find that a CNN-based pose estimator for individual frames can yield
-superior accuracy to a temporally-aware pose estimator without CNN-based
-features; we ascribe this result to the informativeness of CNN-produced image
-features. By making use of temporal smoothing as well as CNN-based features, our
-complete pipeline increases accuracy even further for fast-moving joints like
-wrists and elbows, which are typically the hardest joints to localise.
+We have presented a two-stage pose estimation algorithm: firstly, a candidate
+pose set is generated for each frame using a graphical model incorporating
+CNN-derived features. Secondly, a temporally consistent sequence of poses is
+produced by recombining the poses in each frame's candidate set. We find that a
+CNN-based pose estimator for individual frames can yield superior accuracy to a
+temporally-aware pose estimator without CNN-based features; we ascribe this
+result to the informativeness of CNN-produced image features. By making use of
+temporal smoothing as well as CNN-based features, our complete pipeline
+increases accuracy even further for fast-moving joints like wrists and elbows,
+which are typically the hardest joints to localise.
 
 \ifwacvfinal{%
 \noindent\textbf{Acknowledgements}\quad
