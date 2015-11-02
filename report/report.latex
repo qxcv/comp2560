@@ -149,9 +149,9 @@ each frame in the video sequence. This procedure implicitly scores all possible
 poses in each video frame and returns a selection of the highest-scoring poses,
 which is pruned through non-maximum suppression to ensure that the returned set
 contains a diverse selection of poses. After a candidate pose set has been
-generated for each frame, the joints associated with each pose candidate in each
-frame are recombined to reduce each frame's candidate set down to a single
-high-scoring pose.
+generated for each frame, the joints in each candidate pose are split up, and
+the complete set of joints is used to produce a single best position for each
+joint in each frame of the sequence.
 
 \begin{figure}[t]
 \begin{center}
