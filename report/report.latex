@@ -492,7 +492,6 @@ Additionally, to encourage the connected limbs chosen to make up each frame's
 final, recombined pose to be close to one another, we introduce a recombination
 cost $\rho_v$ for each pair of limbs $(u, v), (v, w) \in \mathcal E$ (where $u
 \neq w$) which share a common joint $v$:
-
 \begin{equation}\label{eqn:recomb-strength}
 \small
 \rho_v(\vec l_v, \vec l_v') = \lambda_\rho \|\vec l_v - \vec l_v'\|^2.
@@ -505,7 +504,6 @@ of joints which are shared between two or more limbs, whilst $\vec l_v$ denotes
 the location of joint $v$ in a recombined pose and $\vec l_v'$ denotes a location
 of joint a $v$ which was discarded during recombination, but for which the
 location of some joint $w$ \emph{connected} to $v$ was used.
-
 \begin{equation}\label{eqn:recomb-cost}
 \small
 \begin{split}
@@ -746,18 +744,16 @@ limb motion was responsible for a large number of failures, including examples
 
 \section{Conclusion}
 
-This paper presented a two-stage approach to pose estimation in videos. In the
-first stage, we generated a candidate pose set in each frame independently using
-a graphical model incorporating CNN-derived features and type-based limb
-deformation costs. In the second stage, we recombined the limbs associated with
-each pose in each candidate set to produce a single best sequence of poses using
-an approximate top-down approach to avoid the computational intractability
-common to loopy graphical models. Evaluation on the challenging Poses in the
-Wild data set showed that, for elbows and shoulders, our method significantly
-improved on that of \cyte{cherian2014mixing}. We closed with a discussion of the
-accuracy and failure modes of the algorithm, and suggested that both accuracy
-and performance could be improved by giving type labels to joints rather than
-limbs.
+We have presented a two-stage pose estimation algorithm: in the first, a
+candidate pose set is generated for each frame using a graphical model
+incorporating CNN-derived features, and in the second, a temporally consistent
+sequence of poses is produced by recombining the poses in each frame's candidate
+set. We find that a CNN-based pose estimator for individual frames can yield
+superior accuracy to a temporally-aware pose estimator without CNN-based
+features; we ascribe this result to the informativeness of CNN-produced image
+features. By making use of temporal smoothing as well as CNN-based features, our
+complete pipeline increases accuracy even further for fast-moving joints like
+wrists and elbows, which are typically the hardest joints to localise.
 
 \ifwacvfinal{%
 \noindent\textbf{Acknowledgements}\quad
