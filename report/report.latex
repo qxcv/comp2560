@@ -630,12 +630,13 @@ Wild data set.}
 \begin{center}
 \input{plots/accuracy.pgf}
 \end{center}
-\caption{PCK over the entire Poses in the Wild data set for different joints.
-A joint is considered to be correctly detected in a single frame if the distance
-between its predicted position and its true position is less than the pixel
-distance threshold indicated on the $x$ axis of the graph. Note that the curve
-for the default configuration in the shoulder plot is hidden by that of the
-static-only configuration.}
+\caption{Accuracy over every frame in the Poses in the Wild data set for
+different joints. A joint is considered to be correctly detected in a single
+frame if the distance between its predicted position and its true position is
+less than some threshold. We have included accuracy measured at a wide range of
+thresholds to indicate precisely how ``close'' each algorithm is, on average, to
+the ground truth. Note that the curve for our algorithm in the shoulder plot is
+obscured by that for Chen and Yuille's algorithm.}
 \label{fig:quantitative}
 \end{figure*}
 
@@ -674,25 +675,16 @@ the recombination stage to produce a final pose sequence.
 The mean Percentage Correct Keypoints (PCK) for our algorithm, averaged over all
 sequences in Poses in the Wild, is given in Figure~\ref{fig:qualitative}. For
 comparison, we have included the results of our algorithm in its previously
-described evaluation configuration (``Default config.'') and the results of our
-algorithm when only one candidate pose is generated for each frame
-(``Static-only''). For comparison, we have also included the results of Cherian
-\etal~\cite{cherian2014mixing} on the same sequence.
-Timings for the different stages of the pose estimation pipeline during testing
-on a single sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
+described evaluation configuration and the results of our algorithm when only
+one candidate pose is generated for each frame, which is equivalent to Chen and
+Yuille's method~\cite{chen2014articulated}. For comparison, we have also
+included the results of Cherian \etal~\cite{cherian2014mixing} on the same
+sequence. Timings for the different stages of the pose estimation pipeline
+during testing on a single sequence of Poses in the Wild are given in
+Table~\ref{tab:runtime}.
 
 \begin{table}
 \begin{center}
-%\begin{tabular}{|l|c|}
-% \hline
-% Stage & Time\\
-% \hline\hline
-% Optical flow & 336.41s\\
-% CNN evaluation & 1712.87s\\
-% Candidate set generation & 159.21s\\
-% Recombination & 10.86s\\
-% \hline
-% \end{tabular}
 \begin{tabular}{|l||c|c|c|c|}
 \hline
 Stage & Flow & CNN & Candidate gen. & Recomb.\\
