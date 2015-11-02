@@ -683,14 +683,21 @@ on a single sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
 
 \begin{table}
 \begin{center}
-\begin{tabular}{|l|c|}
+%\begin{tabular}{|l|c|}
+% \hline
+% Stage & Time\\
+% \hline\hline
+% Optical flow & 336.41s\\
+% CNN evaluation & 1712.87s\\
+% Candidate set generation & 159.21s\\
+% Recombination & 10.86s\\
+% \hline
+% \end{tabular}
+\begin{tabular}{|l||c|c|c|c|}
 \hline
-Stage & Time\\
-\hline\hline
-Optical flow & 336.41s\\
-CNN evaluation & 1712.87s\\
-Candidate set generation & 159.21s\\
-Recombination & 10.86s\\
+Stage & Flow & CNN & Candidate gen. & Recomb.\\
+\hline
+Time & 337s & 1713s & 159s & 11s\\
 \hline
 \end{tabular}
 \end{center}

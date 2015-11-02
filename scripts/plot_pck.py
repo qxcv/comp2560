@@ -95,10 +95,10 @@ if __name__ == '__main__':
             'font.family': 'serif',
             'pgf.rcfonts': False,
             'pgf.texsystem': 'pdflatex',
-            'xtick.labelsize': 'x-small',
-            'ytick.labelsize': 'x-small',
-            'legend.fontsize': 'x-small',
-            'axes.labelsize': 'small',
+            'xtick.labelsize': 'xx-small',
+            'ytick.labelsize': 'xx-small',
+            'legend.fontsize': 'xx-small',
+            'axes.labelsize': 'x-small',
             'axes.titlesize': 'small',
         })
 
