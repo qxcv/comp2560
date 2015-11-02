@@ -78,34 +78,31 @@ The Australian National University\\
 \section{Introduction}
 \label{sec:introduction}
 
-The aim of human pose estimation is to take a sequence of static images or video
-frames and output a series of two-dimensional ``skeletons'' representing the
-locations of certain joints\footnotemark of any humans in those images, as
-depicted in Figure~\ref{fig:skeleton}. Skeletons produced through pose
-estimation are useful for many higher-level computer vision tasks. For instance,
-knowing the locations of limbs can be helpful in identifying what kind of
-clothing a person is wearing
+The aim of human pose estimation is to take a static image or sequence of video
+frames and output ``skeletons'' representing the locations of the
+joints\footnotemark~of any humans in those images, as depicted in
+Figure~\ref{fig:skeleton}. Skeletons produced through pose estimation are useful
+for many higher-level computer vision tasks: for instance, knowing the locations
+of limbs can be helpful in identifying what kind of clothing a person is wearing
 \cyte{liu2012street,liu2012hi,yamaguchi2012parsing}, and the relative positions
 of a person's limbs can be useful for action recognition \cyte{yao2011does}.
 Pose estimation can even be used to classify inanimate objects by observing how
 a person interacts with them \cyte{delaitre2012scene}---for instance, a chair
-could be identified by a person in a sitting position above it. Improving on of
-existing pose estimation techniques, as we do in this paper, promises to yield
-improvements in all of these applications.
+could be identified by a person in a sitting position above it. Improvement of
+existing pose estimation techniques can yield flow-on improvement in all of
+these applications.
 
 \footnotetext{In the jargon of pose estimation, the term ``joint'' can be used
-to refer to any clearly identifiable point on a person's body, including the
-elbows, wrists, head, midpoints of the upper and lower arms, and so on.
-Similarly, ``limb'' can be used to describe any connection made between joints
-for the purpose of constraining or visualising poses, and need not refer to an
-anatomical limb like an arm or leg.}
+to refer to any identifiable point on a person's body, including the elbows,
+wrists, head, and so on. Similarly, ``limb'' can be used to describe any
+connection made between joints for the purpose of constraining or visualising
+poses, and need not refer to an anatomical limb like an arm or leg.}
 
-Pose estimation is complicated by the wide range of anatomically possible human
-poses, the varied appearance of human bodies and clothing, occlusion of
-joints by objects in the scene or by other limbs, background clutter which
-resembles joints, and so on. Taking advantage of the motion information
-present in video sequences introduces another layer of complexity to this
-already challenging problem.
+Pose estimation is complicated by the wide range of plausible poses, the varied
+appearance of human bodies and clothing, occlusion of joints by objects or by
+other limbs, background clutter which resembles joints, and so on. Taking
+advantage of the motion information present in video sequences introduces
+another layer of complexity to this already challenging problem.
 
 We deal with this complexity by dividing our video pose estimation pipeline into
 two phases. Initially, a pose estimation procedure is applied independently to
@@ -138,59 +135,54 @@ elbows are shown in this example.}
 \end{figure}
 
 Our candidate set generation procedure, described in
-Section~\ref{sec:intraframe}, follows the approach of Chen and
-Yuille \cyte{chen2014articulated}, which combines features from a deep CNN with
-a graphical model to estimate poses in a static image. The CNN yields features
-which are much more informative than the Histogram-of-Gradients (HoG) features
-used in previous
-work \cyte{yang2011articulated,cherian2014mixing,ferrari2008progressive,sapp2013modec},
-whilst the graphical model encourages joints to take on
-anatomically reasonable relative positions.
+Section~\ref{sec:intraframe}, follows the approach of Chen and Yuille
+\cyte{chen2014articulated}, which combines features from a deep CNN with a
+graphical model. The CNN yields features which are much more informative than
+the Histogram-of-Gradients (HoG) features used in previous work
+\cyte{yang2011articulated,cherian2014mixing,ferrari2008progressive,sapp2013modec},
+whilst the graphical model encourages joints to take on anatomically reasonable
+relative positions.
 
 As explained in Section~\ref{sec:interframe}, incorporating temporal edges into
-graphical model-based pose estimation methods can result in intractable
-inference problems because of the loopiness of the resulting graph.
-Independently generating a small set of candidate poses in each frame and using
-temporal edges to select a candidate from each frame partially alleviates this
-problem by reducing the number of poses which must be considered. We employ a
-recombination method---as described by Cherian
-\etal \cyte{cherian2014mixing}---to improves efficiency even further by allowing
-joints to be mixed-and-matched from different poses in each candidate set in a
-top-down fashion, thereby increasing the effective size of the candidate sets
-under consideration whilst maintaining low algorithmic complexity.
+graphical model-based pose estimation methods can result in an intractable
+inference problem. Independently generating a small set of candidate poses in
+each frame and using temporal edges to select the best candidate partially
+alleviates this problem. We employ a recombination method---as described by
+Cherian \etal \cyte{cherian2014mixing}---to improve efficiency even further by
+allowing joints to be mixed-and-matched from different poses in each candidate
+set, thereby increasing the effective size of the candidate sets under
+consideration whilst maintaining tractability.
 
 In Section~\ref{sec:results}, we find that, by combining these two approaches,
-we obtain a significant in accuracy over Cherian \etal's method alone, and a
-slight increase in accuracy over Chen and Yuille's method alone when estimating
-the positions of wrists and elbows. Wrists and elbows are the most difficult
-joints to detect due to their size and rapid motion, which makes our result
-significant, especially given that, until recently, Cherian \etal's method and
-Chen and Yuille's method represented the state-of-the-art in video and static
-image pose estimation, respectively.
+we obtain a significant in accuracy over Cherian \etal's method, and a slight
+increase in accuracy over Chen and Yuille's method when estimating the positions
+of wrists and elbows. Wrists and elbows are the most difficult joints to detect
+due to their size and rapid motion, which makes our result significant,
+especially given that, until recently, the aforementioned approaches constituted
+the state-of-the-art in video and static image pose estimation, respectively.
 
 \section{Related work}
 
 Early attempts at human pose estimation often made use of pictorial structure
 models \cyte{fischler1973representation,felzenszwalb2005pictorial}, which
 exploit the fact that poses can be decomposed into joints which are likely to
-stay within a certain range of distances of one another. Yang and
-Ramanan \cyte{yang2011articulated} extended this approach by introducing the
-notion of joint types to capture the different appearances which a joint can have
-depending on whether it's open or closed (in the case of hands), whether it's
-extended or folded (arms), how much it is rotated, and so on. By treating the
-types of each joint as latent variables in their graphical model, and augmenting
-their deformation terms to take into account the joints on either end of a limb,
-Yang and Ramanan were able to obtain a significant increase in accuracy over
-traditional pictorial structure models. In this paper, we use a similar approach
-for generating pose candidate sets within frames.
+stay within certain distances of one another. Yang and Ramanan
+\cyte{yang2011articulated} extended this approach by introducing the notion of
+joint types to capture the different appearances which a joint can have
+depending on its orientation or other attributes. By treating the types of each
+joint as latent variables in a graphical model, and making deformation terms
+take into account the joint types on either end of a limb, Yang and Ramanan were
+able to obtain a significant increase in accuracy over earlier models. In this
+paper, we use a similar approach for generating pose candidate sets within
+frames.
 
-Another common approach is to regress the $(x, y)$ coordinates of joints directly
-from an image \cyte{toshev2014deeppose,sun2012conditional}, although this can
-lead to implausible poses being generated unless some constraints on the
-relative positions of limbs or on the overall pose are introduced. Use of
-graphical models can increase accuracy by eliminating pose candidates in which
-predicted joint positions are individually likely, but collectively implausible
-due to the anatomical constraints imposed by human limbs.
+Another common approach is to regress the $(x, y)$ coordinates of joints
+directly from an image \cyte{toshev2014deeppose,sun2012conditional}, although
+this can lead to implausible poses being generated unless some constraints on
+the relative positions of limbs or on the overall pose are introduced. Using
+graphical models, as we have, can increase accuracy by eliminating pose
+candidates in which predicted joint positions are individually likely, but
+collectively implausible due to the anatomical constraints.
 
 The benefits of CNNs over traditional hand-engineered image features---as
 elucidated by LeCun and Bengio \cyte{lecun1995convolutional}---have recently led
@@ -212,20 +204,17 @@ can be used as potentials for graphical model
 inference \cyte{chen2014articulated,tompson2014joint}, as explained further in
 Section~\ref{sec:img-dep}.
 
-The motion information available in videos has previously been exploited by
-tracking detected poses throughout a video
-sequence \cyte{ji20023d,andriluka2010monocular} or by extending graphical models
+The motion information available in videos has previously been exploited using
+tracking \cyte{ji20023d,andriluka2010monocular} or by extending graphical models
 for single-frame prediction with temporal links between joints in different
 frames \cyte{ferrari2008progressive,cherian2014mixing,sigal2004tracking}. Motion
 information has also been incorporated into CNN-based detectors by introducing
 motion features like optical flow at the input layers, which can sometimes
 increase accuracy over single-frame pose estimation \cyte{jain2014modeep}. As
 alluded to in Section~\ref{sec:introduction}, incorporating temporal links into
-graphical models tends to result in intractable inference problems, and so past
-approaches in this area have generally used approximate methods for inference.
-We avoid this problem by generating pose candidate sets independently and taking
-the recombination approach described in
-Section~\ref{sec:introduction} \cyte{cherian2014mixing}.
+graphical models can make inference intractable, and so past approaches in this
+area have used approximations. We avoid this problem by using recombination, as
+described in Section~\ref{sec:recombination}.
 
 \section{Single-frame candidate set generation}
 \label{sec:intraframe}
@@ -450,6 +439,7 @@ considered in each frame, which restricts the applicability of this technique to
 situations in which $|\mathcal P|$ is small.
 
 \subsection{Recombination}
+\label{sec:recombination}
 
 The method in \cyte{cherian2014mixing} avoids the penalty incurred by large pose
 candidate sets by taking a small, diverse set of $|\mathcal P|$ candidate poses
@@ -587,13 +577,13 @@ Wild data set.}
 \begin{center}
 \input{plots/accuracy.pgf}
 \end{center}
-\caption{Accuracy over every frame in the Poses in the Wild data set for
-different joints. A joint is considered to be correctly detected in a single
-frame if the distance between its predicted position and its true position is
-less than some threshold. We have included accuracy measured at a wide range of
-thresholds to indicate precisely how ``close'' each algorithm is, on average, to
-the ground truth. Note that the curve for our algorithm in the shoulder plot is
-obscured by that for Chen and Yuille's algorithm.}
+\caption{Accuracy on the Poses in the Wild data set for different joints. A
+joint is considered to be correctly detected in a single frame if the distance
+between its predicted position and its true position is less than some
+threshold. We have averaged accuracy for each joint over all frame, and tested
+at a wide range of thresholds to indicate precisely how ``close'' predictions
+are to the ground truth. Note that the curve for our algorithm in the shoulder
+plot is obscured by that for Chen and Yuille's algorithm.}
 \label{fig:quantitative}
 \end{figure*}
 
