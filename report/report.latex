@@ -17,14 +17,14 @@
 
 % Include other packages here, before hyperref.
 
-% If you comment hyperref and then uncomment it, you should delete
-% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
-% run, let it finish, and you should be clear).
+% If you comment hyperref and then uncomment it, you should delete egpaper.aux
+% before re-running latex (or just hit 'q' on the first latex run, let it
+% finish, and you should be clear).
 \usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
 
 % IMPORTANT! Omitting \wacvfinalcopy will leave rulers on the side, include a
-% paper ID, disable acknowledgements, hide the authors list, etc. (as
-% appropriate for reviewing)
+% paper ID, disable acknowledgements, hide the authors list, etc. (which is
+% appropriate for reviewing, but not the camera-ready copy)
 {\wacvfinalcopy}
 
 \def\wacvPaperID{0000} % Fake paper ID for the quasi-conference
@@ -58,40 +58,6 @@ The Australian National University\\
 
 % Random notes about stuff go here.
 %
-% Remember the Heilmeier Catechism! Jochen said that most of its points should
-% be addressed in the discussion. I'll keep track of what I have addressed:
-%
-% - What are you trying to do? Articulate your objectives using absolutely no
-%   jargon.
-%   --> Did this in the intro! I have a pretty diagram of our pose detector and
-%       everything.
-% - How is it done today, and what are the limits of current practice?
-%   --> Sort-of did this in related work. Not sure that fully qualifies, though,
-%       because I don't talk about what specific limitations which my algorithm
-%       addresses.
-%   --> Actually, looking at the introduction and related work sections, I
-%       really do address this. I just feel uneasy about not talking about the
-%       Big Problems in pose estimation, since I feel as though "limitations of
-%       current practice" should refer to the limitations of the field *as a
-%       whole*, not the limitations of specific algorithms. My algorithm doesn't
-%       really address any of open HPE problems, or improve on the state of the
-%       art (which is an implicit limitation of the field as a whole), so I'm
-%       not sure what to write there.
-% - What's new in your approach and why do you think it will be successful?
-%   --> Need to do this. Could really merge it with the previous part. Heck, I
-%       could even put it in the abstract.
-%   ---> Yeah, I sort-of do this already. Perhaps saying "we extend <blah> with
-%        <blah>, which to the best of our knowledge is novel" might help.
-% - Who cares? If you're successful, what difference will it make?
-%   --> Kind-of did this in the intro with the "what are you trying to do" bit.
-%
-% The Heilmeier Catechism also includes the following questions, although they
-% are less relevant for our discussion:
-%
-% - What are the risks and the payoffs?
-% - How much will it cost? How long will it take?
-% - What are the midterm and final "exams" to check for success?
-%
 % Random note on first-person pronouns: in COMP2550, I used "royal we"
 % (referring to yourself as "we"), and it worked okay, so I think I'll do that
 % again for this paper. I'm unnaturally attached to scientific "we", so I don't
@@ -118,16 +84,14 @@ locations of certain joints\footnotemark of any humans in those images, as
 depicted in Figure~\ref{fig:skeleton}. Skeletons produced through pose
 estimation are useful for many higher-level computer vision tasks. For instance,
 knowing the locations of limbs can be helpful in identifying what kind of
-clothing a person is
-wearing \cyte{liu2012street,liu2012hi,yamaguchi2012parsing}, and the relative
-positions of a person's limbs can be useful for action
-recognition \cyte{yao2011does}. Pose estimation can even be used to classify
-inanimate objects by observing how a person interacts with
-them \cyte{delaitre2012scene}---for instance, a chair could be identified by a
-person in a sitting position above it. Improving on the accuracy or performance
-of existing pose estimation techniques could yield improvements in all of these
-applications, which makes pose estimation a promising research area in its own
-right.
+clothing a person is wearing
+\cyte{liu2012street,liu2012hi,yamaguchi2012parsing}, and the relative positions
+of a person's limbs can be useful for action recognition \cyte{yao2011does}.
+Pose estimation can even be used to classify inanimate objects by observing how
+a person interacts with them \cyte{delaitre2012scene}---for instance, a chair
+could be identified by a person in a sitting position above it. Improving on of
+existing pose estimation techniques, as we do in this paper, promises to yield
+improvements in all of these applications.
 
 \footnotetext{In the jargon of pose estimation, the term ``joint'' can be used
 to refer to any clearly identifiable point on a person's body, including the
@@ -200,9 +164,9 @@ we obtain a significant in accuracy over Cherian \etal's method alone, and a
 slight increase in accuracy over Chen and Yuille's method alone when estimating
 the positions of wrists and elbows. Wrists and elbows are the most difficult
 joints to detect due to their size and rapid motion, which makes our result
-significant, especially given that Cherian \etal's method and Chen and Yuille's
-method recently represented the state-of-the-art in video and static image pose
-estimation, respectively.
+significant, especially given that, until recently, Cherian \etal's method and
+Chen and Yuille's method represented the state-of-the-art in video and static
+image pose estimation, respectively.
 
 \section{Related work}
 
@@ -696,11 +660,11 @@ described evaluation configuration and the results of our algorithm when only
 one candidate pose is generated for each frame, in which case it is equivalent
 to Chen and Yuille's method \cyte{chen2014articulated}. We have also included
 the results of Cherian \etal \cyte{cherian2014mixing} on the same sequence.
-Further, we have provided results for Yang and Ramanan's
-\cyte{yang2011articulated} widely used pose estimator for the sake of comparison
-with other work which has been evaluated against theirs, even though Yang and
-Ramanan's results can no longer be considered state-of-the-art. Timings for the
-different stages of the pose estimation pipeline during testing on a single
+Results for Yang and Ramanan's \cyte{yang2011articulated} widely used pose
+estimator have been provided solely to enable future comparison of our work with
+other work which has been evaluated against Yang and Ramanan's system, even
+though their results can no longer be considered state-of-the-art. Timings for
+the different stages of the pose estimation pipeline during testing on a single
 sequence of Poses in the Wild are given in Table~\ref{tab:runtime}.
 
 \begin{table}
