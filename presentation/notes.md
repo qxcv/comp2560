@@ -21,7 +21,7 @@
 - Aim of project: improve accuracy of pose estimation! Benefits all
   applications.
 
-## Existing approaches I
+## Existing approaches
 
 - Common approach is graphical model
   - Use joint detector to figure out which parts of the image "look like" each
@@ -31,25 +31,18 @@
 - How to figure out which parts of the image "look like" each joint?
   Histogram-of-gradients!
 - Just looking at gradients not so informative
-- CNNs have produced much better results
-- Can regress joints directly, but it's a highly nonlinear mapping
-- Better to use CNNs to replace HoG in graphical models
-
-## Existing approaches II
-
+- CNNs have produced much better results; better features
 - How to use motion data?
 - Extending graphical model with links between frames makes it really hard to
   figure out where each joint is
 - Instead, use approximations; cite Anoop's work (will cover later)
-- Other approach: don't use loops in your graphical model, but give multiple
-  input frames, or some other motion queues, to CNN
-  - Not very effective. Can we do better?
 
 ## A hybrid approach
 
 - Two stages: generate a set of candidate poses for each frame using Chen &
   Yuille detector, then choose appropriate candidates to get temporally
   consistent pose sequence
+- Make it clear that this is two stages!
 
 ## Pose model
 
