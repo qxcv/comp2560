@@ -7,6 +7,7 @@ if ~exist('first_time', 'var')
     addpath ./eval/;
     addpath(genpath('./flow/'));    
     addpath ./detect/;
+    addpath ./jrcode/;
     
 	LDOF_startup; % compile LDOF c files    
     YR_compile; % compile YR c files.

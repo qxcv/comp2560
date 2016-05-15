@@ -5,7 +5,7 @@ figno=1023; figure(figno);clf(figno);
 for n = 1:length(frames)   
     %video_showskeleton2(img{n}, detected_pose_seq(n,:));axis off;
     video_showskeleton2([data_path frames(n).name], detected_pose_seq(n,:));axis off;
-    pause(1);
+    pause(0.05);
 end
 end
 

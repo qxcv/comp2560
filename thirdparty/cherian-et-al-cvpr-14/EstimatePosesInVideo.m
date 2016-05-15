@@ -1,4 +1,4 @@
- function new_merged_poses = EstimatePosesInVideo(src_path, model, numposes, config)
+function new_merged_poses = EstimatePosesInVideo(src_path, model, ~, config)
     global numpts_along_limb num_path_parts;
     global parent keyjoints_right keyjoints_left;
     global GetDistanceWeightsFn ComputePartPathCostsFn;
@@ -7,13 +7,8 @@
     flow_param = config.flow_param;
     PartIDs = config.PartIDs;
     data_store_path = config.data_store_path;
-    modeltype = config.modeltype;
-    data_path = config.data_path;
-    video_store_path = config.video_store_path;
     data_flow_path = config.data_flow_path;
     max_poses = config.MAX_POSES;
-    seqlen = config.seqlen;
-    Kpaths = numposes;
     cycled_nodes = config.cycled_nodes;
     GetDistanceWeightsFn = config.GetDistanceWeightsFn;
     ComputePartPathCostsFn = config.ComputePartPathCostsFn;
