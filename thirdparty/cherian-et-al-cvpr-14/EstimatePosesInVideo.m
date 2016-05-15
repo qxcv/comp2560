@@ -60,10 +60,8 @@
               load([data_flow_path strtok(imglist(i).name,'.') '-' strtok(imglist(i+next).name,'.') '.mat'], 'flow');         
         catch        
             fprintf('flow: working on file=%d/%d\n',  i, numfiles);
-            flow = 0;
             [u,v] = LDOF_Wrapper(frames(:,:,:,i), frames(:,:,:,i+next));
-            flow.u= u;
-            flow.v= v;
+            flow = struct('u', {u}, 'v', {v});
             save([data_flow_path strtok(imglist(i).name,'.') '-' strtok(imglist(i+next).name,'.') '.mat'], 'flow'); % cache flow... will take significant space!
         end
         optflow = flow;
