@@ -2,6 +2,7 @@ function like_piw = translate_mpii_seqs(test_seqs, symlink_dir)
 %TRANSLATE_MPII_SEQS Move into format expected by rest of pipeline
 % Does something terrifying with copying, simply because
 % EstimatePosesInVideo uses data that way :(
+SCALE_FACTOR = 0.35; % How much to scale down images
 like_piw = [];
 for seq_idx=1:length(test_seqs.seqs)
     fprintf('Sequence %i/%i\n', seq_idx, length(test_seqs.seqs));
@@ -19,7 +20,7 @@ for seq_idx=1:length(test_seqs.seqs)
         if ~exist(frame_dest, 'file')
             % Also rescale to 560x(something), roughly, to fit in with PIW data
             orig_im = readim(datum);
-            scaled_im = imresize(orig_im, 0.35);
+            scaled_im = imresize(orig_im, SCALE_FACTOR);
             imwrite(scaled_im, frame_dest);
         end
         
@@ -29,7 +30,7 @@ for seq_idx=1:length(test_seqs.seqs)
         piw_datum.imname = frame_fn;
         piw_datum.epi = 1;
         piw_datum.clipindex = datum_idx;
-        piw_datum.point = datum.joint_locs;
+        piw_datum.point = SCALE_FACTOR * (datum.joint_locs - 1) + 1;
         piw_datum.visible = true([1 size(datum.joint_locs, 1)]);
         
         like_piw = [like_piw piw_datum]; %#ok<AGROW>
