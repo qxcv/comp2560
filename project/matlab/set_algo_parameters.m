@@ -22,8 +22,50 @@ config.video_store_path = [config.cache_path 'video/'];
 % cache for flow.
 config.data_flow_path = [config.cache_path 'flow/'];
 
+% MPII stuff
+config.mpii_data_store_path = [config.cache_path 'boxes_public_mpii/']; % 
+config.mpii_dest_path = './dataset/mpii/'; % where we store all MPII stuff
+config.mpii_data_path = fullfile(config.mpii_dest_path, 'selected_seqs/');
+config.mpii_data_flow_path = [config.cache_path 'flow_mpii/'];
+% for translating MPII cooking into PIW-like structure
+config.mpii_trans_spec = struct(...
+    'indices', {...
+        ... MIDDLE:
+        12,    ... Chin (head lower point)  #1
+        ... LEFT:
+        4,     ... Left shoulder            #2
+        [4 6], ... Left upper arm           #3
+        6,     ... Left elbow               #4
+        [6 8], ... Left forearm             #5
+        8,     ... Left wrist               #6
+        ... RIGHT:
+        3,     ... Right shoulder           #7
+        [3 5], ... Right upper arm          #8
+        5,     ... Right elbow              #9
+        [5 7], ... Right forearm            #10
+        7,     ... Right wrist              #11
+        ... TORSO:
+        1,     ... Torso upper point        #12
+        2      ... Torso lower point        #13
+    }, ...
+    'weights', {...
+        1,         ... Chin (head lower point)  #1
+        1,         ... Left shoulder            #2
+        [1/2 1/2], ... Left upper arm           #3
+        1,         ... Left elbow               #4
+        [1/2 1/2], ... Left forearm             #5
+        1,         ... Left wrist               #6
+        1,         ... Right shoulder           #7
+        [1/2 1/2], ... Right upper arm          #8
+        1,         ... Right elbow              #9
+        [1/2 1/2], ... Right forearm            #10
+        1,         ... Right wrist              #11
+        1,         ... Torso upper              #12
+        1,         ... Torso lower              #13
+    });
+
 % GPU ID to use for CNN evaluation. -1 to disable GPU
-config.gpuID = 1;
+config.gpuID = 2;
 
 %% Intra-frame GM parameters
 % max candidate poses to use per frame
@@ -61,4 +103,7 @@ config.num_path_parts = 1; % number of sequence paths to compute per body part.
 % recombination tree structure. This will change depending on the skeleton
 % used in the Y&R algorithm.
 config.pose_joints =  get_recombination_tree();
+
+% MPII stuff
+
 end
