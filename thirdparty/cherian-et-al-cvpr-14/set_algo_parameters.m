@@ -86,7 +86,7 @@ config.numpts_along_limb = 3; % number of extra keypoints per limb--see practica
 config.num_path_parts = 1; % number of sequence paths to compute per body part.
 
 config.pix_thresh = 15; % absolute threshold for pixerror threshold
-config.eval_pix_thresholds = 0:2.5:40;
+config.eval_pix_thresholds = 0:2.5:100;
 % recombination tree structure. This will change depending on the skeleton
 % used in the Y&R algorithm.
 config.pose_joints =  get_recombination_tree();
