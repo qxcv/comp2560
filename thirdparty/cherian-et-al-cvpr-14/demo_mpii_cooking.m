@@ -31,7 +31,7 @@
 % demo code main file to run.
 % for bugs contact anoop.cherian@inria.fr
 %
-function [out_tab, pix_error, detected_pose_seqs, gt_all] = demo(stats_path)
+function results = demo
 warning 'off';
 startup(); % set some paths
 
@@ -51,7 +51,8 @@ model = model_l.model;
 % load mpii test seqs in 13 part version
 mpii_test_seqs = get_mpii_cooking(...
     config.mpii_dest_path, config.cache_path, config.mpii_trans_spec);
-mpii_data = translate_mpii_seqs(mpii_test_seqs, config.mpii_data_path);
+mpii_data = translate_mpii_seqs(mpii_test_seqs, config.mpii_data_path, ...
+    config.mpii_scale_factor);
 
 % process each sequence, here we show only for seq15 available in the
 % dataset folder. 
@@ -104,46 +105,16 @@ for s=1:length(seqs)
     end
 end
 
-%
-% evaluate the sequences for pixel error
-fprintf('evaluating pixel error\n');
-thresholds = config.eval_pix_thresholds;
-pix_error = zeros(length(config.eval_pix_thresholds), 11);
-for i=1:length(config.eval_pix_thresholds) % can be converted to parfor if there are lots of these
-    fprintf('WARNING: Threshold has been silently decreased to account for image resizing!\n');
-    thresh = thresholds(i) * 0.35; % XXX: I'm making the threshold much smaller to account for rescaling of input images
-    pix_error(i, :) = evaluate_pose_seqs(detected_pose_seqs, gt_all, thresh);
-end
-
 fprintf('flattening into other format\n');
-[flat_dets, flat_gts] = flatten_to_cells(detected_pose_seqs, gt_all);
-save(fullfile(config.cache_path, 'flat_preds.mat'), 'flat_dets', 'flat_gts');
-fprintf('evaluating PCP\n');
-limbs = struct('indices', ...
-    {[7 9], [9 11], [2 4], [4 6]}, ...
-    'names', ...
-    {'ruarm', 'rfarm', 'luarm', 'lfarm'});
-pcps = pcp_new(flat_dets, flat_gts, {limbs.indices});
-pcp_t = table({limbs.names}', pcps', 'VariableNames', {'Limb', 'PCP'});
-disp(pcp_t);
-
-out_tab = table(...
-    thresholds', ...
-    mean(pix_error(:, [2, 7]), 2), ...
-    mean(pix_error(:, [4, 9]), 2), ...
-    mean(pix_error(:, [6, 11]), 2), ...
-    'VariableNames', {'Threshold', 'Shoulder', 'Elbow', 'Wrist'});
-
-% It would be nice to have head error, but PIW defines "head" differently
-% to FLIC, so we have to stick with shoulders, elbows and wrists :(
-
-if nargin == 0
-    fprintf('No output file specified, writing stats to console\n');
-    disp(out_tab);
-else
-    fprintf(['Writing stats to ' stats_path '\n']);
-    writetable(out_tab, stats_path);
-end
+dap = get_annotated_poses(detected_pose_seqs, gt_all);
+det = piw_transback(dap);
+results = test_seq_transback(det, gt_all, mpii_test_seqs, config.mpii_scale_factor);
+mpii_conv_pose = @(p) [nan([2 2]); p([7 2 9 4 11 6], :); nan([4 2])];
+seq_transback = @(s) cellfun(mpii_conv_pose, s, 'UniformOutput', false);
+results = cellfun(seq_transback, results, 'UniformOutput', false);
+!mkdir -p results/mpii
+save('results/mpii/cmas-mpii-dets.mat', 'results', 'mpii_test_seqs', ...
+    'dap', 'gt_all', 'config');
 end
 
 function detected_poses = do_the_thing(config, seqs_name, seq_dir, model)

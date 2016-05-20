@@ -1,3 +1,5 @@
 *.swp
 *.pyc
 *#
+# Matlab IDE save files
+*.m~
