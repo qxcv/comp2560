@@ -24,9 +24,13 @@ config.data_flow_path = [config.cache_path 'flow/'];
 
 % MPII stuff
 config.mpii_data_store_path = [config.cache_path 'boxes_public_mpii/']; % 
+config.piw_data_store_path = [config.cache_path 'boxes_public_piw/']; % 
 config.mpii_dest_path = './dataset/mpii/'; % where we store all MPII stuff
+config.piw_dest_path = './dataset/piw/';
 config.mpii_data_path = fullfile(config.mpii_dest_path, 'selected_seqs/');
+config.piw_data_path = fullfile(config.piw_dest_path, 'selected_seqs/');
 config.mpii_data_flow_path = [config.cache_path 'flow_mpii/'];
+config.piw_data_flow_path = [config.cache_path 'flow_piw/'];
 % for translating MPII cooking into PIW-like structure
 config.mpii_trans_spec = struct(...
     'indices', {...
@@ -47,6 +51,41 @@ config.mpii_trans_spec = struct(...
         ... TORSO:
         1,     ... Torso upper point        #12
         2      ... Torso lower point        #13
+    }, ...
+    'weights', {...
+        1,         ... Chin (head lower point)  #1
+        1,         ... Left shoulder            #2
+        [1/2 1/2], ... Left upper arm           #3
+        1,         ... Left elbow               #4
+        [1/2 1/2], ... Left forearm             #5
+        1,         ... Left wrist               #6
+        1,         ... Right shoulder           #7
+        [1/2 1/2], ... Right upper arm          #8
+        1,         ... Right elbow              #9
+        [1/2 1/2], ... Right forearm            #10
+        1,         ... Right wrist              #11
+        1,         ... Torso upper              #12
+        1,         ... Torso lower              #13
+    });
+config.piw_trans_spec = struct(...
+    'indices', {...
+        ... MIDDLE:
+        1,     ... Chin (head lower point)  #1
+        ... LEFT:
+        2,     ... Left shoulder            #2
+        [2 3], ... Left upper arm           #3
+        3,     ... Left elbow               #4
+        [3 4], ... Left forearm             #5
+        4,     ... Left wrist               #6
+        ... RIGHT:
+        5,     ... Right shoulder           #7
+        [5 6], ... Right upper arm          #8
+        6,     ... Right elbow              #9
+        [7 8], ... Right forearm            #10
+        7,     ... Right wrist              #11
+        ... TORSO: (fudged)
+        8,     ... Torso upper point        #12
+        8      ... Torso lower point        #13
     }, ...
     'weights', {...
         1,         ... Chin (head lower point)  #1
@@ -104,7 +143,4 @@ config.num_path_parts = 1; % number of sequence paths to compute per body part.
 % recombination tree structure. This will change depending on the skeleton
 % used in the Y&R algorithm.
 config.pose_joints =  get_recombination_tree();
-
-% MPII stuff
-
 end
