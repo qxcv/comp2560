@@ -31,10 +31,7 @@
 % demo code main file to run.
 % for bugs contact anoop.cherian@inria.fr
 
-% statsPath is an optional argument indicating where to put calculated PCK
-% statistics (in CSV format). If unspecified, statistics will be written to
-% stdout.
-function demo(stats_path, seq_num)
+function results = demo_mpii_cooking(seq_num)
 
 startup(); % set some paths
 
@@ -57,13 +54,14 @@ cy_model.cnn.cnn_deploy_conv_file = './CY/external/my_models/flic/flic_deploy_co
 % get the dataset and gt annotations
 mpii_test_seqs = get_mpii_cooking(...
     config.mpii_dest_path, config.cache_path, config.mpii_trans_spec);
-mpii_data = translate_mpii_seqs(mpii_test_seqs, config.mpii_data_path);
+mpii_data = translate_mpii_seqs(mpii_test_seqs, config.mpii_data_path, ...
+    config.mpii_scale_factor);
 
 % process each sequence, here we show only for seq15 available in the
 % dataset folder.
 detected_pose_type = struct('seq', {}, 'filename', {}, 'frame', {}, 'bestpose',{});
 detected_pose_seqs = repmat(detected_pose_type, [1,1,1]);
-if nargin < 2
+if ~exist('seq_num', 'var')
     seqs = dir(config.data_path); seqs = seqs(3:end);
 else
     % Use * so that we only get the listing for the specific directory that
@@ -85,9 +83,6 @@ for s=1:length(seqs)
     % read the frames and store the respective groundtruth annotations.
     seq_dir = [config.data_path seqs(s).name '/'];
     frames = dir([seq_dir '/*.png']);
-    % TODO: get_groundtruth_for_seq returns a 13-part ground truth rather
-    % than an 18-part one. Need to make the ground truth 18 parts or
-    % convert my own model to 13 parts.
     gt = get_groundtruth_for_seq(frames, mpii_data);% extract gt annotations for the frames in seq
     gt_all = [gt_all, gt]; % used for full evaluation.
 
@@ -121,44 +116,19 @@ for s=1:length(seqs)
     % show_pose_sequence(seq_dir, frames, detected_poses);
 end
 
-% evaluate the sequences for pixel error
-fprintf('evaluating pixel error\n')
-thresholds = config.eval_pix_thresholds;
-pix_error = zeros(length(config.eval_pix_thresholds), 11);
-for i=1:length(config.eval_pix_thresholds) % can be converted to parfor if there are lots of these
-    thresh = thresholds(i);
-    pix_error(i, :) = evaluate_pose_seqs(detected_pose_seqs, gt_all, thresh);
-end
-
 fprintf('flattening into other format\n');
-[flat_dets, flat_gts] = flatten_to_cells(detected_pose_seqs, gt_all);
-save(fullfile(config.cache_path, 'mpii-flat_preds.mat'), 'flat_dets', 'flat_gts');
-fprintf('evaluating PCP\n');
-limbs = struct('indices', ...
-    {[7 9], [9 11], [2 4], [4 6]}, ...
-    'names', ...
-    {'ruarm', 'rfarm', 'luarm', 'lfarm'});
-pcps = pcp_new(flat_dets, flat_gts, {limbs.indices});
-fprintf('Upper arm PCP: %f\nLower arm PCP: %f\n', ...
-    mean(pcps([1 3])), mean(pcps([2 4])));
-
-% fprintf('pixel error @ %d for Shol=%0.4f Elbow=%0.4f Wrist=%0.4f \n', thresh, ...
-%         max(pix_error([2,7])), max(pix_error([4,9])), max(pix_error([6,11])));
-out_tab = table(...
-    thresholds', ...
-    max(pix_error(:, [2, 7]), [], 2), ...
-    max(pix_error(:, [4, 9]), [], 2), ...
-    max(pix_error(:, [6, 11]), [], 2), ...
-    'VariableNames', {'Threshold', 'Shoulder', 'Elbow', 'Wrist'});
-
-% It would be nice to have head error, but PIW defines "head" differently
-% to FLIC, so we have to stick with shoulders, elbows and wrists :(
-
-if nargin == 0
-    fprintf('No output file specified, writing stats to console\n');
-    disp(out_tab);
-else
-    fprintf(['Writing stats to ' stats_path '\n']);
-    writetable(out_tab, stats_path);
-end
-end % end function
+dap = get_annotated_poses(detected_pose_seqs, gt_all);
+det = piw_transback(dap);
+% Results will be a cell array of cell arrays, each containing poses.
+% There's one top-level cell per sequence and one bottom-level cell per
+% frame.
+results = test_seq_transback(det, gt_all, mpii_test_seqs, config.mpii_scale_factor);
+% Now put back in original MPII format
+mpii_conv_pose = @(p) [nan([2 2]); p([7 2 9 4 11 6], :); nan([4 2])];
+seq_transback = @(s) cellfun(mpii_conv_pose, s, 'UniformOutput', false);
+results = cellfun(seq_transback, results, 'UniformOutput', false);
+!mkdir -p results/mpii
+% Save all the things!
+save('results/mpii/comp2560-mpii-dets', 'results', 'mpii_test_seqs', ...
+    'dap', 'gt_all', 'config');
+end % end functionl

@@ -63,6 +63,7 @@ config.mpii_trans_spec = struct(...
         1,         ... Torso upper              #12
         1,         ... Torso lower              #13
     });
+config.mpii_scale_factor = 0.35;
 
 % GPU ID to use for CNN evaluation. -1 to disable GPU
 config.gpuID = 2;
