@@ -31,32 +31,29 @@
 % demo code main file to run.
 % for bugs contact anoop.cherian@inria.fr
 %
-function results = demo_mpii_cooking
+function results = demo_piw_full
 warning 'off';
 startup(); % set some paths
 
 % configure. See the function for details. You need to set the cache and
 % the sequence paths in the config.
 config = set_algo_parameters();
-% Overriding so that I don't need my own config :P
-config.data_store_path = config.mpii_data_store_path;
-config.data_path = config.mpii_data_path;
-config.data_flow_path = config.mpii_data_flow_path;
+config.data_store_path = config.piw_data_store_path;
+config.data_path = config.piw_data_path;
+config.data_flow_path = config.piw_data_flow_path;
 
 % load the bodypart model learned using Yang and Ramanan framework.
 model_l = load('./data/FLIC_model.mat');% the 13part FLIC human pose model.
 model = model_l.model;
 
 % get the dataset and gt annotations
-% load mpii test seqs in 13 part version
-mpii_test_seqs = get_mpii_cooking(...
-    config.mpii_dest_path, config.cache_path, config.mpii_trans_spec);
-mpii_data = translate_mpii_seqs(mpii_test_seqs, config.mpii_data_path, ...
-    config.mpii_scale_factor);
+piw_test_seqs = get_piw_full(...
+    config.cache_path, config.piw_trans_spec);
+piw_data = translate_piw_seqs(piw_test_seqs, config.piw_data_path);
 
 % process each sequence, here we show only for seq15 available in the
 % dataset folder. 
-seqs = dir(config.mpii_data_path); seqs = seqs(3:end);
+seqs = dir(config.piw_data_path); seqs = seqs(3:end);
 dps_parsave = cell([1 length(seqs)]);
 all_detections = []; gt_all = []; mov = 1;
 
@@ -67,7 +64,7 @@ parfor s=1:length(seqs)
     % read the frames and store the respective groundtruth annotations.
     seq_dir = [config.data_path seqs(s).name '/']; %#ok<PFBNS>
     frames = dir([seq_dir '/*.png']);
-    gt = get_groundtruth_for_seq(frames, mpii_data);% extract gt annotations for the frames in seq
+    gt = get_groundtruth_for_seq(frames, piw_data);% extract gt annotations for the frames in seq
     gt_all = [gt_all, gt]; % used for full evaluation.
 
     % now we are ready to compute the part sequences and recombination! 
@@ -108,12 +105,12 @@ end
 fprintf('flattening into other format\n');
 dap = get_annotated_poses(detected_pose_seqs, gt_all);
 det = piw_transback(dap);
-results = test_seq_transback(det, gt_all, mpii_test_seqs, config.mpii_scale_factor);
-mpii_conv_pose = @(p) [nan([2 2]); p([7 2 9 4 11 6], :); nan([4 2])];
-seq_transback = @(s) cellfun(mpii_conv_pose, s, 'UniformOutput', false);
+results = test_seq_transback(det, gt_all, piw_test_seqs, 1);
+piw_conv_pose = @(p) [nan nan; p([3 4 6 7 9 11], :); nan nan];
+seq_transback = @(s) cellfun(piw_conv_pose, s, 'UniformOutput', false);
 results = cellfun(seq_transback, results, 'UniformOutput', false);
-!mkdir -p results/mpii
-save('results/mpii/cmas-mpii-dets.mat', 'results', 'mpii_test_seqs', ...
+mkdir_p('results/piw');
+save('results/piw/cmas-piw-dets.mat', 'results', 'piw_test_seqs', ...
     'dap', 'gt_all', 'config');
 end
 

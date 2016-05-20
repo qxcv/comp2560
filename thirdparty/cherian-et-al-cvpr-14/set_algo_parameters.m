@@ -10,13 +10,16 @@ config.cache_path = './cache/';
 % this is the place to store the pose candidates
 config.data_store_path = [config.cache_path 'boxes_public1/']; % 
 config.mpii_data_store_path = [config.cache_path 'boxes_public_mpii/']; % 
+config.piw_data_store_path = [config.cache_path 'boxes_public_piw/']; % 
 
 % this is the place where the video sequences are stored as frames, each
 % sequence in a separate folder. If you use poses in the wild, then the
 % path will be something like below.
 config.data_path = './dataset/selected_seqs/';
 config.mpii_dest_path = './dataset/mpii/'; % where we store all MPII stuff
+config.piw_dest_path = './dataset/piw/';
 config.mpii_data_path = fullfile(config.mpii_dest_path, 'selected_seqs/');
+config.piw_data_path = fullfile(config.piw_dest_path, 'selected_seqs/');
 %config.data_path = '/scratch2/bigimbaz/cherian/cherian/INRIA-Pose/selected_seqs/';
 
 
@@ -27,6 +30,7 @@ config.video_store_path = [config.cache_path 'video/'];
 % cache for flow.
 config.data_flow_path = [config.cache_path 'flow/'];
 config.mpii_data_flow_path = [config.cache_path 'flow_mpii/'];
+config.piw_data_flow_path = [config.cache_path 'flow_piw/'];
 
 % for translating MPII cooking into PIW-like structure
 config.mpii_trans_spec = struct(...
@@ -48,6 +52,41 @@ config.mpii_trans_spec = struct(...
         ... TORSO:
         1,     ... Torso upper point        #12
         2      ... Torso lower point        #13
+    }, ...
+    'weights', {...
+        1,         ... Chin (head lower point)  #1
+        1,         ... Left shoulder            #2
+        [1/2 1/2], ... Left upper arm           #3
+        1,         ... Left elbow               #4
+        [1/2 1/2], ... Left forearm             #5
+        1,         ... Left wrist               #6
+        1,         ... Right shoulder           #7
+        [1/2 1/2], ... Right upper arm          #8
+        1,         ... Right elbow              #9
+        [1/2 1/2], ... Right forearm            #10
+        1,         ... Right wrist              #11
+        1,         ... Torso upper              #12
+        1,         ... Torso lower              #13
+    });
+config.piw_trans_spec = struct(...
+    'indices', {...
+        ... MIDDLE:
+        1,     ... Chin (head lower point)  #1
+        ... LEFT:
+        2,     ... Left shoulder            #2
+        [2 3], ... Left upper arm           #3
+        3,     ... Left elbow               #4
+        [3 4], ... Left forearm             #5
+        4,     ... Left wrist               #6
+        ... RIGHT:
+        5,     ... Right shoulder           #7
+        [5 6], ... Right upper arm          #8
+        6,     ... Right elbow              #9
+        [7 8], ... Right forearm            #10
+        7,     ... Right wrist              #11
+        ... TORSO: (fudged)
+        8,     ... Torso upper point        #12
+        8      ... Torso lower point        #13
     }, ...
     'weights', {...
         1,         ... Chin (head lower point)  #1
