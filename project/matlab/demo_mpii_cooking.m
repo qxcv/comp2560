@@ -101,9 +101,7 @@ for s=1:length(seqs)
     for i=1:length(frames)
         detected_pose_seqs(mov, s, i).seq = seqs(s).name;
         detected_pose_seqs(mov, s, i).filename = frames(i).name;
-        frame_match = regexp(frames(i).name, '-(?<frame_no>\d+)\.png$', 'names');
-        assert(numel(frame_match) == 1);
-        detected_pose_seqs(mov, s, i).frame = str2double(frame_match.frame_no);
+        detected_pose_seqs(mov, s, i).frame = get_framenum(frames(i).name);
         assert(~isnan(detected_pose_seqs(mov, s, i).frame));
 
         % if we could find a pose sequence path
