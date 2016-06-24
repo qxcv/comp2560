@@ -2,3 +2,4 @@ cache/
 *.mexa64
 *.m~
 results/
+topk/
